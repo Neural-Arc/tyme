@@ -77,7 +77,7 @@ export const TimeZoneDisplay = () => {
     if (!suggestedTime) return;
 
     // Parse the suggested meeting time
-    const timeRegex = /(\d{1,2}):(\d{2})\s*(am|pm)?/i;
+    const timeRegex = /(\d{1,2}):(\d{2})(?:\s*(am|pm))?/i;
     const timeMatch = suggestedTime.match(timeRegex);
     
     if (!timeMatch) return;

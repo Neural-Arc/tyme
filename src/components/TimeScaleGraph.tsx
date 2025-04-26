@@ -138,7 +138,7 @@ export const TimeScaleGraph = ({ cities, specifiedDate, suggestedTime }: TimeSca
     
     // If we have a suggested time, highlight it on the graph
     if (suggestedTime) {
-      const timeRegex = /(\d{1,2}):(\d{2})\s*(am|pm)?/i;
+      const timeRegex = /(\d{1,2}):(\d{2})(?:\s*(am|pm))?/i;
       const timeMatch = suggestedTime.match(timeRegex);
       
       if (timeMatch) {
@@ -166,8 +166,8 @@ export const TimeScaleGraph = ({ cities, specifiedDate, suggestedTime }: TimeSca
         <Clock className="h-5 w-5 text-white/60" />
         <h3 className="text-xl font-medium text-white">Working Hours Overlap (8:00 - 21:00)</h3>
       </div>
-      
-      {/* Best time range callout - Moved above the graph */}
+
+      {/* Best time range callout - Above the graph */}
       {bestTimeRange && (
         <div className="mb-6 p-4 bg-black/50 border border-[#3dd68c]/20 rounded-lg transition-all duration-300">
           <p className="text-lg font-medium">

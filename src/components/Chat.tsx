@@ -31,11 +31,13 @@ export const Chat = () => {
           detail: { cities, suggestedTime, specifiedDate } 
         });
         window.dispatchEvent(event);
+        toast.success(`Found ${cities.length} cities and suggested meeting time ${suggestedTime}`);
       } else {
         toast.error('Could not identify cities or meeting time from your message. Please be more specific.');
       }
     } catch (error) {
       console.error('Error:', error);
+      toast.error('An error occurred while processing your request');
     } finally {
       setInput('');
       setIsLoading(false);
