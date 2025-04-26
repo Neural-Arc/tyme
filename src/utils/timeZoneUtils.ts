@@ -1,4 +1,3 @@
-
 // Map cities to their approximate UTC offsets and time zones
 export const getCityOffset = (city: string): number => {
   const cityTimeZones: Record<string, {offset: number, timezone: string}> = {
@@ -77,7 +76,8 @@ export const formatTime = (hour: number): string => {
 
 // Convert UTC hour to local hour based on offset
 export const convertUtcToLocal = (utcHour: number, offset: number): number => {
-  let localHour = (utcHour + offset) % 24;
+  let localHour = utcHour + offset;
+  if (localHour >= 24) localHour -= 24;
   if (localHour < 0) localHour += 24;
   return localHour;
 };

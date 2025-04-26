@@ -1,4 +1,3 @@
-
 import { Clock, Info } from 'lucide-react';
 import { 
   formatTime,
@@ -53,7 +52,15 @@ export const TimeScaleGraph = ({
           <div className="flex justify-between items-center">
             <p className="text-lg font-medium">
               <span className="text-[#3dd68c] font-bold">✓ Best meeting time: </span>
-              {bestTimeRange.formattedLocal} {defaultLocation}
+              {bestTimeRange.formattedLocal}
+              <span className="ml-2 text-white/60">
+                {new Date().toLocaleDateString(undefined, { 
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                })}
+              </span>
             </p>
             <TooltipProvider>
               <Tooltip>
@@ -91,7 +98,6 @@ export const TimeScaleGraph = ({
               })
               .map((cityData) => {
                 const isCurrentLocation = cityData.city === defaultLocation;
-                // Calculate the city-specific local hour for the best time
                 const cityLocalHour = bestTimeRange ? 
                   convertUtcToLocal(bestTimeRange.utcHour, cityData.offset) : null;
 
@@ -137,7 +143,7 @@ export const TimeScaleGraph = ({
                           <div
                             className="absolute top-0 bottom-0 bg-[#F97316] border border-[#F97316] rounded-sm transition-all duration-300"
                             style={{
-                              left: `${((cityLocalHour % 24) / 24) * 100}%`,
+                              left: `${(cityLocalHour / 24) * 100}%`,
                               width: `${(1 / 24) * 100}%`,
                               zIndex: 10
                             }}

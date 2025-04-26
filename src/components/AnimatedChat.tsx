@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -137,16 +136,14 @@ export const AnimatedChat = ({
     )}>
       <div className="flex justify-center mb-8">
         <img 
-          src="/logo.png" 
+          src="uploaded-logo.png"
           alt="App Logo" 
           width={80} 
           height={80} 
           className="mx-auto object-contain w-[80px] h-[80px]"
           onError={(e) => {
-            console.error('Failed to load logo at /logo.png');
-            e.currentTarget.style.display = 'none';
-            // Attempt to load the uploaded image directly
-            e.currentTarget.src = 'uploaded-logo.png';
+            console.error('Failed to load logo');
+            e.currentTarget.src = '/logo.png'; // Fallback to default logo
           }}
         />
       </div>
