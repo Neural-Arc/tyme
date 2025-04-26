@@ -1,3 +1,4 @@
+
 import { Clock, Info } from 'lucide-react';
 import { 
   formatTime,
@@ -132,7 +133,7 @@ export const TimeScaleGraph = ({
                           <div
                             className="absolute top-0 bottom-0 bg-[#F97316] border border-[#F97316] rounded-sm"
                             style={{
-                              left: `${(bestTimeRange.utcHour / 24) * 100}%`,
+                              left: `${(bestTimeRange.localHour / 24) * 100}%`,
                               width: `${(1 / 24) * 100}%`,
                               zIndex: 10
                             }}

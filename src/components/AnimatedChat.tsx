@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -142,9 +141,10 @@ export const AnimatedChat = ({
           width={90} 
           height={90} 
           className="object-contain"
+          style={{ display: 'block' }}
           onError={(e) => {
-            e.currentTarget.style.display = 'none';
             console.error('Failed to load logo');
+            e.currentTarget.style.display = 'none';
           }}
         />
       </div>
@@ -192,4 +192,3 @@ export const AnimatedChat = ({
     </div>
   );
 };
-

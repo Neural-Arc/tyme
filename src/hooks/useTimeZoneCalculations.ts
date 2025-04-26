@@ -41,12 +41,15 @@ export const useTimeZoneCalculations = (
       const offset = getCityOffset(city);
       const workingHours: number[] = [];
       
-      // Calculate working hours in UTC (8 AM to 9 PM local time)
+      // Calculate local hours for working hours (8 AM to 9 PM)
       for (let h = 8; h <= 21; h++) {
+        // Convert local hour to UTC
         let utcHour = h - offset;
-        if (utcHour < 0) utcHour += 24;
-        if (utcHour >= 24) utcHour -= 24;
-        workingHours.push(utcHour);
+        // Then convert UTC hour to user's local time
+        let localHour = (utcHour + userTimeZoneOffset) % 24;
+        if (localHour < 0) localHour += 24;
+        
+        workingHours.push(Math.floor(localHour));
       }
 
       return { city, workingHours, offset };
