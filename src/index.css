@@ -13,23 +13,4 @@
   }
 }
 
-@layer utilities {
-  .grid-cols-24 {
-    grid-template-columns: repeat(24, minmax(0, 1fr));
-  }
-  
-  .animate-fade-up {
-    animation: fadeUp 0.5s ease-out forwards;
-  }
-}
-
-@keyframes fadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+/* Removed all other custom utilities and animations */

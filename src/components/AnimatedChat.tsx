@@ -24,20 +24,53 @@ export const AnimatedChat = ({
   showResults 
 }: AnimatedChatProps) => {
   const [isListening, setIsListening] = useState(false);
-  const [recognition, setRecognition] = useState<any>(null);
+  const [recognition, setRecognition] = useState<SpeechRecognition | null>(null);
   const { toast } = useToast();
+
+  // Define SpeechRecognition type for TypeScript
+  interface SpeechRecognition extends EventTarget {
+    continuous: boolean;
+    interimResults: boolean;
+    lang: string;
+    start: () => void;
+    stop: () => void;
+    onresult: (event: SpeechRecognitionEvent) => void;
+    onerror: (event: SpeechRecognitionErrorEvent) => void;
+    onend: () => void;
+  }
+
+  interface SpeechRecognitionEvent extends Event {
+    results: SpeechRecognitionResultList;
+  }
+
+  interface SpeechRecognitionResultList {
+    length: number;
+    item(index: number): SpeechRecognitionResult;
+  }
+
+  interface SpeechRecognitionResult {
+    [index: number]: SpeechRecognitionAlternative;
+  }
+
+  interface SpeechRecognitionAlternative {
+    transcript: string;
+  }
+
+  interface SpeechRecognitionErrorEvent extends Event {
+    error: string;
+  }
 
   const startListening = () => {
     try {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
       
       if (SpeechRecognition) {
-        const recognitionInstance = new SpeechRecognition();
+        const recognitionInstance = new SpeechRecognition() as SpeechRecognition;
         recognitionInstance.continuous = false;
         recognitionInstance.interimResults = false;
         recognitionInstance.lang = 'en-US';
 
-        recognitionInstance.onresult = (event) => {
+        recognitionInstance.onresult = (event: SpeechRecognitionEvent) => {
           const transcript = event.results[0][0].transcript;
           setInput(transcript);
           setIsListening(false);
@@ -47,7 +80,7 @@ export const AnimatedChat = ({
           });
         };
 
-        recognitionInstance.onerror = (event) => {
+        recognitionInstance.onerror = (event: SpeechRecognitionErrorEvent) => {
           console.error('Speech recognition error:', event.error);
           setIsListening(false);
           toast({
@@ -159,3 +192,4 @@ export const AnimatedChat = ({
     </div>
   );
 };
+
