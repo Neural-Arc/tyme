@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { TimeZoneCard } from './TimeZoneCard';
 import { TimeScaleGraph } from './TimeScaleGraph';
@@ -48,10 +49,15 @@ export const TimeZoneDisplay = () => {
         sourceCityOffset: result.sourceCityOffset,
         targetCityOffset: result.targetCityOffset
       });
+
+      // Clear meeting-related state when showing time conversion
+      setCities([]);
+      setSuggestedTime(undefined);
     } else if (cities && cities.length > 0) {
       setCities(cities);
       setSpecifiedDate(specifiedDate || new Date());
       setSuggestedTime(suggestedTime);
+      // Clear time conversion when showing meeting schedule
       setTimeConversion(null);
     }
   };

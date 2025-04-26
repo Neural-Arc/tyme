@@ -35,17 +35,31 @@ export const Chat = () => {
         ? input
         : `${input}, ${defaultLocation}`;
 
-      const { cities, suggestedTime, specifiedDate } = await processMessage(processInput, apiKey);
+      const response = await processMessage(processInput, apiKey);
       
-      if (cities.length > 0 && suggestedTime) {
+      if (response.timeConversionRequest) {
         const event = new CustomEvent('updateTimeZones', { 
-          detail: { cities, suggestedTime, specifiedDate } 
+          detail: { 
+            timeConversionRequest: response.timeConversionRequest,
+            specifiedDate: response.specifiedDate 
+          } 
         });
         window.dispatchEvent(event);
         setShowResults(true);
-        toast.success(`Found ${cities.length} cities and suggested meeting time ${suggestedTime}`);
+        toast.success('Time conversion completed successfully');
+      } else if (response.cities.length > 0 && response.suggestedTime) {
+        const event = new CustomEvent('updateTimeZones', { 
+          detail: { 
+            cities: response.cities, 
+            suggestedTime: response.suggestedTime, 
+            specifiedDate: response.specifiedDate 
+          } 
+        });
+        window.dispatchEvent(event);
+        setShowResults(true);
+        toast.success(`Found ${response.cities.length} cities and suggested meeting time ${response.suggestedTime}`);
       } else {
-        toast.error('Could not identify cities or meeting time from your message. Please be more specific.');
+        toast.error('Could not process your request. Try being more specific with the city and time format (e.g., "10 AM Sydney time tomorrow" or "Schedule a meeting with London at 2 PM")');
       }
     } catch (error) {
       console.error('Error:', error);

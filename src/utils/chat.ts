@@ -27,6 +27,11 @@ export async function processMessage(message: string, apiKey: string): Promise<{
                    SOURCE_CITY: [for conversion requests, the city where the time was specified]
                    SOURCE_TIME: [for conversion requests, the specified time in format "HH:MM" or "HH:MM AM/PM"]
                    
+                   For time conversion requests like "what is 3 PM Sydney time in my timezone" or "10 AM Tokyo time tomorrow",
+                   use TYPE: conversion and provide SOURCE_CITY and SOURCE_TIME.
+                   
+                   For meeting scheduling requests, use TYPE: meeting and provide CITIES and BEST_TIME.
+                   
                    Example for meeting:
                    TYPE: meeting
                    CITIES: New York, London, Tokyo
@@ -80,14 +85,13 @@ export async function processMessage(message: string, apiKey: string): Promise<{
     }
 
     if (type === 'conversion') {
-      // Parse source city and time for conversion requests
       const sourceCityMatch = content.match(/SOURCE_CITY:\s*(.*)/i);
       const sourceTimeMatch = content.match(/SOURCE_TIME:\s*(.*)/i);
       
       if (sourceCityMatch && sourceTimeMatch) {
         return {
           content,
-          cities,
+          cities: [],
           specifiedDate,
           timeConversionRequest: {
             sourceCity: sourceCityMatch[1].trim(),
