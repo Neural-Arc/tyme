@@ -1,5 +1,6 @@
+
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Clock } from 'lucide-react';
+import { Clock, CloudSun, Cloud, CloudRain } from 'lucide-react';
 import { getTimeZoneAcronym, formatTimeZone } from '@/utils/timeZoneUtils';
 
 interface TimeConversionCardProps {
@@ -7,21 +8,38 @@ interface TimeConversionCardProps {
   time: Date;
   offset: number;
   isSource?: boolean;
+  weather?: {
+    temperature: number;
+    condition: string;
+  };
+  newsHeadline?: string;
 }
 
-export const TimeConversionCard = ({ city, time, offset, isSource }: TimeConversionCardProps) => {
+export const TimeConversionCard = ({ city, time, offset, isSource, weather, newsHeadline }: TimeConversionCardProps) => {
+  const getWeatherIcon = (condition: string) => {
+    const lowerCondition = condition.toLowerCase();
+    
+    if (lowerCondition.includes('rain') || lowerCondition.includes('storm')) {
+      return <CloudRain className="h-4 w-4 text-blue-400" />;
+    } else if (lowerCondition.includes('cloud')) {
+      return <Cloud className="h-4 w-4 text-gray-400" />;
+    } else {
+      return <CloudSun className="h-4 w-4 text-yellow-400" />;
+    }
+  };
+  
   return (
-    <Card className={`card-animate border-white/10 ${isSource ? 'bg-black/60' : 'bg-black/40'}`}>
+    <Card className={`card-animate border-white/10 transition-all duration-300 transform hover:scale-105 ${isSource ? 'bg-black/60' : 'bg-black/40'}`}>
       <CardHeader className="flex flex-row items-center gap-3 pb-2">
-        <Clock className={`h-5 w-5 ${isSource ? 'text-[#3dd68c]' : 'text-white/60'}`} />
+        <Clock className={`h-5 w-5 ${isSource ? 'text-blue-400' : 'text-white/60'}`} />
         <CardTitle className="text-lg font-medium text-white">
           {city}
-          {isSource && <span className="ml-2 text-xs text-[#3dd68c]">(Source Time)</span>}
+          {isSource && <span className="ml-2 text-xs text-blue-400">(Source Time)</span>}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-2">
         <div className="flex items-baseline gap-2">
-          <p className={`text-2xl font-medium ${isSource ? 'text-[#3dd68c]' : 'text-white'}`}>
+          <p className={`text-2xl font-medium ${isSource ? 'text-blue-400' : 'text-white'}`}>
             {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </p>
           <span className="text-xs text-white/60">
@@ -36,6 +54,20 @@ export const TimeConversionCard = ({ city, time, offset, isSource }: TimeConvers
             day: 'numeric'
           })}
         </p>
+        
+        {weather && (
+          <div className="mt-3 pt-3 border-t border-white/10 flex items-center gap-2">
+            {getWeatherIcon(weather.condition)}
+            <span className="text-sm text-white/80">{weather.temperature}°C | {weather.condition}</span>
+          </div>
+        )}
+        
+        {newsHeadline && (
+          <div className="mt-3 pt-3 border-t border-white/10">
+            <p className="text-xs font-medium text-white/80">Business News:</p>
+            <p className="text-sm text-white/90 italic">{newsHeadline}</p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

@@ -30,16 +30,16 @@ export const TimeScaleGraph = ({
   currentDate
 }: TimeScaleGraphProps) => {
   const timeMarkers = generateHourLabels(0, 23, 3);
-  const formatHour = (hour: number): string => hour.toString().padStart(2, '0');
-
-  if (timeZoneData.length > 5) {
+  
+  // Check if there are too many cities
+  if (timeZoneData.length > 3) {
     return (
-      <div className="bg-black/40 border border-white/10 rounded-xl p-6">
-        <p className="text-white text-center">Please select 5 or fewer cities for optimal display.</p>
+      <div className="bg-black/40 border border-white/10 rounded-xl p-6 animate-fade-up">
+        <p className="text-white text-center">Please select 3 or fewer cities for optimal display.</p>
       </div>
     );
   }
-
+  
   return (
     <div className="bg-black/40 border border-white/10 rounded-xl p-6 animate-fade-up">
       <div className="flex items-center gap-3 mb-6">
@@ -48,14 +48,15 @@ export const TimeScaleGraph = ({
       </div>
 
       {bestTimeRange && defaultLocation && (
-        <div className="mb-6 p-4 bg-black/50 border border-[#3dd68c]/20 rounded-lg">
+        <div className="mb-6 p-4 bg-black/50 border border-blue-400/20 rounded-lg">
           <div className="flex justify-between items-start flex-wrap gap-2">
             <div className="flex-1 min-w-0">
               <p className="text-lg font-medium">
-                <span className="text-[#3dd68c] font-bold whitespace-nowrap">✓ Best meeting time:</span>
+                <span className="text-blue-400 font-bold">Best meeting time:</span>
                 <br />
-                <span className="whitespace-nowrap">{bestTimeRange.formattedLocal}</span>
-                <span className="ml-2 text-white/60 whitespace-nowrap">
+                <span>{bestTimeRange.formattedLocal}</span>
+                <br />
+                <span className="text-white/60">
                   {currentDate.toLocaleDateString(undefined, {
                     weekday: 'long',
                     year: 'numeric',
@@ -97,7 +98,7 @@ export const TimeScaleGraph = ({
           <div className="absolute top-0 left-[180px] right-0 flex justify-between text-white/70 text-sm border-b border-white/20 pb-2">
             {timeMarkers.map(hour => (
               <div key={hour} className="text-center min-w-[36px]">
-                {formatHour(hour)}:00
+                {hour.toString().padStart(2, '0')}:00
               </div>
             ))}
           </div>
@@ -109,7 +110,6 @@ export const TimeScaleGraph = ({
               return a.city.localeCompare(b.city);
             }).map((cityData, index) => {
               const isCurrentLocation = cityData.city === defaultLocation;
-              const cityLocalHour = bestTimeRange ? convertUtcToLocal(bestTimeRange.utcHour, cityData.offset) : null;
               
               return (
                 <div 
@@ -123,7 +123,7 @@ export const TimeScaleGraph = ({
                     <div className="w-[160px]">
                       <span className={`text-sm truncate block ${isCurrentLocation ? 'text-white font-medium' : 'text-white/80'}`}>
                         {cityData.city}
-                        {isCurrentLocation && <span className="ml-1 text-xs text-[#3dd68c]">(Current)</span>}
+                        {isCurrentLocation && <span className="ml-1 text-xs text-blue-400">(Current)</span>}
                       </span>
                       <span className="text-white/60 text-xs">
                         {getTimeZoneAcronym(cityData.offset)} ({formatTimeZone(cityData.offset)})
@@ -131,7 +131,7 @@ export const TimeScaleGraph = ({
                     </div>
 
                     {bestTimeRange?.cityTimes[cityData.city] && (
-                      <div className="absolute right-2 text-xs text-[#D2702A] font-medium">
+                      <div className="absolute right-2 text-xs text-orange-400 font-medium">
                         {bestTimeRange.cityTimes[cityData.city]}
                       </div>
                     )}
@@ -141,9 +141,10 @@ export const TimeScaleGraph = ({
                     <div className="absolute inset-0 grid grid-cols-24 gap-px">
                       {Array.from({ length: 24 }).map((_, hour) => {
                         const isWorkingHour = cityData.workingHours.includes(hour);
-                        const isSelectedHour = cityLocalHour !== null && (
-                          Math.floor(cityLocalHour) === hour || 
-                          (Math.floor(cityLocalHour) === hour - 1 && cityLocalHour % 1 >= 0.5)
+                        
+                        // Improved calculation for matching the best time hour
+                        const isBestTimeHour = bestTimeRange && (
+                          Math.floor(convertUtcToLocal(bestTimeRange.utcHour, cityData.offset)) === hour
                         );
 
                         return (
@@ -151,10 +152,10 @@ export const TimeScaleGraph = ({
                             key={hour} 
                             className={`
                               h-full transition-all duration-300
-                              ${isWorkingHour ? 'bg-[#1F3A29]/10 hover:bg-[#1F3A29]/20' : 'bg-black/60'}
-                              ${isSelectedHour ? 'timeline-highlight !bg-[#D2702A]/90 hover:!bg-[#D2702A]' : ''}
+                              ${isWorkingHour ? 'bg-blue-900/10 hover:bg-blue-900/20' : 'bg-black/60'}
+                              ${isBestTimeHour ? 'timeline-highlight !bg-orange-400/90 hover:!bg-orange-400' : ''}
                               border rounded-sm
-                              ${isWorkingHour ? 'border-[#1F3A29]/20' : 'border-white/5'}
+                              ${isWorkingHour ? 'border-blue-900/20' : 'border-white/5'}
                             `} 
                           />
                         );

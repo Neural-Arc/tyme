@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { TimeZoneCard } from './TimeZoneCard';
 import { TimeScaleGraph } from './TimeScaleGraph';
@@ -5,6 +6,7 @@ import { TimeConversionCard } from './TimeConversionCard';
 import { useLocation } from '@/hooks/useLocation';
 import { useTimeZoneCalculations } from '@/hooks/useTimeZoneCalculations';
 import { formatTimeZone, getTimeZoneAcronym, convertTimeBetweenCities } from '@/utils/timeZoneUtils';
+import { fetchWeatherData, fetchBusinessNews } from '@/utils/apiServices';
 
 export const TimeZoneDisplay = () => {
   const [cities, setCities] = useState<string[]>([]);
@@ -27,14 +29,19 @@ export const TimeZoneDisplay = () => {
     sourceCityOffset: number;
     targetCityOffset: number;
   } | null>(null);
+  
+  const [weather, setWeather] = useState<Record<string, { temperature: number; condition: string } | null>>({});
+  const [newsHeadline, setNewsHeadline] = useState<string | null>(null);
 
   const resetStates = () => {
     setTimeConversion(null);
     setCities([]);
     setSuggestedTime(undefined);
+    setWeather({});
+    setNewsHeadline(null);
   };
 
-  const handleUpdateTimeZones = (event: CustomEvent) => {
+  const handleUpdateTimeZones = async (event: CustomEvent) => {
     const { cities, suggestedTime, specifiedDate, timeConversionRequest } = event.detail;
     
     // Reset all states before processing new request
@@ -57,10 +64,31 @@ export const TimeZoneDisplay = () => {
         sourceCityOffset: result.sourceCityOffset,
         targetCityOffset: result.targetCityOffset
       });
+
+      // Fetch weather data for source city
+      const weatherData = await fetchWeatherData(sourceCity);
+      if (weatherData) {
+        setWeather(prev => ({ ...prev, [sourceCity]: weatherData }));
+      }
+      
+      // Fetch business news only for single city conversion
+      const news = await fetchBusinessNews(sourceCity);
+      setNewsHeadline(news);
+      
     } else if (cities && cities.length > 0) {
-      setCities(cities);
+      // Limit to 3 cities
+      const limitedCities = cities.slice(0, 3);
+      setCities(limitedCities);
       setSpecifiedDate(specifiedDate || new Date());
       setSuggestedTime(suggestedTime);
+      
+      // Fetch weather data for all cities
+      for (const city of limitedCities) {
+        const weatherData = await fetchWeatherData(city);
+        if (weatherData) {
+          setWeather(prev => ({ ...prev, [city]: weatherData }));
+        }
+      }
     }
   };
 
@@ -71,6 +99,16 @@ export const TimeZoneDisplay = () => {
     };
   }, [defaultLocation]); // Add defaultLocation as dependency
 
+  if (isLoading) {
+    return (
+      <div className="space-y-8 animate-fade-up">
+        <div className="bg-black/40 border border-white/10 rounded-xl p-6">
+          <p className="text-white text-center">Loading your location data...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8 animate-fade-up">
       {timeConversion && (
@@ -80,11 +118,14 @@ export const TimeZoneDisplay = () => {
             time={timeConversion.targetTime}
             offset={timeConversion.targetCityOffset}
             isSource
+            weather={weather[timeConversion.targetCity]}
           />
           <TimeConversionCard
             city={timeConversion.sourceCity}
             time={timeConversion.sourceTime}
             offset={timeConversion.sourceCityOffset}
+            weather={weather[timeConversion.sourceCity]}
+            newsHeadline={newsHeadline}
           />
         </div>
       )}
@@ -116,6 +157,7 @@ export const TimeZoneDisplay = () => {
                 })}
                 timeZone={`${getTimeZoneAcronym(tzData.offset)} (${formatTimeZone(tzData.offset)})`}
                 isCurrentLocation={tzData.city === defaultLocation}
+                weather={weather[tzData.city]}
               />
             ))}
           </div>
