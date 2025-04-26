@@ -1,8 +1,8 @@
-
 import { Clock, Info } from 'lucide-react';
 import { formatTime, formatTimeZone, generateHourLabels, getTimeZoneAcronym, convertUtcToLocal } from '@/utils/timeZoneUtils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { MeetingInviteDialog } from './MeetingInviteDialog';
+
 interface TimeScaleGraphProps {
   timeZoneData: {
     city: string;
@@ -20,6 +20,7 @@ interface TimeScaleGraphProps {
   timeZoneName: string;
   currentDate: Date;
 }
+
 export const TimeScaleGraph = ({
   timeZoneData,
   bestTimeRange,
@@ -27,20 +28,20 @@ export const TimeScaleGraph = ({
   timeZoneName,
   currentDate
 }: TimeScaleGraphProps) => {
-  // Use intervals of 3 hours for time markers
   const timeMarkers = generateHourLabels(0, 23, 3);
   const formatHour = (hour: number): string => hour.toString().padStart(2, '0');
+
   return <div className="bg-black/40 border border-white/10 rounded-xl p-6 animate-fade-up">
       <div className="flex items-center gap-3 mb-6">
         <Clock className="h-5 w-5 text-white/60" />
         <h3 className="text-xl font-medium text-white">Working Hours (08:00 - 21:00)</h3>
       </div>
 
-      {bestTimeRange && defaultLocation && <div className="mb-6 p-4 bg-black/50 border border-[#3dd68c]/20 rounded-lg">
+      {bestTimeRange && defaultLocation && <div className="mb-6 p-4 bg-black/50 border border-[#F7632B]/20 rounded-lg">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2 flex-1 min-w-0">
               <p className="text-lg font-medium truncate flex items-center flex-wrap">
-                <span className="text-[#3dd68c] font-bold whitespace-nowrap">✓ Best meeting time: </span>
+                <span className="text-[#F7632B] font-bold whitespace-nowrap">✓ Best meeting time: </span>
                 <span className="whitespace-nowrap">{bestTimeRange.formattedLocal}</span>
                 <span className="ml-2 text-white/60 whitespace-nowrap">
                   {currentDate.toLocaleDateString(undefined, {
@@ -75,7 +76,6 @@ export const TimeScaleGraph = ({
 
       <div className="relative overflow-x-auto">
         <div className="min-w-[800px] h-auto">
-          {/* Time markers with improved visibility */}
           <div className="absolute top-0 left-[180px] right-0 flex justify-between text-white/70 text-sm border-b border-white/20 pb-2">
             {timeMarkers.map(hour => <div key={hour} className="text-center min-w-[36px]">
                 {formatHour(hour)}:00
@@ -90,6 +90,7 @@ export const TimeScaleGraph = ({
           }).map((cityData, index) => {
             const isCurrentLocation = cityData.city === defaultLocation;
             const cityLocalHour = bestTimeRange ? convertUtcToLocal(bestTimeRange.utcHour, cityData.offset) : null;
+            
             return <div key={cityData.city} className="card-animate space-y-1" style={{
               animationDelay: `${index * 0.1}s`
             }}>
@@ -97,37 +98,35 @@ export const TimeScaleGraph = ({
                       <div className="w-[160px]">
                         <span className={`text-sm truncate block ${isCurrentLocation ? 'text-white font-medium' : 'text-white/80'}`}>
                           {cityData.city}
-                          {isCurrentLocation && <span className="ml-1 text-xs text-[#3dd68c]">(Current)</span>}
+                          {isCurrentLocation && <span className="ml-1 text-xs text-[#F7632B]">(Current)</span>}
                         </span>
                         <span className="text-white/60 text-xs">
                           {getTimeZoneAcronym(cityData.offset)} ({formatTimeZone(cityData.offset)})
                         </span>
                       </div>
 
-                      {bestTimeRange?.cityTimes[cityData.city] && <div className="absolute right-2 text-xs text-[#F97316] font-medium">
+                      {bestTimeRange?.cityTimes[cityData.city] && <div className="absolute right-2 text-xs text-[#F45A74] font-medium">
                           {bestTimeRange.cityTimes[cityData.city]}
                         </div>}
                     </div>
 
                     <div className="relative h-10 ml-[180px]">
                       <div className="absolute inset-0 grid grid-cols-24 gap-px">
-                        {Array.from({
-                    length: 24
-                  }).map((_, hour) => {
-                    const isWorkingHour = cityData.workingHours.includes(hour);
-                    // Improved hour matching logic with fractional hours
-                    const hourValue = cityLocalHour !== null ? cityLocalHour : 0;
-                    const hourFloor = Math.floor(hourValue);
-                    const isSelectedHour = cityLocalHour !== null && hourFloor === hour;
-                    
-                    return <div key={hour} className={`
-                                h-full transition-all duration-300
-                                ${isWorkingHour ? 'bg-[#3dd68c]/10 hover:bg-[#3dd68c]/20' : 'bg-black/60'}
-                                ${isSelectedHour ? 'timeline-highlight !bg-[#F97316]/90 hover:!bg-[#F97316]' : ''}
-                                border rounded-sm
-                                ${isWorkingHour ? 'border-[#3dd68c]/20' : 'border-white/5'}
-                              `} />;
-                  })}
+                        {Array.from({ length: 24 }).map((_, hour) => {
+                          const isWorkingHour = cityData.workingHours.includes(hour);
+                          const hourValue = cityLocalHour !== null ? cityLocalHour : 0;
+                          const isSelectedHour = cityLocalHour !== null && 
+                            (Math.floor(hourValue) === hour || 
+                             (hour === Math.floor(hourValue) + 1 && hourValue % 1 > 0));
+                          
+                          return <div key={hour} className={`
+                            h-full transition-all duration-300
+                            ${isWorkingHour ? 'bg-[#278484]/10 hover:bg-[#278484]/20' : 'bg-black/60'}
+                            ${isSelectedHour ? 'timeline-highlight !bg-[#F45A74]/90 hover:!bg-[#F45A74]' : ''}
+                            border rounded-sm
+                            ${isWorkingHour ? 'border-[#278484]/20' : 'border-white/5'}
+                          `} />;
+                        })}
                       </div>
                     </div>
                   </div>;
