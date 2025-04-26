@@ -4,6 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Mic, MicOff, Send, Loader } from 'lucide-react';
 import { cn } from "@/lib/utils";
+// We don't need to explicitly import the types as they're declared globally
+// The speech.d.ts file makes these types available throughout the application
 
 interface AnimatedChatProps {
   input: string;
@@ -27,7 +29,7 @@ export const AnimatedChat = ({
 
   const startListening = () => {
     // Check if browser supports SpeechRecognition
-    const SpeechRecognitionAPI: SpeechRecognitionConstructor | undefined = 
+    const SpeechRecognitionAPI = 
       window.SpeechRecognition || window.webkitSpeechRecognition;
     
     if (SpeechRecognitionAPI) {
