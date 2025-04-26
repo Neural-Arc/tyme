@@ -1,4 +1,6 @@
 
+import { toast } from "sonner";
+
 export async function processMessage(message: string, apiKey: string): Promise<string> {
   try {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
