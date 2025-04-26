@@ -1,13 +1,16 @@
+
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { TimeZoneCard } from './TimeZoneCard';
 import { TimeScaleGraph } from './TimeScaleGraph';
 import { useLocation } from '@/hooks/useLocation';
+import { getCityOffset, formatTimeZone } from '@/utils/timeZoneUtils';
 
 interface TimeZoneInfo {
   city: string;
   meetingTime: string;
   date?: string;
+  timeZone?: string;
 }
 
 export const TimeZoneDisplay = () => {
@@ -15,7 +18,7 @@ export const TimeZoneDisplay = () => {
   const [cities, setCities] = useState<string[]>([]);
   const [specifiedDate, setSpecifiedDate] = useState<Date | undefined>(undefined);
   const [suggestedTime, setSuggestedTime] = useState<string | undefined>(undefined);
-  const { defaultLocation, isLoading } = useLocation();
+  const { defaultLocation, timeZoneOffset, timeZoneName, isLoading } = useLocation();
 
   // Function to format current time for the default location
   const getCurrentTimeString = () => {
@@ -48,43 +51,6 @@ export const TimeZoneDisplay = () => {
     };
   }, []);
 
-  const getCityOffset = (city: string): number => {
-    // Map cities to their approximate UTC offsets
-    const cityOffsets: Record<string, number> = {
-      'london': 0,
-      'new york': -5,
-      'los angeles': -8,
-      'san francisco': -8,
-      'tokyo': 9,
-      'sydney': 10,
-      'melbourne': 10,
-      'paris': 1,
-      'berlin': 1,
-      'dubai': 4,
-      'singapore': 8,
-      'hong kong': 8,
-      'beijing': 8,
-      'mumbai': 5.5,
-      'delhi': 5.5,
-      'toronto': -5,
-      'rio': -3,
-      'sao paulo': -3,
-      'cape town': 2,
-      'mexico city': -6,
-    };
-    
-    const lowerCity = city.toLowerCase();
-    
-    for (const [key, offset] of Object.entries(cityOffsets)) {
-      if (lowerCity.includes(key)) {
-        return offset;
-      }
-    }
-    
-    // Default to random offset for demo purposes
-    return Math.floor(Math.random() * 24) - 12;
-  };
-
   const updateTimeZones = (cities: string[], suggestedTime?: string, userSpecifiedDate?: Date) => {
     if (!suggestedTime) return;
 
@@ -105,9 +71,12 @@ export const TimeZoneDisplay = () => {
     // Use specified date or current date
     const baseDate = userSpecifiedDate || new Date();
     
-    // Set the base date to the suggested meeting time in UTC
-    const utcMeetingDate = new Date(baseDate);
-    utcMeetingDate.setUTCHours(hours, minutes, 0, 0);
+    // Set the base date to the suggested meeting time in the user's local time zone
+    const meetingDate = new Date(baseDate);
+    meetingDate.setHours(hours, minutes, 0, 0);
+    
+    // Convert to UTC (for calculations)
+    const utcMeetingHour = (hours - timeZoneOffset) % 24;
     
     // Only add cities that were explicitly mentioned by the user
     const uniqueCities = [...new Set(cities)];
@@ -118,10 +87,13 @@ export const TimeZoneDisplay = () => {
       const offsetHours = Math.floor(offset);
       const offsetMinutes = (offset - offsetHours) * 60;
       
+      // Convert UTC meeting time to this city's local time
+      const cityHour = (utcMeetingHour + offset) % 24;
+      if (cityHour < 0) cityHour += 24;
+      
       // Create date for this city based on the meeting time
-      const cityDate = new Date(utcMeetingDate);
-      cityDate.setUTCHours(cityDate.getUTCHours() + offsetHours);
-      cityDate.setUTCMinutes(cityDate.getUTCMinutes() + offsetMinutes);
+      const cityDate = new Date(baseDate);
+      cityDate.setHours(cityHour, minutes, 0, 0);
       
       // Format meeting time without seconds
       const timeFormatter = new Intl.DateTimeFormat('en', {
@@ -132,7 +104,8 @@ export const TimeZoneDisplay = () => {
       return {
         city,
         meetingTime: timeFormatter.format(cityDate),
-        date: format(cityDate, 'EEEE, MMMM do, yyyy')
+        date: format(cityDate, 'EEEE, MMMM do, yyyy'),
+        timeZone: formatTimeZone(offset)
       };
     });
     
@@ -149,6 +122,7 @@ export const TimeZoneDisplay = () => {
             city={defaultLocation}
             meetingTime={getCurrentTimeString()}
             date={getCurrentDateString()}
+            timeZone={timeZoneName}
           />
         </div>
       )}
@@ -164,6 +138,7 @@ export const TimeZoneDisplay = () => {
                 city={tz.city}
                 meetingTime={tz.meetingTime}
                 date={tz.date}
+                timeZone={tz.timeZone}
               />
             ))}
           </div>
