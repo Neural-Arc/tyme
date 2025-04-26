@@ -1,8 +1,10 @@
+
 import { useState, useEffect } from 'react';
 import { TimeZoneCard } from './TimeZoneCard';
 import { format } from 'date-fns';
 import { Card } from './ui/card';
 import { MapPin } from 'lucide-react';
+import { TimeScaleGraph } from './TimeScaleGraph';
 
 interface TimeZoneInfo {
   city: string;
@@ -15,6 +17,7 @@ export const TimeZoneDisplay = () => {
   const [timeZones, setTimeZones] = useState<TimeZoneInfo[]>([]);
   const [bestCallTime, setBestCallTime] = useState<string>('');
   const [userLocation, setUserLocation] = useState<string>('');
+  const [cities, setCities] = useState<string[]>([]);
 
   useEffect(() => {
     // Get local timezone
@@ -30,6 +33,19 @@ export const TimeZoneDisplay = () => {
       city: 'Your Location',
       currentTime: format(new Date(), 'h:mm a, EEEE, MMMM do, yyyy'),
     }]);
+
+    // Listen for updateTimeZones events
+    const handleUpdateTimeZones = (event: CustomEvent) => {
+      const { cities, suggestedTime } = event.detail;
+      updateTimeZones(cities, suggestedTime);
+      setCities(cities);
+    };
+
+    window.addEventListener('updateTimeZones', handleUpdateTimeZones as EventListener);
+
+    return () => {
+      window.removeEventListener('updateTimeZones', handleUpdateTimeZones as EventListener);
+    };
   }, []);
 
   // Update this function to handle incoming timezone data from Chat
@@ -58,6 +74,11 @@ export const TimeZoneDisplay = () => {
           />
         ))}
       </div>
+      
+      {/* Goldilocks Zone Graph */}
+      {cities.length > 0 && (
+        <TimeScaleGraph cities={cities} />
+      )}
       
       {/* Best Call Time Section */}
       {bestCallTime && (
