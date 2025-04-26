@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { TimeZoneCard } from './TimeZoneCard';
 import { TimeScaleGraph } from './TimeScaleGraph';
@@ -53,10 +52,10 @@ export const TimeZoneDisplay = () => {
       setTimeConversion({
         sourceCity,
         targetCity: defaultLocation,
-        sourceTime: result.targetDateTime, // Swap source and target times
-        targetTime: result.sourceDateTime,
-        sourceCityOffset: result.targetCityOffset, // Swap source and target offsets
-        targetCityOffset: result.sourceCityOffset
+        sourceTime: result.sourceDateTime,
+        targetTime: result.targetDateTime,
+        sourceCityOffset: result.sourceCityOffset,
+        targetCityOffset: result.targetCityOffset
       });
     } else if (cities && cities.length > 0) {
       setCities(cities);

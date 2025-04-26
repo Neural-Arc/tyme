@@ -161,10 +161,10 @@ export const convertTimeBetweenCities = (
   const sourceDateTime = new Date(sourceDate);
   sourceDateTime.setHours(hours, minutes, 0, 0);
   
-  // Calculate target time
+  // Calculate target time considering the offset difference
   const targetDateTime = new Date(sourceDateTime);
-  const hoursDiff = targetCityOffset - sourceCityOffset;
-  targetDateTime.setHours(targetDateTime.getHours() - hoursDiff);
+  const hoursDiff = sourceCityOffset - targetCityOffset; // Corrected offset calculation
+  targetDateTime.setHours(targetDateTime.getHours() + hoursDiff);
   
   return {
     sourceDateTime,
