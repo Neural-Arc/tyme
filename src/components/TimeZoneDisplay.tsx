@@ -1,15 +1,17 @@
+
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { TimeZoneCard } from './TimeZoneCard';
 import { TimeScaleGraph } from './TimeScaleGraph';
 import { useLocation } from '@/hooks/useLocation';
-import { getCityOffset, formatTimeZone } from '@/utils/timeZoneUtils';
+import { getCityOffset, formatTimeZone, getTimeZoneAcronym, convertUtcToLocal, formatTime } from '@/utils/timeZoneUtils';
 
 interface TimeZoneInfo {
   city: string;
   meetingTime: string;
   date?: string;
   timeZone?: string;
+  timeZoneAcronym?: string;
 }
 
 export const TimeZoneDisplay = () => {
@@ -17,6 +19,7 @@ export const TimeZoneDisplay = () => {
   const [cities, setCities] = useState<string[]>([]);
   const [specifiedDate, setSpecifiedDate] = useState<Date | undefined>(undefined);
   const [suggestedTime, setSuggestedTime] = useState<string | undefined>(undefined);
+  const [meetingUtcHour, setMeetingUtcHour] = useState<number | null>(null);
   const { defaultLocation, timeZoneOffset, timeZoneName, isLoading } = useLocation();
 
   // Function to format current time for the default location
@@ -75,7 +78,11 @@ export const TimeZoneDisplay = () => {
     meetingDate.setHours(hours, minutes, 0, 0);
     
     // Convert to UTC (for calculations)
-    const utcMeetingHour = (hours - timeZoneOffset) % 24;
+    let utcMeetingHour = hours - timeZoneOffset;
+    if (utcMeetingHour < 0) utcMeetingHour += 24;
+    if (utcMeetingHour >= 24) utcMeetingHour -= 24;
+    
+    setMeetingUtcHour(utcMeetingHour);
     
     // Add current location to the beginning of cities array if not already included
     const uniqueCities = [...new Set([defaultLocation, ...cities])].filter(Boolean);
@@ -87,8 +94,7 @@ export const TimeZoneDisplay = () => {
       const offsetMinutes = (offset - offsetHours) * 60;
       
       // Convert UTC meeting time to this city's local time
-      let cityHour = (utcMeetingHour + offset) % 24;
-      if (cityHour < 0) cityHour += 24;
+      let cityHour = convertUtcToLocal(utcMeetingHour, offset);
       
       // Create date for this city based on the meeting time
       const cityDate = new Date(baseDate);
@@ -104,7 +110,8 @@ export const TimeZoneDisplay = () => {
         city,
         meetingTime: timeFormatter.format(cityDate),
         date: format(cityDate, 'EEEE, MMMM do, yyyy'),
-        timeZone: formatTimeZone(offset)
+        timeZone: formatTimeZone(offset),
+        timeZoneAcronym: getTimeZoneAcronym(offset)
       };
     });
     
@@ -135,7 +142,7 @@ export const TimeZoneDisplay = () => {
                 city={tz.city}
                 meetingTime={tz.meetingTime}
                 date={tz.date}
-                timeZone={tz.timeZone}
+                timeZone={`${tz.timeZoneAcronym} (${tz.timeZone})`}
                 isCurrentLocation={tz.city === defaultLocation}
               />
             ))}
