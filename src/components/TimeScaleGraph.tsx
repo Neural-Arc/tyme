@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Clock, Info } from 'lucide-react';
 import { useLocation } from '@/hooks/useLocation';
@@ -9,8 +10,7 @@ import {
   convertBetweenTimeZones,
   generateHourLabels,
   getTimeZoneAcronym,
-  calculateBestMeetingTime,
-  convertAndFormatTime
+  calculateBestMeetingTime
 } from '@/utils/timeZoneUtils';
 import {
   Tooltip,
@@ -47,29 +47,75 @@ export const TimeScaleGraph = ({ cities, specifiedDate, suggestedTime, defaultLo
   useEffect(() => {
     if (!cities || cities.length === 0) return;
     
+    // Always ensure default location is included if provided
     const allCities = defaultLocation 
       ? [defaultLocation, ...cities.filter(city => city !== defaultLocation)]
       : cities;
     
-    const workingHoursData = allCities.map(city => ({
-      city,
-      workingHours: Array.from({ length: 14 }, (_, i) => i + 8),
-      offset: getCityOffset(city)
-    }));
+    const workingHoursData: Array<{ city: string; workingHours: number[]; offset: number }> = [];
     
-    // Calculate best meeting time
-    const bestTime = calculateBestMeetingTime(workingHoursData, defaultLocation || '', timeZoneOffset);
-    setRecommendedTime(bestTime.utcHour);
-    
-    const cityTimeData = workingHoursData.map(cityData => {
-      const timeInfo = convertAndFormatTime(bestTime.utcHour, cityData.offset);
-      return {
-        ...cityData,
-        localTime: timeInfo.formattedTime
-      };
+    // Calculate working hours for each city
+    allCities.forEach(city => {
+      const offset = getCityOffset(city);
+      const workingHours: number[] = [];
+      
+      // Calculate working hours in UTC for this city (8 AM to 9 PM local time)
+      for (let h = 8; h <= 21; h++) {
+        // Convert local working hour to UTC
+        let utcHour = h - offset;
+        if (utcHour < 0) utcHour += 24;
+        if (utcHour >= 24) utcHour -= 24;
+        
+        workingHours.push(utcHour);
+      }
+      
+      workingHoursData.push({ city, workingHours, offset });
     });
     
-    setCityHours(cityTimeData);
+    setCityHours(workingHoursData);
+    
+    // Handle suggested time if provided
+    if (suggestedTime) {
+      const timeRegex = /(\d{1,2}):(\d{2})(?:\s*(am|pm))?/i;
+      const timeMatch = suggestedTime.match(timeRegex);
+      
+      if (timeMatch) {
+        let hours = parseInt(timeMatch[1]);
+        const minutes = parseInt(timeMatch[2]);
+        const period = timeMatch[3]?.toLowerCase();
+        
+        if (period === 'pm' && hours < 12) hours += 12;
+        if (period === 'am' && hours === 12) hours = 0;
+        
+        setSuggestedLocalHour(hours);
+        
+        // Convert suggested local time to UTC for consistency
+        let utcHour = hours - timeZoneOffset;
+        if (utcHour < 0) utcHour += 24;
+        if (utcHour >= 24) utcHour -= 24;
+        
+        setRecommendedTime(utcHour);
+        
+        // Calculate all city times for this suggested time
+        const cityTimes: Record<string, string> = {};
+        workingHoursData.forEach(cityData => {
+          const cityLocalHour = convertUtcToLocal(utcHour, cityData.offset);
+          cityTimes[cityData.city] = formatTime(cityLocalHour);
+        });
+        
+        setBestTimeRange({
+          utcHour,
+          localHour: hours,
+          formattedLocal: formatTime(hours),
+          cityTimes
+        });
+      }
+    } else {
+      // Calculate best meeting time if no suggested time
+      const bestTime = calculateBestMeetingTime(workingHoursData, defaultLocation || '', timeZoneOffset);
+      setRecommendedTime(bestTime.utcHour);
+      setBestTimeRange(bestTime);
+    }
   }, [cities, suggestedTime, timeZoneOffset, defaultLocation]);
 
   // Use intervals of 3 hours for time markers

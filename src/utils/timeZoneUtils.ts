@@ -1,3 +1,4 @@
+
 // Map cities to their approximate UTC offsets
 export const getCityOffset = (city: string): number => {
   const cityOffsets: Record<string, number> = {
