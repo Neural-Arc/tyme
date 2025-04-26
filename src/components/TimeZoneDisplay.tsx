@@ -29,8 +29,17 @@ export const TimeZoneDisplay = () => {
     targetCityOffset: number;
   } | null>(null);
 
+  const resetStates = () => {
+    setTimeConversion(null);
+    setCities([]);
+    setSuggestedTime(undefined);
+  };
+
   const handleUpdateTimeZones = (event: CustomEvent) => {
     const { cities, suggestedTime, specifiedDate, timeConversionRequest } = event.detail;
+    
+    // Reset all states before processing new request
+    resetStates();
     
     if (timeConversionRequest) {
       const { sourceCity, time } = timeConversionRequest;
@@ -44,21 +53,15 @@ export const TimeZoneDisplay = () => {
       setTimeConversion({
         sourceCity,
         targetCity: defaultLocation,
-        sourceTime: result.sourceDateTime,
-        targetTime: result.targetDateTime,
-        sourceCityOffset: result.sourceCityOffset,
-        targetCityOffset: result.targetCityOffset
+        sourceTime: result.targetDateTime, // Swap source and target times
+        targetTime: result.sourceDateTime,
+        sourceCityOffset: result.targetCityOffset, // Swap source and target offsets
+        targetCityOffset: result.sourceCityOffset
       });
-
-      // Clear meeting-related state when showing time conversion
-      setCities([]);
-      setSuggestedTime(undefined);
     } else if (cities && cities.length > 0) {
       setCities(cities);
       setSpecifiedDate(specifiedDate || new Date());
       setSuggestedTime(suggestedTime);
-      // Clear time conversion when showing meeting schedule
-      setTimeConversion(null);
     }
   };
 
@@ -67,22 +70,22 @@ export const TimeZoneDisplay = () => {
     return () => {
       window.removeEventListener('updateTimeZones', handleUpdateTimeZones as EventListener);
     };
-  }, []);
+  }, [defaultLocation]); // Add defaultLocation as dependency
 
   return (
     <div className="space-y-8 animate-fade-up">
       {timeConversion && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <TimeConversionCard
-            city={timeConversion.sourceCity}
-            time={timeConversion.sourceTime}
-            offset={timeConversion.sourceCityOffset}
-            isSource
-          />
-          <TimeConversionCard
             city={timeConversion.targetCity}
             time={timeConversion.targetTime}
             offset={timeConversion.targetCityOffset}
+            isSource
+          />
+          <TimeConversionCard
+            city={timeConversion.sourceCity}
+            time={timeConversion.sourceTime}
+            offset={timeConversion.sourceCityOffset}
           />
         </div>
       )}
