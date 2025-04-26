@@ -17,7 +17,8 @@ export async function processMessage(message: string, apiKey: string): Promise<{
                    Always respond with the following format:
                    1. List each city mentioned and its current time
                    2. Suggest 2-3 optimal meeting times that work well for all participants
-                   3. Keep responses concise and focused on time zone information`
+                   3. Keep responses concise and focused on time zone information
+                   4. Always return the best meeting time in the format "X:XX AM/PM" (e.g., "2:00 PM")`
         }, {
           role: 'user',
           content: message
@@ -32,9 +33,17 @@ export async function processMessage(message: string, apiKey: string): Promise<{
 
     // Extract cities and suggested time from the response
     const content = data.choices[0].message.content;
-    const cities = content.match(/\b[A-Z][a-zA-Z\s]+(?=[\s,])/g) || [];
-    const suggestedTimeMatch = content.match(/(?:suggested|optimal|best) (?:meeting )?times?:?\s*([^\n]+)/i);
+    
+    // Better city extraction regex
+    const cityRegex = /\b(?:(?!am|pm|time|about)[A-Z][a-zA-Z\s]{2,})\b/g;
+    const cities = content.match(cityRegex) || [];
+    
+    // Improved time extraction
+    const suggestedTimeMatch = content.match(/(?:suggested|optimal|best|recommended)(?:\s+meeting)?\s+times?:?\s*([0-9]{1,2}:[0-9]{2}\s*[AP]M)/i);
     const suggestedTime = suggestedTimeMatch ? suggestedTimeMatch[1].trim() : undefined;
+
+    console.log("Extracted cities:", cities);
+    console.log("Suggested time:", suggestedTime);
 
     return { content, cities, suggestedTime };
   } catch (error) {

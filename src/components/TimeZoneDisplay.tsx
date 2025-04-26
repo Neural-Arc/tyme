@@ -29,12 +29,21 @@ export const TimeZoneDisplay = () => {
       setUserLocation('Your Location');
     }
     
-    updateTimeZones([], undefined, selectedDate);
+    // Don't update time zones without cities
+    if (cities.length > 0) {
+      updateTimeZones(cities, undefined, selectedDate);
+    } else {
+      // Reset time zones when no cities
+      setTimeZones([]);
+      setBestCallTime('');
+    }
 
     const handleUpdateTimeZones = (event: CustomEvent) => {
       const { cities, suggestedTime } = event.detail;
-      updateTimeZones(cities, suggestedTime, selectedDate);
-      setCities(cities);
+      if (cities && cities.length > 0) {
+        updateTimeZones(cities, suggestedTime, selectedDate);
+        setCities(cities);
+      }
     };
 
     window.addEventListener('updateTimeZones', handleUpdateTimeZones as EventListener);
@@ -42,26 +51,36 @@ export const TimeZoneDisplay = () => {
     return () => {
       window.removeEventListener('updateTimeZones', handleUpdateTimeZones as EventListener);
     };
-  }, [selectedDate]);
+  }, [selectedDate, cities]);
 
   const updateTimeZones = (cities: string[], suggestedTime?: string, date: Date = new Date()) => {
     const formattedDate = format(date, 'EEEE, MMMM do, yyyy');
-    const userLocTimeZone = {
-      city: 'Your Location',
-      currentTime: format(date, 'h:mm a'),
-      suggestedTime,
-      date: formattedDate
-    };
     
-    const uniqueCities = [...new Set(cities)];
-    const cityTimeZones = uniqueCities.map(city => ({
-      city,
-      currentTime: format(date, 'h:mm a'),
-      suggestedTime,
-      date: formattedDate
-    }));
+    // Only add user location if we have cities
+    const timeZonesList: TimeZoneInfo[] = [];
     
-    setTimeZones([userLocTimeZone, ...cityTimeZones]);
+    if (cities.length > 0) {
+      // Add user location
+      timeZonesList.push({
+        city: 'Your Location',
+        currentTime: format(date, 'h:mm'),
+        suggestedTime,
+        date: formattedDate
+      });
+      
+      // Add city time zones
+      const uniqueCities = [...new Set(cities)];
+      const cityTimeZones = uniqueCities.map(city => ({
+        city,
+        currentTime: format(date, 'h:mm'),
+        suggestedTime,
+        date: formattedDate
+      }));
+      
+      timeZonesList.push(...cityTimeZones);
+    }
+    
+    setTimeZones(timeZonesList);
     
     if (suggestedTime) {
       setBestCallTime(suggestedTime);
@@ -78,7 +97,7 @@ export const TimeZoneDisplay = () => {
         />
       </div>
 
-      {/* Best Call Time Card */}
+      {/* Best Call Time Card - Only show if we have a best call time */}
       {bestCallTime && (
         <div className="bg-white rounded-xl p-6 shadow-lg">
           <h3 className="text-xl font-medium text-black mb-2">Best Time for the Call</h3>
@@ -91,18 +110,20 @@ export const TimeZoneDisplay = () => {
         </div>
       )}
 
-      {/* Time Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {timeZones.map((tz, index) => (
-          <TimeZoneCard
-            key={`${tz.city}-${index}`}
-            city={tz.city}
-            currentTime={tz.currentTime}
-            suggestedTime={tz.suggestedTime}
-            date={tz.date}
-          />
-        ))}
-      </div>
+      {/* Time Cards Grid - Only show cards for the cities we have */}
+      {timeZones.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {timeZones.map((tz, index) => (
+            <TimeZoneCard
+              key={`${tz.city}-${index}`}
+              city={tz.city}
+              currentTime={tz.currentTime}
+              suggestedTime={tz.suggestedTime}
+              date={tz.date}
+            />
+          ))}
+        </div>
+      )}
       
       {/* Goldilocks Zone Graph */}
       {cities.length > 0 && (
