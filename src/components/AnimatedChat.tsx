@@ -4,6 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Mic, MicOff, Send, Loader } from 'lucide-react';
 import { cn } from "@/lib/utils";
+// Import the speech types to make TypeScript recognize them
+import '../types/speech.d.ts';
 
 interface AnimatedChatProps {
   input: string;
