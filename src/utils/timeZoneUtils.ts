@@ -111,6 +111,15 @@ export const generateHourLabels = (startHour: number, endHour: number, interval:
   return hours;
 };
 
+// Convert UTC hour to local time and return formatted string
+export const convertAndFormatTime = (utcHour: number, offset: number): { localHour: number; formattedTime: string } => {
+  const localHour = convertUtcToLocal(utcHour, offset);
+  return {
+    localHour,
+    formattedTime: formatTime(localHour)
+  };
+};
+
 // Calculate best meeting time considering all cities' working hours
 export const calculateBestMeetingTime = (
   cityHours: Array<{ city: string; workingHours: number[]; offset: number }>,
