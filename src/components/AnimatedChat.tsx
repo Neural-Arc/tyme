@@ -1,11 +1,8 @@
-
 import React, { useState } from 'react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Mic, MicOff, Send, Loader } from 'lucide-react';
 import { cn } from "@/lib/utils";
-// We don't need to explicitly import the types as they're declared globally
-// The speech.d.ts file makes these types available throughout the application
 
 interface AnimatedChatProps {
   input: string;
@@ -28,13 +25,10 @@ export const AnimatedChat = ({
   const [recognition, setRecognition] = useState<SpeechRecognition | null>(null);
 
   const startListening = () => {
-    // Check if browser supports SpeechRecognition
-    const SpeechRecognitionAPI = 
-      window.SpeechRecognition || window.webkitSpeechRecognition;
+    const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
     
     if (SpeechRecognitionAPI) {
       const recognitionInstance = new SpeechRecognitionAPI();
-      
       recognitionInstance.continuous = false;
       recognitionInstance.interimResults = false;
 
@@ -72,13 +66,12 @@ export const AnimatedChat = ({
       "w-full max-w-3xl mx-auto transition-all duration-500 ease-in-out",
       showResults ? "mt-8" : "mt-[20vh]"
     )}>
-      {/* Logo centered above the chat input */}
       <div className="flex justify-center mb-8">
         <img 
           src="/logo.png" 
           alt="App Logo" 
-          width="120" 
-          height="120" 
+          width="90" 
+          height="90" 
           className="object-contain" 
         />
       </div>
