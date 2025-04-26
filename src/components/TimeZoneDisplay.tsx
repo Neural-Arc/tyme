@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { TimeZoneCard } from './TimeZoneCard';
@@ -88,7 +87,7 @@ export const TimeZoneDisplay = () => {
       const offsetMinutes = (offset - offsetHours) * 60;
       
       // Convert UTC meeting time to this city's local time
-      const cityHour = (utcMeetingHour + offset) % 24;
+      let cityHour = (utcMeetingHour + offset) % 24;
       if (cityHour < 0) cityHour += 24;
       
       // Create date for this city based on the meeting time
