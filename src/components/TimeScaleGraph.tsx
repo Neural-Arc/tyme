@@ -132,9 +132,9 @@ export const TimeScaleGraph = ({
 
                         {bestTimeRange && (
                           <div
-                            className="absolute top-0 bottom-0 bg-[#F97316] border border-[#F97316] rounded-sm"
+                            className="absolute top-0 bottom-0 bg-[#F97316] border border-[#F97316] rounded-sm transition-all duration-300"
                             style={{
-                              left: `${(bestTimeRange.localHour / 24) * 100}%`,
+                              left: `${((bestTimeRange.localHour % 24) / 24) * 100}%`,
                               width: `${(1 / 24) * 100}%`,
                               zIndex: 10
                             }}

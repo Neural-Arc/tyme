@@ -138,9 +138,9 @@ export const AnimatedChat = ({
         <img 
           src="/logo.png" 
           alt="App Logo" 
-          width={90} 
-          height={90} 
-          className="mx-auto object-contain"
+          width={80} 
+          height={80} 
+          className="mx-auto object-contain w-[80px] h-[80px]"
           onError={(e) => {
             console.error('Failed to load logo at /logo.png');
             e.currentTarget.style.display = 'none';
