@@ -15,7 +15,7 @@ export const TimeZoneDisplay = () => {
   const [cities, setCities] = useState<string[]>([]);
   const [specifiedDate, setSpecifiedDate] = useState<Date | undefined>(undefined);
   const [suggestedTime, setSuggestedTime] = useState<string | undefined>(undefined);
-  const { defaultLocation } = useLocation();
+  const { defaultLocation, isLoading } = useLocation();
 
   // Function to format current time for the default location
   const getCurrentTimeString = () => {
@@ -142,9 +142,9 @@ export const TimeZoneDisplay = () => {
   return (
     <div className="space-y-8 animate-fade-up">
       {/* Default Location Time Card - Always visible */}
-      {defaultLocation && (
+      {defaultLocation && !isLoading && (
         <div className="mb-8">
-          <h3 className="text-white/60 mb-4 text-sm">Your Location</h3>
+          <h3 className="text-white/60 mb-4 text-sm">Current Location</h3>
           <TimeZoneCard
             city={defaultLocation}
             meetingTime={getCurrentTimeString()}
@@ -153,7 +153,7 @@ export const TimeZoneDisplay = () => {
         </div>
       )}
 
-      {/* Time Cards Grid - only show user-requested city cards */}
+      {/* Meeting Times Section */}
       {timeZones.length > 0 && (
         <div>
           <h3 className="text-white/60 mb-4 text-sm">Meeting Times</h3>
@@ -170,7 +170,7 @@ export const TimeZoneDisplay = () => {
         </div>
       )}
       
-      {/* Time Scale Graph - Only show when there are multiple cities */}
+      {/* Time Scale Graph */}
       {cities.length > 1 && suggestedTime && (
         <TimeScaleGraph 
           cities={cities}
