@@ -26,30 +26,34 @@ export const AnimatedChat = ({
   const [recognition, setRecognition] = useState<SpeechRecognition | null>(null);
 
   const startListening = () => {
-    if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      const recognition = new SpeechRecognition();
+    // Check if browser supports SpeechRecognition
+    const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+    
+    if (SpeechRecognitionAPI) {
+      const recognitionInstance = new SpeechRecognitionAPI();
       
-      recognition.continuous = false;
-      recognition.interimResults = false;
+      recognitionInstance.continuous = false;
+      recognitionInstance.interimResults = false;
 
-      recognition.onresult = (event) => {
+      recognitionInstance.onresult = (event) => {
         const transcript = event.results[0][0].transcript;
         setInput(transcript);
         setIsListening(false);
       };
 
-      recognition.onerror = () => {
+      recognitionInstance.onerror = () => {
         setIsListening(false);
       };
 
-      recognition.onend = () => {
+      recognitionInstance.onend = () => {
         setIsListening(false);
       };
 
-      setRecognition(recognition);
-      recognition.start();
+      setRecognition(recognitionInstance);
+      recognitionInstance.start();
       setIsListening(true);
+    } else {
+      console.error("Speech recognition not supported in this browser");
     }
   };
 

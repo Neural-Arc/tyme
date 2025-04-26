@@ -55,8 +55,11 @@ interface SpeechRecognitionConstructor {
 }
 
 declare global {
+  var SpeechRecognition: SpeechRecognitionConstructor | undefined;
+  var webkitSpeechRecognition: SpeechRecognitionConstructor | undefined;
+  
   interface Window {
-    SpeechRecognition: SpeechRecognitionConstructor;
-    webkitSpeechRecognition: SpeechRecognitionConstructor;
+    SpeechRecognition: SpeechRecognitionConstructor | undefined;
+    webkitSpeechRecognition: SpeechRecognitionConstructor | undefined;
   }
 }
