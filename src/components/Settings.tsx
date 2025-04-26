@@ -6,15 +6,19 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Settings as SettingsIcon } from 'lucide-react';
 import { toast } from 'sonner';
+import { useLocation } from '@/hooks/useLocation';
 
 export const Settings = () => {
   const [apiKey, setApiKey] = useState('');
   const [open, setOpen] = useState(false);
+  const { defaultLocation, setUserLocation } = useLocation();
+  const [location, setLocation] = useState(defaultLocation);
 
   useEffect(() => {
     const savedKey = localStorage.getItem('openai_api_key');
@@ -29,8 +33,14 @@ export const Settings = () => {
       return;
     }
 
+    if (!location) {
+      toast.error('Please enter your location');
+      return;
+    }
+
     localStorage.setItem('openai_api_key', apiKey);
-    toast.success('API key saved successfully');
+    setUserLocation(location);
+    toast.success('Settings saved successfully');
     setOpen(false);
   };
 
@@ -44,6 +54,9 @@ export const Settings = () => {
       <DialogContent className="bg-muted border-white/10">
         <DialogHeader>
           <DialogTitle className="text-white">Settings</DialogTitle>
+          <DialogDescription className="text-white/60">
+            Configure your API key and default location
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <div>
@@ -54,6 +67,16 @@ export const Settings = () => {
               onChange={(e) => setApiKey(e.target.value)}
               className="bg-background border-white/10 text-white mt-2"
               placeholder="sk-..."
+            />
+          </div>
+          <div>
+            <label className="text-sm text-white/60">Your Location</label>
+            <Input
+              type="text"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              className="bg-background border-white/10 text-white mt-2"
+              placeholder="e.g., London"
             />
           </div>
           <Button 

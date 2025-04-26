@@ -5,10 +5,12 @@ import { Button } from "@/components/ui/button";
 import { MessageSquare, Loader } from 'lucide-react';
 import { processMessage } from '@/utils/chat';
 import { toast } from 'sonner';
+import { useLocation } from '@/hooks/useLocation';
 
 export const Chat = () => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const { defaultLocation } = useLocation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,12 +22,21 @@ export const Chat = () => {
       return;
     }
 
+    if (!defaultLocation) {
+      toast.error('Please set your location in settings first');
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      const { cities, suggestedTime, specifiedDate } = await processMessage(input, apiKey);
+      // Add user's location to the input if not already mentioned
+      const processInput = input.toLowerCase().includes(defaultLocation.toLowerCase())
+        ? input
+        : `${input}, ${defaultLocation}`;
+
+      const { cities, suggestedTime, specifiedDate } = await processMessage(processInput, apiKey);
       
-      // Update time zones with the extracted cities, suggested time, and specified date
       if (cities.length > 0 && suggestedTime) {
         const event = new CustomEvent('updateTimeZones', { 
           detail: { cities, suggestedTime, specifiedDate } 
@@ -54,7 +65,7 @@ export const Chat = () => {
         <Input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="e.g. New York, London, Tokyo for next Monday..."
+          placeholder={`e.g. New York, Tokyo for next Monday... (Your location: ${defaultLocation || 'Not set'})`}
           className="bg-black/30 text-white border-white/10 text-2xl h-24 px-6"
           disabled={isLoading}
         />
@@ -62,7 +73,7 @@ export const Chat = () => {
           type="submit" 
           variant="outline" 
           className="bg-black/30 border-white/10 hover:bg-white/10 h-24 w-16"
-          disabled={isLoading}
+          disabled={isLoading || !defaultLocation}
         >
           {isLoading ? (
             <Loader className="h-8 w-8 animate-spin" />
