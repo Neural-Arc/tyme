@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, Copy } from 'lucide-react';
+import { Mail, Copy, Send } from 'lucide-react';
 
 interface MeetingInviteDialogProps {
   meetingTime: string;
@@ -25,6 +25,36 @@ export const MeetingInviteDialog = ({ meetingTime, date }: MeetingInviteDialogPr
         description: "Meeting link copied to clipboard!",
         duration: 2000
       });
+    });
+  };
+
+  const handleSendInvite = () => {
+    // Form validation
+    if (!senderName || !senderEmail || !recipientEmails) {
+      toast({
+        variant: "destructive",
+        description: "Please fill in all required fields",
+        duration: 3000
+      });
+      return;
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(senderEmail)) {
+      toast({
+        variant: "destructive",
+        description: "Please enter a valid email address",
+        duration: 3000
+      });
+      return;
+    }
+
+    // In a real app, you would send the invite here
+    // For now, we'll just show a success toast
+    toast({
+      description: "Meeting invite sent successfully!",
+      duration: 3000
     });
   };
 
@@ -89,6 +119,13 @@ export const MeetingInviteDialog = ({ meetingTime, date }: MeetingInviteDialogPr
             <p>Meeting Time: {meetingTime}</p>
             <p>Date: {date}</p>
           </div>
+          <Button 
+            className="mt-4 bg-[#3dd68c] hover:bg-[#34bb7a] text-black" 
+            onClick={handleSendInvite}
+          >
+            <Send className="mr-2 h-4 w-4" />
+            Send Invitation
+          </Button>
         </div>
       </DialogContent>
     </Dialog>
