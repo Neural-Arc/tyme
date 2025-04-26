@@ -5,10 +5,12 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Mail, Copy, Send } from 'lucide-react';
+
 interface MeetingInviteDialogProps {
   meetingTime: string;
   date: string;
 }
+
 export const MeetingInviteDialog = ({
   meetingTime,
   date
@@ -61,7 +63,7 @@ export const MeetingInviteDialog = ({
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="ml-4 mx-[8px]">
           <Mail className="mr-2 h-4 w-4" />
-          Send Meeting Invite
+          Send Invite
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px] bg-black/90 text-white border border-white/10">
