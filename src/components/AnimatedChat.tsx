@@ -4,8 +4,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Mic, MicOff, Send, Loader } from 'lucide-react';
 import { cn } from "@/lib/utils";
-// Import the speech types to make TypeScript recognize them
-import '../types/speech.d.ts';
 
 interface AnimatedChatProps {
   input: string;
@@ -29,7 +27,7 @@ export const AnimatedChat = ({
 
   const startListening = () => {
     // Check if browser supports SpeechRecognition
-    const SpeechRecognitionAPI: SpeechRecognitionConstructor | undefined = 
+    const SpeechRecognitionAPI = 
       window.SpeechRecognition || window.webkitSpeechRecognition;
     
     if (SpeechRecognitionAPI) {
@@ -70,8 +68,19 @@ export const AnimatedChat = ({
   return (
     <div className={cn(
       "w-full max-w-3xl mx-auto transition-all duration-500 ease-in-out",
-      showResults ? "mt-8" : "mt-[30vh]"
+      showResults ? "mt-8" : "mt-[20vh]"
     )}>
+      {/* Logo centered above the chat input */}
+      <div className="flex justify-center mb-8">
+        <img 
+          src="/logo.png" 
+          alt="App Logo" 
+          width="120" 
+          height="120" 
+          className="object-contain" 
+        />
+      </div>
+      
       <p className="text-center text-xl mb-8 text-white/80">
         Type cities or countries and we'll find your best call time...
       </p>

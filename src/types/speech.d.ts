@@ -54,7 +54,6 @@ interface SpeechRecognitionConstructor {
   prototype: SpeechRecognition;
 }
 
-// Make sure to declare these as global interfaces
 declare global {
   interface Window {
     SpeechRecognition: SpeechRecognitionConstructor | undefined;

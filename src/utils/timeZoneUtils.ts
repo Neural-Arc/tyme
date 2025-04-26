@@ -1,38 +1,63 @@
-// Map cities to their approximate UTC offsets
+
+// Map cities to their approximate UTC offsets and time zones
 export const getCityOffset = (city: string): number => {
-  const cityOffsets: Record<string, number> = {
-    'london': 0,
-    'new york': -5, 
-    'los angeles': -8,
-    'san francisco': -8,
-    'tokyo': 9,
-    'sydney': 10,
-    'melbourne': 10,
-    'paris': 1,
-    'berlin': 1,
-    'dubai': 4,
-    'singapore': 8,
-    'hong kong': 8,
-    'beijing': 8,
-    'mumbai': 5.5,
-    'delhi': 5.5,
-    'toronto': -5,
-    'rio': -3,
-    'sao paulo': -3,
-    'cape town': 2,
-    'mexico city': -6,
+  const cityTimeZones: Record<string, {offset: number, timezone: string}> = {
+    'london': {offset: 0, timezone: 'Europe/London'},
+    'new york': {offset: -5, timezone: 'America/New_York'},
+    'los angeles': {offset: -8, timezone: 'America/Los_Angeles'},
+    'san francisco': {offset: -8, timezone: 'America/Los_Angeles'},
+    'tokyo': {offset: 9, timezone: 'Asia/Tokyo'},
+    'sydney': {offset: 10, timezone: 'Australia/Sydney'},
+    'melbourne': {offset: 10, timezone: 'Australia/Melbourne'},
+    'paris': {offset: 1, timezone: 'Europe/Paris'},
+    'berlin': {offset: 1, timezone: 'Europe/Berlin'},
+    'dubai': {offset: 4, timezone: 'Asia/Dubai'},
+    'singapore': {offset: 8, timezone: 'Asia/Singapore'},
+    'hong kong': {offset: 8, timezone: 'Asia/Hong_Kong'},
+    'beijing': {offset: 8, timezone: 'Asia/Shanghai'},
+    'mumbai': {offset: 5.5, timezone: 'Asia/Kolkata'},
+    'delhi': {offset: 5.5, timezone: 'Asia/Kolkata'},
+    'toronto': {offset: -5, timezone: 'America/Toronto'},
+    'rio': {offset: -3, timezone: 'America/Sao_Paulo'},
+    'sao paulo': {offset: -3, timezone: 'America/Sao_Paulo'},
+    'cape town': {offset: 2, timezone: 'Africa/Johannesburg'},
+    'mexico city': {offset: -6, timezone: 'America/Mexico_City'},
   };
   
   const lowerCity = city.toLowerCase();
   
-  for (const [key, offset] of Object.entries(cityOffsets)) {
+  // Try to find the city in our dictionary
+  for (const [key, data] of Object.entries(cityTimeZones)) {
     if (lowerCity.includes(key)) {
-      return offset;
+      // Try to get the current offset using Intl API for more accuracy (handles DST)
+      try {
+        const formatter = new Intl.DateTimeFormat('en-US', {
+          timeZone: data.timezone,
+          timeZoneName: 'shortOffset'
+        });
+        
+        // Extract the UTC offset from the formatted string
+        const tzString = formatter.format(new Date());
+        const match = tzString.match(/UTC([+-]\d+)(?::(\d+))?/);
+        
+        if (match) {
+          const hours = parseInt(match[1], 10);
+          const minutes = match[2] ? parseInt(match[2], 10) / 60 : 0;
+          return hours >= 0 ? hours + minutes : hours - minutes;
+        }
+      } catch (e) {
+        console.log(`Could not determine accurate timezone for ${city}, using default offset.`);
+      }
+      
+      // Fall back to hardcoded offset if Intl API fails
+      return data.offset;
     }
   }
   
-  // Default offset for unknown cities
-  return Math.floor(Math.random() * 24) - 12;
+  // For unknown cities, try to make an educated guess using the browser's timezone
+  console.log(`Unknown city: ${city}, using default timezone offset.`);
+  const localOffset = -(new Date().getTimezoneOffset() / 60);
+  return localOffset;
 };
 
 // Format time in 12-hour format with AM/PM
@@ -146,10 +171,11 @@ export const calculateBestMeetingTime = (
     });
   }
   
-  // Give much higher weight to the default location (3x instead of 1.5x)
+  // Adjust the scoring algorithm to prioritize better overlap of working hours
   cityHours.forEach(cityData => {
-    // Increase weight for current location significantly
-    const weight = cityData.city === defaultLocation ? 3 : 1; 
+    // Increase weight for default location
+    const weight = cityData.city === defaultLocation ? 3 : 1;
+    
     cityData.workingHours.forEach(hour => {
       hourCounts[hour] += weight;
     });
@@ -160,21 +186,20 @@ export const calculateBestMeetingTime = (
   let bestUtcHour = 12; // Default to noon UTC if no better option
   
   for (let hour = 0; hour < 24; hour++) {
-    // Only consider hours that are working hours for the default location
-    if (defaultLocationData && !defaultLocationWorkingHours.has(hour)) {
-      continue; // Skip this hour if it's not a working hour for default location
+    // Skip hours outside default location's working hours if specified
+    if (defaultLocationData && defaultLocationWorkingHours.size > 0 && !defaultLocationWorkingHours.has(hour)) {
+      continue;
     }
     
     const localHour = convertUtcToLocal(hour, userTimeZoneOffset);
-    // Give higher priority to user's reasonable working hours (9am-6pm)
-    const isIdealUserHour = localHour >= 9 && localHour <= 18;
-    const isUserWorkingHour = localHour >= 8 && localHour <= 21;
+    const isIdealHour = localHour >= 9 && localHour <= 17; // 9 AM to 5 PM is ideal
+    const isWorkingHour = localHour >= 8 && localHour <= 19; // 8 AM to 7 PM is acceptable
     
     let score = hourCounts[hour];
     
-    // Give bonus to user's working hours
-    if (isIdealUserHour) score += 2;
-    else if (isUserWorkingHour) score += 1;
+    // Boost score for user's ideal and working hours
+    if (isIdealHour) score += 2;
+    else if (isWorkingHour) score += 1;
     
     if (score > bestScore) {
       bestScore = score;
@@ -182,13 +207,11 @@ export const calculateBestMeetingTime = (
     }
   }
 
-  // If no suitable time found (possibly because default location has no working hours in dataset),
-  // find a reasonable hour in the default location's working hours (8 AM - 9 PM)
+  // If no good overlap found, use a reasonable working hour for default location
   if (bestScore < 0) {
-    // Default to 2 PM local time for the default location if no better option found
+    // Try to find a time that works for default location (2 PM local time is a good default)
     const defaultLocalHour = 14; // 2 PM
-    bestUtcHour = (defaultLocalHour - defaultOffset) % 24;
-    if (bestUtcHour < 0) bestUtcHour += 24;
+    bestUtcHour = Math.floor((defaultLocalHour - defaultOffset + 24) % 24);
   }
   
   // Convert best UTC hour to local time for user
@@ -212,7 +235,6 @@ export const calculateBestMeetingTime = (
  * Converts UTC time to local time and formats it
  * @param utcHour - Hour in UTC
  * @param cityOffset - Timezone offset for the city
- * @param includeMinutes - Whether to include minutes in the formatted time
  * @returns Formatted local time string (e.g. "3:00 PM")
  */
 export const convertAndFormatTime = (utcHour: number, cityOffset: number): string => {

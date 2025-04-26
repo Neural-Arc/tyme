@@ -6,15 +6,7 @@
 @layer base {
   body {
     @apply text-foreground antialiased;
-    background: radial-gradient(
-      circle at bottom center,
-      rgba(255, 255, 160, 0.8) 0%,
-      rgba(255, 192, 203, 0.4) 20%,
-      rgba(144, 238, 144, 0.6) 50%,
-      rgba(0, 0, 0, 0.9) 100%
-    );
-    background-repeat: no-repeat;
-    background-size: cover;
+    background-color: #000000;
     height: 100vh;
     margin: 0;
     overflow-x: hidden;
