@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -10,17 +10,32 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Settings as SettingsIcon } from 'lucide-react';
+import { toast } from 'sonner';
 
 export const Settings = () => {
   const [apiKey, setApiKey] = useState('');
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    const savedKey = localStorage.getItem('openai_api_key');
+    if (savedKey) {
+      setApiKey(savedKey);
+    }
+  }, []);
 
   const handleSave = () => {
-    // TODO: Implement API key saving
+    if (!apiKey.startsWith('sk-')) {
+      toast.error('Please enter a valid OpenAI API key');
+      return;
+    }
+
     localStorage.setItem('openai_api_key', apiKey);
+    toast.success('API key saved successfully');
+    setOpen(false);
   };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="ghost" className="absolute top-4 right-4 text-white/60 hover:text-white">
           <SettingsIcon className="h-5 w-5" />
@@ -41,7 +56,10 @@ export const Settings = () => {
               placeholder="sk-..."
             />
           </div>
-          <Button onClick={handleSave} className="w-full bg-white/5 border-white/10 hover:bg-white/10">
+          <Button 
+            onClick={handleSave} 
+            className="w-full bg-white/5 border-white/10 hover:bg-white/10"
+          >
             Save Settings
           </Button>
         </div>
