@@ -28,13 +28,15 @@ interface TimeScaleGraphProps {
   } | null;
   defaultLocation?: string;
   timeZoneName: string;
+  currentDate: Date;
 }
 
 export const TimeScaleGraph = ({ 
   timeZoneData,
   bestTimeRange,
   defaultLocation,
-  timeZoneName
+  timeZoneName,
+  currentDate
 }: TimeScaleGraphProps) => {
   // Use intervals of 3 hours for time markers
   const timeMarkers = generateHourLabels(0, 23, 3);
@@ -54,7 +56,7 @@ export const TimeScaleGraph = ({
               <span className="text-[#3dd68c] font-bold">✓ Best meeting time: </span>
               {bestTimeRange.formattedLocal}
               <span className="ml-2 text-white/60">
-                {new Date().toLocaleDateString(undefined, { 
+                {currentDate.toLocaleDateString(undefined, { 
                   weekday: 'long',
                   year: 'numeric',
                   month: 'long',

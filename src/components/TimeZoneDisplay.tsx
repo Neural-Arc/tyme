@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { TimeZoneCard } from './TimeZoneCard';
 import { TimeScaleGraph } from './TimeScaleGraph';
@@ -7,7 +8,7 @@ import { formatTimeZone, getTimeZoneAcronym } from '@/utils/timeZoneUtils';
 
 export const TimeZoneDisplay = () => {
   const [cities, setCities] = useState<string[]>([]);
-  const [specifiedDate, setSpecifiedDate] = useState<Date | undefined>(undefined);
+  const [specifiedDate, setSpecifiedDate] = useState<Date>(new Date());
   const [suggestedTime, setSuggestedTime] = useState<string | undefined>(undefined);
   const { defaultLocation, timeZoneOffset, timeZoneName, isLoading } = useLocation();
 
@@ -23,7 +24,7 @@ export const TimeZoneDisplay = () => {
     
     if (cities && cities.length > 0) {
       setCities(cities);
-      setSpecifiedDate(specifiedDate);
+      setSpecifiedDate(specifiedDate || new Date());
       setSuggestedTime(suggestedTime);
     }
   };
@@ -37,17 +38,16 @@ export const TimeZoneDisplay = () => {
 
   return (
     <div className="space-y-8 animate-fade-up">
-      {/* Time Scale Graph - Now shown at the top if there are any cities */}
       {cities.length > 0 && (
         <TimeScaleGraph 
           timeZoneData={timeZoneData}
           bestTimeRange={bestTimeRange}
           defaultLocation={defaultLocation}
           timeZoneName={timeZoneName}
+          currentDate={specifiedDate}
         />
       )}
 
-      {/* Meeting Times Section */}
       {timeZoneData.length > 0 && (
         <div>
           <h3 className="text-white/60 mb-4 text-sm">Meeting Times</h3>
@@ -57,7 +57,12 @@ export const TimeZoneDisplay = () => {
                 key={`${tzData.city}-${index}`}
                 city={tzData.city}
                 meetingTime={bestTimeRange?.cityTimes[tzData.city] || ''}
-                date={specifiedDate ? specifiedDate.toDateString() : undefined}
+                date={specifiedDate?.toLocaleDateString(undefined, {
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                })}
                 timeZone={`${getTimeZoneAcronym(tzData.offset)} (${formatTimeZone(tzData.offset)})`}
                 isCurrentLocation={tzData.city === defaultLocation}
               />
