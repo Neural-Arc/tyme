@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { TimeZoneCard } from './TimeZoneCard';
 import { format } from 'date-fns';
@@ -28,7 +27,7 @@ export const TimeZoneDisplay = () => {
     
     // Set initial local time card
     setTimeZones([{
-      city: city || 'Local Time',
+      city: 'Your Location',
       currentTime: format(new Date(), 'h:mm a, EEEE, MMMM do, yyyy'),
     }]);
   }, []);
@@ -48,15 +47,6 @@ export const TimeZoneDisplay = () => {
 
   return (
     <div className="space-y-8">
-      {/* User's Location Time Card */}
-      <div className="glass-card p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <MapPin className="h-5 w-5 text-white/60" />
-          <h3 className="text-lg font-medium">Your Location: {userLocation}</h3>
-        </div>
-        <p className="text-white/60">{localTimeZone}</p>
-      </div>
-
       {/* Time Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {timeZones.map((tz, index) => (

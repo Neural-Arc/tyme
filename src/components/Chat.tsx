@@ -63,7 +63,7 @@ export const Chat = () => {
         Type the cities and we'll find the best time for your global call.
       </p>
       
-      <div className="space-y-4 mb-4">
+      <div className="space-y-4 mb-4 min-h-[400px] overflow-y-auto">
         {messages.map((message) => (
           <div 
             key={message.id}
@@ -71,7 +71,7 @@ export const Chat = () => {
               message.role === 'assistant' ? 'bg-white/5' : 'bg-white/10'
             }`}
           >
-            <p className="text-white/90">{message.content}</p>
+            <p className="text-white/90 text-lg">{message.content}</p>
           </div>
         ))}
       </div>
@@ -81,19 +81,19 @@ export const Chat = () => {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="e.g. Find a good time for San Francisco, London, and Tokyo..."
-          className="bg-muted text-white border-white/10"
+          className="bg-muted text-white border-white/10 text-lg h-12"
           disabled={isLoading}
         />
         <Button 
           type="submit" 
           variant="outline" 
-          className="bg-white/5 border-white/10 hover:bg-white/10"
+          className="bg-white/5 border-white/10 hover:bg-white/10 h-12 w-12"
           disabled={isLoading}
         >
           {isLoading ? (
-            <Loader className="h-5 w-5 animate-spin" />
+            <Loader className="h-6 w-6 animate-spin" />
           ) : (
-            <MessageSquare className="h-5 w-5" />
+            <MessageSquare className="h-6 w-6" />
           )}
         </Button>
       </form>
