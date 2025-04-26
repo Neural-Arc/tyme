@@ -1,4 +1,3 @@
-
 import { Clock, Info } from 'lucide-react';
 import { 
   formatTime,
@@ -47,12 +46,12 @@ export const TimeScaleGraph = ({
         <h3 className="text-xl font-medium text-white">Working Hours (08:00 - 21:00)</h3>
       </div>
 
-      {bestTimeRange && (
+      {bestTimeRange && defaultLocation && (
         <div className="mb-6 p-4 bg-black/50 border border-[#3dd68c]/20 rounded-lg">
           <div className="flex justify-between items-center">
             <p className="text-lg font-medium">
               <span className="text-[#3dd68c] font-bold">✓ Best meeting time: </span>
-              {bestTimeRange.formattedLocal} {timeZoneName}
+              {bestTimeRange.formattedLocal} {defaultLocation}
             </p>
             <TooltipProvider>
               <Tooltip>
@@ -71,11 +70,11 @@ export const TimeScaleGraph = ({
       )}
 
       <div className="relative overflow-x-auto">
-        <div className="min-w-[800px] h-[340px]">
+        <div className="min-w-[800px] h-auto">
           {/* Time markers on top */}
           <div className="absolute top-0 left-[180px] right-0 flex justify-between text-white/60 text-sm border-b border-white/10 pb-2">
             {timeMarkers.map(hour => (
-              <div key={hour} className="text-center" style={{ width: '36px' }}>
+              <div key={hour} className="text-center min-w-[36px]">
                 {formatHour(hour)}:00
               </div>
             ))}
@@ -128,27 +127,18 @@ export const TimeScaleGraph = ({
                             />
                           );
                         })}
-                      </div>
 
-                      {bestTimeRange && (
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <div
-                                className="absolute top-0 bottom-0 bg-[#F97316]/50 border border-[#F97316] rounded-sm"
-                                style={{
-                                  left: `${(bestTimeRange.utcHour / 24) * 100}%`,
-                                  width: `${(1 / 24) * 100}%`,
-                                  zIndex: 10
-                                }}
-                              />
-                            </TooltipTrigger>
-                            <TooltipContent className="bg-black/90 border border-white/10 text-white">
-                              <p>Recommended time: {bestTimeRange.cityTimes[cityData.city]}</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      )}
+                        {bestTimeRange && (
+                          <div
+                            className="absolute top-0 bottom-0 bg-[#F97316]/50 border border-[#F97316] rounded-sm"
+                            style={{
+                              left: `${(bestTimeRange.localHour / 24) * 100}%`,
+                              width: `${(1 / 24) * 100}%`,
+                              zIndex: 10
+                            }}
+                          />
+                        )}
+                      </div>
                     </div>
                   </div>
                 );
