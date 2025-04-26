@@ -98,13 +98,15 @@ export const TimeScaleGraph = ({
                 if (b.city === defaultLocation) return 1;
                 return a.city.localeCompare(b.city);
               })
-              .map((cityData) => {
+              .map((cityData, index) => {
                 const isCurrentLocation = cityData.city === defaultLocation;
                 const cityLocalHour = bestTimeRange ? 
                   convertUtcToLocal(bestTimeRange.utcHour, cityData.offset) : null;
 
                 return (
-                  <div key={cityData.city} className="space-y-1">
+                  <div key={cityData.city} className="card-animate space-y-1" style={{
+                    animationDelay: `${index * 0.1}s`
+                  }}>
                     <div className="flex justify-between items-center">
                       <div className="w-[160px]">
                         <span className={`text-sm truncate block ${
@@ -131,26 +133,19 @@ export const TimeScaleGraph = ({
                       <div className="absolute inset-0 grid grid-cols-24 gap-px">
                         {Array.from({ length: 24 }).map((_, hour) => {
                           const isWorkingHour = cityData.workingHours.includes(hour);
+                          const isSelectedHour = cityLocalHour === hour;
+                          
                           return (
                             <div
                               key={hour}
-                              className={`h-full ${
+                              className={`h-full transition-all duration-300 ${
                                 isWorkingHour ? 'bg-[#3dd68c]/20 border-[#3dd68c]/20' : 'bg-black/40 border-white/10'
+                              } ${
+                                isSelectedHour ? 'timeline-highlight !bg-[#F97316] border-[#F97316]' : ''
                               } border rounded-sm`}
                             />
                           );
                         })}
-
-                        {bestTimeRange && cityLocalHour !== null && (
-                          <div
-                            className="absolute top-0 bottom-0 bg-[#F97316] border border-[#F97316] rounded-sm transition-all duration-300"
-                            style={{
-                              left: `${(cityLocalHour / 24) * 100}%`,
-                              width: `${(1 / 24) * 100}%`,
-                              zIndex: 10
-                            }}
-                          />
-                        )}
                       </div>
                     </div>
                   </div>

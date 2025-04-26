@@ -1,4 +1,3 @@
-
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Clock } from 'lucide-react';
 import { getTimeZoneAcronym, formatTimeZone } from '@/utils/timeZoneUtils';
@@ -12,7 +11,7 @@ interface TimeConversionCardProps {
 
 export const TimeConversionCard = ({ city, time, offset, isSource }: TimeConversionCardProps) => {
   return (
-    <Card className={`border-white/10 ${isSource ? 'bg-black/60' : 'bg-black/40'}`}>
+    <Card className={`card-animate border-white/10 ${isSource ? 'bg-black/60' : 'bg-black/40'}`}>
       <CardHeader className="flex flex-row items-center gap-3 pb-2">
         <Clock className={`h-5 w-5 ${isSource ? 'text-[#3dd68c]' : 'text-white/60'}`} />
         <CardTitle className="text-lg font-medium text-white">

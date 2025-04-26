@@ -11,7 +11,7 @@ interface TimeZoneCardProps {
 
 export const TimeZoneCard = ({ city, meetingTime, date, timeZone, isCurrentLocation }: TimeZoneCardProps) => {
   return (
-    <div className={`border border-white/10 rounded-lg p-6 transition-all duration-300 ${
+    <div className={`card-animate border border-white/10 rounded-lg p-6 transition-all duration-300 ${
       isCurrentLocation ? 'border-[#3dd68c]/50 bg-black/60' : 'bg-black/40 hover:bg-white/5'
     }`}>
       <div className="flex items-center gap-3 mb-4">
