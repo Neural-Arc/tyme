@@ -1,4 +1,3 @@
-
 // Map cities to their approximate UTC offsets
 export const getCityOffset = (city: string): number => {
   const cityOffsets: Record<string, number> = {
@@ -199,4 +198,19 @@ export const calculateBestMeetingTime = (
     formattedLocal: formatTime(localHour),
     cityTimes
   };
+};
+
+/**
+ * Converts UTC time to local time and formats it
+ * @param utcHour - Hour in UTC
+ * @param cityOffset - Timezone offset for the city
+ * @param includeMinutes - Whether to include minutes in the formatted time
+ * @returns Formatted local time string (e.g. "3:00 PM")
+ */
+export const convertAndFormatTime = (utcHour: number, cityOffset: number, includeMinutes: boolean = true): string => {
+  // Convert UTC hour to local hour for this city
+  let localHour = convertUtcToLocal(utcHour, cityOffset);
+  
+  // Format the time with or without minutes
+  return formatTime(localHour, includeMinutes ? 0 : undefined);
 };
