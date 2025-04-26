@@ -7,6 +7,7 @@ import { Clock } from 'lucide-react';
 
 interface TimeScaleGraphProps {
   cities: string[];
+  selectedDate: Date;
 }
 
 interface HourData {
@@ -16,7 +17,7 @@ interface HourData {
   cities: string[];
 }
 
-export const TimeScaleGraph = ({ cities }: TimeScaleGraphProps) => {
+export const TimeScaleGraph = ({ cities, selectedDate }: TimeScaleGraphProps) => {
   const [hourData, setHourData] = useState<HourData[]>([]);
   const [goldilockZone, setGoldilockZone] = useState<{start: number; end: number} | null>(null);
 
@@ -24,7 +25,7 @@ export const TimeScaleGraph = ({ cities }: TimeScaleGraphProps) => {
     if (!cities || cities.length === 0) return;
     
     const hours: HourData[] = Array.from({ length: 24 }, (_, i) => {
-      const date = new Date();
+      const date = new Date(selectedDate);
       date.setHours(i, 0, 0, 0);
       return {
         hour: i,
@@ -105,7 +106,7 @@ export const TimeScaleGraph = ({ cities }: TimeScaleGraphProps) => {
     }
 
     setHourData(hours);
-  }, [cities]);
+  }, [cities, selectedDate]);
 
   const getBarColor = (hour: number, overlap: number) => {
     const maxOverlap = Math.max(...hourData.map(h => h.overlap));
