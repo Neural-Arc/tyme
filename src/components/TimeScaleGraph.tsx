@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from './ui/chart';
 import { BarChart, Bar, XAxis, Cell, ResponsiveContainer } from 'recharts';
@@ -7,7 +6,6 @@ import { Clock } from 'lucide-react';
 
 interface TimeScaleGraphProps {
   cities: string[];
-  selectedDate: Date;
 }
 
 interface HourData {
@@ -17,9 +15,10 @@ interface HourData {
   cities: string[];
 }
 
-export const TimeScaleGraph = ({ cities, selectedDate }: TimeScaleGraphProps) => {
+export const TimeScaleGraph = ({ cities }: TimeScaleGraphProps) => {
   const [hourData, setHourData] = useState<HourData[]>([]);
   const [goldilockZone, setGoldilockZone] = useState<{start: number; end: number} | null>(null);
+  const selectedDate = new Date();
 
   useEffect(() => {
     if (!cities || cities.length === 0) return;

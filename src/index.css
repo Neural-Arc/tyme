@@ -6,7 +6,8 @@
 @layer base {
   body {
     @apply text-foreground antialiased;
-    background: #000000;
+    background-image: url('/lovable-uploads/ebbc6fb8-f161-4c23-9735-8603d3cd6db7.png');
+    background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
     min-height: 100vh;
