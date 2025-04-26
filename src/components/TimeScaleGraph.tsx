@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Clock, Info } from 'lucide-react';
 import { useLocation } from '@/hooks/useLocation';
@@ -37,7 +38,7 @@ export const TimeScaleGraph = ({ cities, specifiedDate, suggestedTime, defaultLo
   };
 
   // Get time markers for the scale - every 3 hours, in 24-hour format
-  const timeMarkers = Array.from({ length: 9 }, (_, i) => i * 3);
+  // Removed the first timeMarkers declaration
 
   useEffect(() => {
     if (!cities || cities.length === 0) return;
@@ -178,6 +179,7 @@ export const TimeScaleGraph = ({ cities, specifiedDate, suggestedTime, defaultLo
   const localBestTimeRange = getLocalBestTimeRange();
   
   // Get time markers for the scale - every 3 hours
+  // Use the generateHourLabels function to create time markers
   const timeMarkers = generateHourLabels(0, 23, 3);
 
   return (
