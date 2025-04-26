@@ -4,7 +4,6 @@ import { Clock } from 'lucide-react';
 interface TimeZoneCardProps {
   city: string;
   currentTime: string;
-  suggestedTime?: string;
   date?: string;
 }
 

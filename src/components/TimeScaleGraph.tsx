@@ -1,6 +1,5 @@
 
 import { useState, useEffect } from 'react';
-import { format } from 'date-fns';
 import { Clock } from 'lucide-react';
 
 interface TimeScaleGraphProps {
@@ -138,15 +137,29 @@ export const TimeScaleGraph = ({ cities, specifiedDate }: TimeScaleGraphProps) =
   }, [cities]);
 
   const formatHour = (hour: number): string => {
-    return hour === 0 ? '12 AM' : hour === 12 ? '12 PM' : hour > 12 ? `${hour - 12} PM` : `${hour} AM`;
+    return hour === 0 ? '24' : `${hour}`;
   };
 
   return (
     <div className="glass-card p-6 animate-fade-up">
       <div className="flex items-center gap-3 mb-6">
         <Clock className="h-5 w-5 text-white/60" />
-        <h3 className="text-xl font-medium text-white">Working Hours Overlap (8 AM - 9 PM)</h3>
+        <h3 className="text-xl font-medium text-white">Working Hours Overlap (8:00 - 21:00)</h3>
       </div>
+      
+      {/* Best time range callout - Moved to the top */}
+      {bestTimeRange && (
+        <div className="mb-6 p-4 bg-black/50 border border-[#3dd68c]/20 rounded-lg transition-all duration-300">
+          <p className="text-lg font-medium">
+            <span className="text-[#3dd68c] font-bold">✓ Best meeting window: </span>
+            {formatHour(bestTimeRange.start)}:00 - {formatHour(bestTimeRange.end + 1)}:00
+          </p>
+          <p className="text-sm text-white/60 mt-2">
+            This time range works best for all {cities.length} {cities.length === 1 ? 'location' : 'locations'}, 
+            keeping everyone within their 8:00 - 21:00 working hours.
+          </p>
+        </div>
+      )}
       
       <div className="relative h-[300px] w-full">
         {/* Time scale */}
@@ -173,7 +186,7 @@ export const TimeScaleGraph = ({ cities, specifiedDate }: TimeScaleGraphProps) =
                 <div className="flex justify-between">
                   <span className="text-white/80 text-sm">{cityData.city}</span>
                   <span className="text-white/60 text-xs">
-                    {formatHour(8)} - {formatHour(21)} local time
+                    8:00 - 21:00 local time
                   </span>
                 </div>
                 
@@ -220,20 +233,6 @@ export const TimeScaleGraph = ({ cities, specifiedDate }: TimeScaleGraphProps) =
           ></div>
         )}
       </div>
-
-      {/* Best time range callout */}
-      {bestTimeRange && (
-        <div className="mt-6 p-4 bg-black/50 border border-[#3dd68c]/20 rounded-lg transition-all duration-300">
-          <p className="text-lg font-medium">
-            <span className="text-[#3dd68c] font-bold">✓ Best meeting window: </span>
-            {formatHour(bestTimeRange.start)} - {formatHour(bestTimeRange.end + 1)}
-          </p>
-          <p className="text-sm text-white/60 mt-2">
-            This time range works best for all {cities.length} {cities.length === 1 ? 'location' : 'locations'}, 
-            keeping everyone within their 8 AM - 9 PM working hours.
-          </p>
-        </div>
-      )}
     </div>
   );
 };

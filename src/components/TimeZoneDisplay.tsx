@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { format, addHours, addMinutes } from 'date-fns';
+import { format } from 'date-fns';
 import { TimeZoneCard } from './TimeZoneCard';
 import { TimeScaleGraph } from './TimeScaleGraph';
 
@@ -12,9 +12,7 @@ interface TimeZoneInfo {
 
 export const TimeZoneDisplay = () => {
   const [timeZones, setTimeZones] = useState<TimeZoneInfo[]>([]);
-  const [bestCallTime, setBestCallTime] = useState<string>('');
   const [cities, setCities] = useState<string[]>([]);
-  const [showDefaultCard, setShowDefaultCard] = useState<boolean>(true);
   const [specifiedDate, setSpecifiedDate] = useState<Date | undefined>(undefined);
 
   useEffect(() => {
@@ -26,7 +24,6 @@ export const TimeZoneDisplay = () => {
         updateTimeZones(cities, suggestedTime, specifiedDate);
         setCities(cities);
         setSpecifiedDate(specifiedDate);
-        setShowDefaultCard(false);
       }
     };
 
@@ -93,57 +90,38 @@ export const TimeZoneDisplay = () => {
       cityDate.setUTCHours(baseUtcHours + hours);
       cityDate.setUTCMinutes(baseUtcMinutes + minutes);
       
+      // Format time without AM/PM
+      const timeFormatter = new Intl.DateTimeFormat('en', {
+        hour: 'numeric',
+        minute: 'numeric',
+        hour12: false
+      });
+      
       return {
         city,
-        currentTime: format(cityDate, 'h:mm a'),
+        currentTime: timeFormatter.format(cityDate),
         date: format(cityDate, 'EEEE, MMMM do, yyyy')
       };
     });
     
     setTimeZones(cityTimeZones);
-    
-    if (suggestedTime) {
-      setBestCallTime(suggestedTime);
-    }
   };
 
   return (
     <div className="space-y-8 animate-fade-up">
-      {/* Best Call Time Card - Only show if we have a suggested time */}
-      {bestCallTime && (
-        <div className="glass-card p-6">
-          <h3 className="text-xl font-medium mb-2 text-white/90">Recommended Call Time</h3>
-          <p className="text-2xl font-bold text-white">
-            {bestCallTime}
-            <span className="text-sm font-normal text-white/60 block mt-1">
-              {specifiedDate ? format(specifiedDate, 'EEEE, MMMM do, yyyy') : format(new Date(), 'EEEE, MMMM do, yyyy')}
-            </span>
-          </p>
+      {/* Time Cards Grid - only show user-requested city cards */}
+      {timeZones.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {timeZones.map((tz, index) => (
+            <TimeZoneCard
+              key={`${tz.city}-${index}`}
+              city={tz.city}
+              currentTime={tz.currentTime}
+              date={tz.date}
+            />
+          ))}
         </div>
       )}
-
-      {/* Time Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Show default user location card only if no cities have been entered */}
-        {showDefaultCard && (
-          <TimeZoneCard
-            key="default-location"
-            city="Your Location"
-            currentTime={format(new Date(), 'h:mm a')}
-            date={format(new Date(), 'EEEE, MMMM do, yyyy')}
-          />
-        )}
-        
-        {/* Show user-requested city cards */}
-        {timeZones.map((tz, index) => (
-          <TimeZoneCard
-            key={`${tz.city}-${index}`}
-            city={tz.city}
-            currentTime={tz.currentTime}
-            date={tz.date}
-          />
-        ))}
-      </div>
       
       {/* Time Scale Graph - Only show when there are multiple cities */}
       {cities.length > 1 && (
