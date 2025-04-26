@@ -1,10 +1,15 @@
-
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { TimeZoneCard } from './TimeZoneCard';
 import { TimeScaleGraph } from './TimeScaleGraph';
 import { useLocation } from '@/hooks/useLocation';
-import { getCityOffset, formatTimeZone, getTimeZoneAcronym, convertUtcToLocal, formatTime } from '@/utils/timeZoneUtils';
+import { 
+  getCityOffset, 
+  formatTimeZone, 
+  getTimeZoneAcronym, 
+  convertAndFormatTime,
+  calculateBestMeetingTime 
+} from '@/utils/timeZoneUtils';
 
 interface TimeZoneInfo {
   city: string;
@@ -54,11 +59,9 @@ export const TimeZoneDisplay = () => {
   }, []);
 
   const updateTimeZones = (cities: string[], suggestedTime?: string, userSpecifiedDate?: Date) => {
-    // Use specified date or current date
     const baseDate = userSpecifiedDate || new Date();
     let utcMeetingHour: number;
     
-    // Parse the suggested meeting time if provided
     if (suggestedTime) {
       const timeRegex = /(\d{1,2}):(\d{2})(?:\s*(am|pm))?/i;
       const timeMatch = suggestedTime.match(timeRegex);
@@ -68,55 +71,48 @@ export const TimeZoneDisplay = () => {
         const minutes = parseInt(timeMatch[2]);
         const period = timeMatch[3]?.toLowerCase();
         
-        // Convert to 24-hour format if AM/PM is specified
         if (period === 'pm' && hours < 12) hours += 12;
         if (period === 'am' && hours === 12) hours = 0;
         
-        // Convert to UTC (for calculations)
         utcMeetingHour = hours - timeZoneOffset;
         if (utcMeetingHour < 0) utcMeetingHour += 24;
         if (utcMeetingHour >= 24) utcMeetingHour -= 24;
       } else {
-        // If no valid time format, default to current hour
         utcMeetingHour = new Date().getUTCHours();
       }
     } else {
-      // If no suggested time, default to current hour
       utcMeetingHour = new Date().getUTCHours();
     }
     
     setMeetingUtcHour(utcMeetingHour);
     
-    // Always ensure default location is first in the list
-    let uniqueCities: string[] = [];
-    
+    // Ensure default location is first
+    let uniqueCities = [];
     if (defaultLocation) {
       uniqueCities = [defaultLocation, ...cities.filter(city => city !== defaultLocation)];
     } else {
       uniqueCities = [...new Set(cities)];
     }
     
+    // Prepare city data for time calculations
+    const cityData = uniqueCities.filter(Boolean).map(city => ({
+      city,
+      workingHours: Array.from({ length: 14 }, (_, i) => i + 8), // 8am to 9pm
+      offset: getCityOffset(city)
+    }));
+    
+    // Calculate best meeting time
+    const bestTime = calculateBestMeetingTime(cityData, defaultLocation || '', timeZoneOffset);
+    utcMeetingHour = bestTime.utcHour;
+    
     const cityTimeZones = uniqueCities.filter(Boolean).map(city => {
       const offset = getCityOffset(city);
-      
-      // Calculate hours and handle partial hours like India (UTC+5.5)
-      const offsetHours = Math.floor(offset);
-      const offsetMinutes = (offset - offsetHours) * 60;
-      
-      // Convert UTC meeting time to this city's local time
-      let cityHour = convertUtcToLocal(utcMeetingHour, offset);
-      
-      // Create date for this city based on the meeting time
-      const cityDate = new Date(baseDate);
-      cityDate.setHours(cityHour, 0, 0, 0);
-      
-      // Format meeting time
-      const meetingTime = formatTime(cityHour);
+      const timeInfo = convertAndFormatTime(utcMeetingHour, offset);
       
       return {
         city,
-        meetingTime,
-        date: format(cityDate, 'EEEE, MMMM do, yyyy'),
+        meetingTime: timeInfo.formattedTime,
+        date: format(baseDate, 'EEEE, MMMM do, yyyy'),
         timeZone: formatTimeZone(offset),
         timeZoneAcronym: getTimeZoneAcronym(offset)
       };
