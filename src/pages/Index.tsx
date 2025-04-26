@@ -5,11 +5,11 @@ import { TimeZoneDisplay } from "@/components/TimeZoneDisplay";
 
 const Index = () => {
   return (
-    <div className="min-h-screen p-4 relative bg-black">
+    <div className="min-h-screen p-4 relative bg-gradient-to-br from-[#3dd68c]/20 to-[#3dd68c]/5">
       <Settings />
       
-      <main className="container max-w-3xl mx-auto pt-12">
-        <div className="space-y-12">
+      <main className="container max-w-3xl mx-auto">
+        <div className="space-y-8">
           <Chat />
           <TimeZoneDisplay />
         </div>

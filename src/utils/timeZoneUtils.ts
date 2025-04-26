@@ -36,14 +36,17 @@ export const getCityOffset = (city: string): number => {
 };
 
 // Format time in 12-hour format with AM/PM
-export const formatTime = (hour: number, minute: number = 0): string => {
-  // Handle decimal hours (e.g., 2.5 -> 2:30)
-  const wholeHour = Math.floor(hour);
-  const decimalPart = hour % 1;
-  const minutes = minute || Math.round(decimalPart * 60);
+export const formatTime = (hour: number): string => {
+  // Ensure hour is between 0 and 24
+  hour = ((hour % 24) + 24) % 24;
   
+  const wholeHour = Math.floor(hour);
+  const minutes = Math.round((hour - wholeHour) * 60);
+  
+  // Convert to 12-hour format
   const period = wholeHour < 12 ? 'AM' : 'PM';
   const displayHour = wholeHour % 12 || 12;
+  
   return `${displayHour}:${minutes.toString().padStart(2, '0')} ${period}`;
 };
 
@@ -212,10 +215,7 @@ export const calculateBestMeetingTime = (
  * @param includeMinutes - Whether to include minutes in the formatted time
  * @returns Formatted local time string (e.g. "3:00 PM")
  */
-export const convertAndFormatTime = (utcHour: number, cityOffset: number, includeMinutes: boolean = true): string => {
-  // Convert UTC hour to local hour for this city
-  let localHour = convertUtcToLocal(utcHour, cityOffset);
-  
-  // Format the time with or without minutes
-  return formatTime(localHour, includeMinutes ? 0 : undefined);
+export const convertAndFormatTime = (utcHour: number, cityOffset: number): string => {
+  const localHour = convertUtcToLocal(utcHour, cityOffset);
+  return formatTime(localHour);
 };
