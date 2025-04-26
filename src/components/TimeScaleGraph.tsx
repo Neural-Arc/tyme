@@ -82,8 +82,8 @@ export const TimeScaleGraph = ({
 
       <div className="relative overflow-x-auto">
         <div className="min-w-[800px] h-auto">
-          {/* Time markers on top */}
-          <div className="absolute top-0 left-[180px] right-0 flex justify-between text-white/60 text-sm border-b border-white/10 pb-2">
+          {/* Time markers with improved visibility */}
+          <div className="absolute top-0 left-[180px] right-0 flex justify-between text-white/70 text-sm border-b border-white/20 pb-2">
             {timeMarkers.map(hour => (
               <div key={hour} className="text-center min-w-[36px]">
                 {formatHour(hour)}:00
@@ -104,9 +104,13 @@ export const TimeScaleGraph = ({
                   convertUtcToLocal(bestTimeRange.utcHour, cityData.offset) : null;
 
                 return (
-                  <div key={cityData.city} className="card-animate space-y-1" style={{
-                    animationDelay: `${index * 0.1}s`
-                  }}>
+                  <div 
+                    key={cityData.city} 
+                    className="card-animate space-y-1" 
+                    style={{
+                      animationDelay: `${index * 0.1}s`
+                    }}
+                  >
                     <div className="flex justify-between items-center">
                       <div className="w-[160px]">
                         <span className={`text-sm truncate block ${
@@ -133,16 +137,20 @@ export const TimeScaleGraph = ({
                       <div className="absolute inset-0 grid grid-cols-24 gap-px">
                         {Array.from({ length: 24 }).map((_, hour) => {
                           const isWorkingHour = cityData.workingHours.includes(hour);
-                          const isSelectedHour = cityLocalHour === hour;
+                          // Improved hour matching logic
+                          const isSelectedHour = cityLocalHour !== null && 
+                            Math.floor(cityLocalHour) === hour;
                           
                           return (
                             <div
                               key={hour}
-                              className={`h-full transition-all duration-300 ${
-                                isWorkingHour ? 'bg-[#3dd68c]/20 border-[#3dd68c]/20' : 'bg-black/40 border-white/10'
-                              } ${
-                                isSelectedHour ? 'timeline-highlight !bg-[#F97316] border-[#F97316]' : ''
-                              } border rounded-sm`}
+                              className={`
+                                h-full transition-all duration-300
+                                ${isWorkingHour ? 'bg-[#3dd68c]/10 hover:bg-[#3dd68c]/20' : 'bg-black/60'}
+                                ${isSelectedHour ? 'timeline-highlight !bg-[#F97316]/90 hover:!bg-[#F97316]' : ''}
+                                border rounded-sm
+                                ${isWorkingHour ? 'border-[#3dd68c]/20' : 'border-white/5'}
+                              `}
                             />
                           );
                         })}

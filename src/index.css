@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -39,24 +40,44 @@
   opacity: 0;
 }
 
-.card-animate:nth-child(1) { animation-delay: 0s; }
-.card-animate:nth-child(2) { animation-delay: 0.1s; }
+/* Enhanced staggered delays */
+.card-animate:nth-child(1) { animation-delay: 0.1s; }
+.card-animate:nth-child(2) { animation-delay: 0.15s; }
 .card-animate:nth-child(3) { animation-delay: 0.2s; }
-.card-animate:nth-child(4) { animation-delay: 0.3s; }
-.card-animate:nth-child(5) { animation-delay: 0.4s; }
+.card-animate:nth-child(4) { animation-delay: 0.25s; }
+.card-animate:nth-child(5) { animation-delay: 0.3s; }
 
-/* Timeline highlight animation */
+/* Improved timeline highlight animation */
 @keyframes highlight-fade {
-  from {
+  0% {
     opacity: 0;
-    transform: scaleX(0.8);
+    transform: scaleX(0.95);
+    background-color: rgba(249, 115, 22, 0);
   }
-  to {
+  100% {
     opacity: 1;
     transform: scaleX(1);
+    background-color: rgba(249, 115, 22, 0.9);
   }
 }
 
 .timeline-highlight {
-  animation: highlight-fade 0.3s ease-out forwards;
+  animation: highlight-fade 0.4s ease-out forwards;
+}
+
+/* Working hours hover effect */
+@keyframes pulse-subtle {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.timeline-highlight:hover {
+  animation: pulse-subtle 0.6s ease-in-out infinite;
 }
