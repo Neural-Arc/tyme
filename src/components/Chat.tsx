@@ -23,12 +23,12 @@ export const Chat = () => {
     setIsLoading(true);
 
     try {
-      const { cities, suggestedTime } = await processMessage(input, apiKey);
+      const { cities, suggestedTime, specifiedDate } = await processMessage(input, apiKey);
       
-      // Update time zones with the extracted cities and suggested time
+      // Update time zones with the extracted cities, suggested time, and specified date
       if (cities.length > 0) {
         const event = new CustomEvent('updateTimeZones', { 
-          detail: { cities, suggestedTime } 
+          detail: { cities, suggestedTime, specifiedDate } 
         });
         window.dispatchEvent(event);
       }
@@ -50,7 +50,7 @@ export const Chat = () => {
         <Input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="e.g. New York, London, Tokyo..."
+          placeholder="e.g. New York, London, Tokyo for next Monday..."
           className="bg-black/30 text-white border-white/10 text-2xl h-24 px-6"
           disabled={isLoading}
         />

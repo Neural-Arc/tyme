@@ -1,224 +1,236 @@
+
 import { useState, useEffect } from 'react';
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from './ui/chart';
-import { BarChart, Bar, XAxis, Cell, ResponsiveContainer } from 'recharts';
 import { format } from 'date-fns';
 import { Clock } from 'lucide-react';
 
 interface TimeScaleGraphProps {
   cities: string[];
+  specifiedDate?: Date;
 }
 
-interface HourData {
-  hour: number;
-  displayHour: string;
-  overlap: number;
-  cities: string[];
+interface CityWorkingHours {
+  city: string;
+  workingHours: number[];
 }
 
-export const TimeScaleGraph = ({ cities }: TimeScaleGraphProps) => {
-  const [hourData, setHourData] = useState<HourData[]>([]);
-  const [goldilockZone, setGoldilockZone] = useState<{start: number; end: number} | null>(null);
-  const selectedDate = new Date();
+export const TimeScaleGraph = ({ cities, specifiedDate }: TimeScaleGraphProps) => {
+  const [cityHours, setCityHours] = useState<CityWorkingHours[]>([]);
+  const [bestTimeRange, setBestTimeRange] = useState<{start: number; end: number} | null>(null);
+  const baseDate = specifiedDate || new Date();
+
+  // Map cities to their approximate UTC offsets
+  const getCityOffset = (city: string): number => {
+    const cityOffsets: Record<string, number> = {
+      'london': 0,
+      'new york': -5, 
+      'los angeles': -8,
+      'san francisco': -8,
+      'tokyo': 9,
+      'sydney': 10,
+      'melbourne': 10,
+      'paris': 1,
+      'berlin': 1,
+      'dubai': 4,
+      'singapore': 8,
+      'hong kong': 8,
+      'beijing': 8,
+      'mumbai': 5.5,
+      'delhi': 5.5,
+      'toronto': -5,
+      'rio': -3,
+      'sao paulo': -3,
+      'cape town': 2,
+      'mexico city': -6,
+    };
+    
+    const lowerCity = city.toLowerCase();
+    
+    for (const [key, offset] of Object.entries(cityOffsets)) {
+      if (lowerCity.includes(key)) {
+        return offset;
+      }
+    }
+    
+    // Default offset for unknown cities
+    return Math.floor(Math.random() * 24) - 12;
+  };
 
   useEffect(() => {
     if (!cities || cities.length === 0) return;
     
-    const hours: HourData[] = Array.from({ length: 24 }, (_, i) => {
-      const date = new Date(selectedDate);
-      date.setHours(i, 0, 0, 0);
-      return {
-        hour: i,
-        displayHour: format(date, 'h a'),
-        overlap: 0,
-        cities: []
-      };
-    });
-
-    // Working hours (8 AM to 9 PM) for each city
-    cities.forEach(city => {
-      let offset = 0;
-      
-      // Simulate different time zones
-      if (city.toLowerCase() === 'your location') offset = 0;
-      else if (city.toLowerCase().includes('new york')) offset = 0;
-      else if (city.toLowerCase().includes('london')) offset = 5;
-      else if (city.toLowerCase().includes('tokyo')) offset = 13;
-      else if (city.toLowerCase().includes('sydney')) offset = 15;
-      else if (city.toLowerCase().includes('paris')) offset = 6;
-      else if (city.toLowerCase().includes('dubai')) offset = 9;
-      else if (city.toLowerCase().includes('singapore')) offset = 12;
-      else if (city.toLowerCase().includes('los angeles')) offset = -3;
-      else if (city.toLowerCase().includes('san francisco')) offset = -3;
-      else if (city.toLowerCase().includes('beijing')) offset = 13;
-      else if (city.toLowerCase().includes('mumbai')) offset = 10;
-      else if (city.toLowerCase().includes('berlin')) offset = 6;
-      else if (city.toLowerCase().includes('toronto')) offset = 0;
-      else if (city.toLowerCase().includes('rio')) offset = 3;
-      else if (city.toLowerCase().includes('cape town')) offset = 7;
-      else if (city.toLowerCase().includes('mexico city')) offset = -1;
-      else offset = Math.floor(Math.random() * 24);
-
-      // Mark working hours (8 AM to 9 PM) for this city
-      for (let h = 8; h <= 21; h++) {
-        const adjustedHour = (h + offset) % 24;
-        hours[adjustedHour].overlap += 1;
-        hours[adjustedHour].cities.push(city);
-      }
-    });
-
-    // Find the Goldilocks zone with maximum overlap
-    let maxOverlap = Math.max(...hours.map(h => h.overlap));
-    const bestHours = hours.filter(h => h.overlap === maxOverlap);
+    const workingHoursData: CityWorkingHours[] = [];
     
-    if (bestHours.length > 0) {
-      const sortedHours = bestHours.sort((a, b) => a.hour - b.hour);
+    cities.forEach(city => {
+      const offset = getCityOffset(city);
+      const workingHours: number[] = [];
       
-      // Find consecutive hours to form a zone
-      let startHour = sortedHours[0].hour;
-      let endHour = startHour;
-      let currentZoneLength = 1;
-      let maxZoneLength = 1;
-      let maxZoneStart = startHour;
+      // Calculate working hours in UTC for this city (8 AM to 9 PM local time)
+      for (let h = 8; h <= 21; h++) {
+        // Convert local hour to UTC hour
+        let utcHour = (h - offset) % 24;
+        if (utcHour < 0) utcHour += 24;
+        workingHours.push(utcHour);
+      }
       
-      for (let i = 1; i < sortedHours.length; i++) {
-        if (sortedHours[i].hour === endHour + 1) {
-          // Part of the same zone
-          endHour = sortedHours[i].hour;
-          currentZoneLength++;
-          
-          if (currentZoneLength > maxZoneLength) {
-            maxZoneLength = currentZoneLength;
-            maxZoneStart = startHour;
-          }
-        } else {
-          // Start of a new zone
-          startHour = sortedHours[i].hour;
-          endHour = startHour;
-          currentZoneLength = 1;
+      workingHoursData.push({ city, workingHours });
+    });
+    
+    setCityHours(workingHoursData);
+    
+    // Find overlapping hours
+    if (workingHoursData.length > 1) {
+      const hourCounts = new Array(24).fill(0);
+      
+      workingHoursData.forEach(cityData => {
+        cityData.workingHours.forEach(hour => {
+          hourCounts[hour]++;
+        });
+      });
+      
+      // Find the hours where all cities overlap
+      const allCitiesCount = workingHoursData.length;
+      let bestOverlapCount = 0;
+      let bestHours: number[] = [];
+      
+      for (let hour = 0; hour < 24; hour++) {
+        if (hourCounts[hour] > bestOverlapCount) {
+          bestOverlapCount = hourCounts[hour];
+          bestHours = [hour];
+        } else if (hourCounts[hour] === bestOverlapCount && bestOverlapCount > 0) {
+          bestHours.push(hour);
         }
       }
       
-      setGoldilockZone({
-        start: maxZoneStart,
-        end: maxZoneStart + maxZoneLength - 1
-      });
+      // Find the longest consecutive best hour range
+      if (bestHours.length > 0) {
+        bestHours.sort((a, b) => a - b);
+        let currentStart = bestHours[0];
+        let currentEnd = bestHours[0];
+        let maxStart = currentStart;
+        let maxEnd = currentEnd;
+        let maxLength = 1;
+        let currentLength = 1;
+        
+        for (let i = 1; i < bestHours.length; i++) {
+          if (bestHours[i] === bestHours[i-1] + 1) {
+            // Consecutive hour
+            currentEnd = bestHours[i];
+            currentLength++;
+            
+            if (currentLength > maxLength) {
+              maxLength = currentLength;
+              maxStart = currentStart;
+              maxEnd = currentEnd;
+            }
+          } else {
+            // Not consecutive, start a new sequence
+            currentStart = bestHours[i];
+            currentEnd = bestHours[i];
+            currentLength = 1;
+          }
+        }
+        
+        setBestTimeRange({ start: maxStart, end: maxEnd });
+      } else {
+        setBestTimeRange(null);
+      }
     }
+  }, [cities]);
 
-    setHourData(hours);
-  }, [cities, selectedDate]);
-
-  const getBarColor = (hour: number, overlap: number) => {
-    const maxOverlap = Math.max(...hourData.map(h => h.overlap));
-    if (goldilockZone && hour >= goldilockZone.start && hour <= goldilockZone.end) {
-      return '#3dd68c'; // Bright green for Goldilocks zone
-    }
-    if (overlap === 0) return '#ffffff10';
-    
-    // Enhanced color gradient for better visualization
-    const baseColor = '#9b87f5'; // Purple base color
-    const opacity = 0.2 + (overlap / maxOverlap) * 0.8;
-    return `rgba(155, 135, 245, ${opacity})`;
+  const formatHour = (hour: number): string => {
+    return hour === 0 ? '12 AM' : hour === 12 ? '12 PM' : hour > 12 ? `${hour - 12} PM` : `${hour} AM`;
   };
-
-  const getBarHeight = (overlap: number) => {
-    if (overlap === 0) return 20;
-    return 20 + (overlap * 35); // Scale the height based on overlap, increased effect
-  };
-
-  // Add interactivity by highlighting bars on hover
-  const [activeHour, setActiveHour] = useState<number | null>(null);
 
   return (
     <div className="glass-card p-6 animate-fade-up">
       <div className="flex items-center gap-3 mb-6">
         <Clock className="h-5 w-5 text-white/60" />
-        <h3 className="text-xl font-medium">Working Hours Overlap (8 AM - 9 PM)</h3>
+        <h3 className="text-xl font-medium text-white">Working Hours Overlap (8 AM - 9 PM)</h3>
       </div>
       
-      <div className="h-[300px] w-full">
-        <ChartContainer config={{
-          hour: {
-            theme: {
-              light: "#FFFFFF",
-              dark: "#FFFFFF",
-            },
-            label: "Hour",
-          },
-          overlap: {
-            theme: {
-              light: "#FFFFFF",
-              dark: "#FFFFFF",
-            },
-            label: "Cities Available",
-          }
-        }}>
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart 
-              data={hourData} 
-              margin={{ top: 20, right: 20, left: 20, bottom: 20 }}
-              onMouseMove={(data) => {
-                if (data.activeTooltipIndex !== undefined) {
-                  setActiveHour(data.activeTooltipIndex);
-                }
-              }}
-              onMouseLeave={() => setActiveHour(null)}
-            >
-              <XAxis 
-                dataKey="displayHour" 
-                tick={{ fill: '#ffffff80' }} 
-                axisLine={{ stroke: '#ffffff40' }}
-                tickLine={{ stroke: '#ffffff40' }}
-              />
-              
-              <ChartTooltip
-                content={
-                  <ChartTooltipContent
-                    labelFormatter={(value) => `${value}`}
-                    formatter={(value, name, { payload }) => (
-                      <div>
-                        <div className="mb-2 font-medium">{payload.displayHour}</div>
-                        <div className="text-sm text-muted-foreground">
-                          <span className="font-bold">{payload.overlap}</span> cities available:<br/>
-                          <span className="text-sm text-white/70">{payload.cities.join(', ')}</span>
-                        </div>
-                      </div>
-                    )}
-                  />
-                }
-              />
-
-              <Bar 
-                dataKey="overlap" 
-                fill="#8884d8"
-                minPointSize={20}
-                radius={[4, 4, 0, 0]}
-                animationDuration={800}
-              >
-                {hourData.map((entry, index) => (
-                  <Cell 
-                    key={`cell-${index}`} 
-                    fill={getBarColor(entry.hour, entry.overlap)}
-                    height={getBarHeight(entry.overlap)}
-                    className={`transition-all duration-300 ${activeHour === index ? 'filter drop-shadow-lg scale-y-105' : ''}`}
-                    stroke={activeHour === index || (goldilockZone && index >= goldilockZone.start && index <= goldilockZone.end) ? '#ffffff' : 'transparent'}
-                    strokeWidth={1}
-                  />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </ChartContainer>
+      <div className="relative h-[300px] w-full">
+        {/* Time scale */}
+        <div className="absolute top-0 left-0 right-0 flex justify-between text-white/60 text-sm border-b border-white/10 pb-1">
+          {[0, 6, 12, 18, 23].map(hour => (
+            <div key={hour} className="text-center">{formatHour(hour)}</div>
+          ))}
+        </div>
+        
+        {/* City working hours bars */}
+        <div className="mt-8 space-y-6">
+          {cityHours.map((cityData, index) => {
+            const colorIndex = index % 5;
+            const colors = [
+              'bg-white/25 border-white/40',
+              'bg-white/20 border-white/30',
+              'bg-white/15 border-white/25',
+              'bg-white/10 border-white/20',
+              'bg-white/5 border-white/15'
+            ];
+            
+            return (
+              <div key={cityData.city} className="space-y-1">
+                <div className="flex justify-between">
+                  <span className="text-white/80 text-sm">{cityData.city}</span>
+                  <span className="text-white/60 text-xs">
+                    {formatHour(8)} - {formatHour(21)} local time
+                  </span>
+                </div>
+                
+                <div className="relative h-8 w-full bg-white/5 rounded">
+                  <div className="absolute inset-0 grid grid-cols-24 gap-px">
+                    {Array.from({ length: 24 }).map((_, hour) => (
+                      <div key={hour} className="h-full"></div>
+                    ))}
+                  </div>
+                  
+                  {cityData.workingHours.map(hour => {
+                    const isInBestTimeRange = 
+                      bestTimeRange && (hour >= bestTimeRange.start && hour <= bestTimeRange.end);
+                    
+                    return (
+                      <div 
+                        key={hour} 
+                        className={`absolute top-0 bottom-0 border ${
+                          isInBestTimeRange 
+                            ? 'bg-[#3dd68c]/30 border-[#3dd68c]/50' 
+                            : colors[colorIndex]
+                        } rounded-sm transition-all duration-300`}
+                        style={{
+                          left: `${(hour / 24) * 100}%`, 
+                          width: `${(1 / 24) * 100}%`
+                        }}
+                      ></div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        
+        {/* Goldilocks zone overlay */}
+        {bestTimeRange && (
+          <div 
+            className="absolute top-8 h-[calc(100%-32px)] bg-[#3dd68c]/10 border-l border-r border-[#3dd68c]/20 transition-all duration-300 pointer-events-none"
+            style={{
+              left: `${(bestTimeRange.start / 24) * 100}%`,
+              width: `${((bestTimeRange.end - bestTimeRange.start + 1) / 24) * 100}%`
+            }}
+          ></div>
+        )}
       </div>
 
-      {goldilockZone && (
-        <div className="mt-6 p-4 bg-[#1A1F2C] border border-[#9b87f5]/30 rounded-lg transition-all duration-300 hover:border-[#9b87f5]/50">
+      {/* Best time range callout */}
+      {bestTimeRange && (
+        <div className="mt-6 p-4 bg-black/50 border border-[#3dd68c]/20 rounded-lg transition-all duration-300">
           <p className="text-lg font-medium">
             <span className="text-[#3dd68c] font-bold">✓ Best meeting window: </span>
-            {hourData[goldilockZone.start].displayHour} - {hourData[goldilockZone.end < 23 ? goldilockZone.end + 1 : 0].displayHour}
+            {formatHour(bestTimeRange.start)} - {formatHour(bestTimeRange.end + 1)}
           </p>
           <p className="text-sm text-white/60 mt-2">
-            This time range works well for {cities.length} {cities.length === 1 ? 'location' : 'locations'}, 
-            keeping the call within 8 AM - 9 PM for everyone.
+            This time range works best for all {cities.length} {cities.length === 1 ? 'location' : 'locations'}, 
+            keeping everyone within their 8 AM - 9 PM working hours.
           </p>
         </div>
       )}

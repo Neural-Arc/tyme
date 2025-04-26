@@ -1,7 +1,7 @@
 
 import { toast } from "sonner";
 
-export async function processMessage(message: string, apiKey: string): Promise<{ content: string; cities: string[]; suggestedTime?: string }> {
+export async function processMessage(message: string, apiKey: string): Promise<{ content: string; cities: string[]; suggestedTime?: string; specifiedDate?: Date }> {
   try {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -36,7 +36,8 @@ export async function processMessage(message: string, apiKey: string): Promise<{
     
     // Better city extraction regex - exclude time indicators and common words
     const cityRegex = /\b(?:(?!am|pm|time|about|currently)[A-Z][a-zA-Z\s]{2,})\b/g;
-    let cities = content.match(cityRegex) || [];
+    const cityMatches = content.match(cityRegex);
+    let cities = cityMatches ? [...cityMatches] : [];
     
     // Clean up the extracted cities
     cities = cities.map(city => city.trim().replace(/\s+/g, ' '));
@@ -50,11 +51,58 @@ export async function processMessage(message: string, apiKey: string): Promise<{
     // Improved time extraction for best call time
     const suggestedTimeMatch = content.match(/(?:suggested|optimal|best|recommended)(?:\s+meeting)?\s+times?:?\s*([0-9]{1,2}:[0-9]{2}\s*[AP]M)/i);
     const suggestedTime = suggestedTimeMatch ? suggestedTimeMatch[1].trim() : undefined;
+    
+    // Extract any date specified in the user's message
+    const dateRegex = /(?:\b(?:on|for)\s+)?(\d{1,2})(?:st|nd|rd|th)?\s+(?:of\s+)?(January|February|March|April|May|June|July|August|September|October|November|December|Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sep|Oct|Nov|Dec)(?:\s+(\d{4}))?/i;
+    const dateMatch = message.match(dateRegex);
+    
+    // Also look for day names
+    const dayRegex = /\b(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday|Mon|Tue|Wed|Thu|Fri|Sat|Sun)\b/i;
+    const dayMatch = message.match(dayRegex);
+    
+    let specifiedDate: Date | undefined;
+    
+    if (dateMatch) {
+      const day = dateMatch[1];
+      const month = dateMatch[2];
+      const year = dateMatch[3] ? parseInt(dateMatch[3]) : new Date().getFullYear();
+      
+      const monthMap: {[key: string]: number} = {
+        'january': 0, 'jan': 0, 'february': 1, 'feb': 1, 'march': 2, 'mar': 2,
+        'april': 3, 'apr': 3, 'may': 4, 'june': 5, 'jun': 5,
+        'july': 6, 'jul': 6, 'august': 7, 'aug': 7,
+        'september': 8, 'sep': 8, 'october': 9, 'oct': 9,
+        'november': 10, 'nov': 10, 'december': 11, 'dec': 11
+      };
+      
+      const monthIndex = monthMap[month.toLowerCase()];
+      specifiedDate = new Date(year, monthIndex, parseInt(day));
+    } else if (dayMatch) {
+      const dayName = dayMatch[1].toLowerCase();
+      const daysOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+      const shortDays = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+      
+      let dayIndex = daysOfWeek.indexOf(dayName);
+      if (dayIndex === -1) {
+        dayIndex = shortDays.indexOf(dayName);
+      }
+      
+      if (dayIndex !== -1) {
+        const today = new Date();
+        const currentDay = today.getDay();
+        let daysToAdd = dayIndex - currentDay;
+        if (daysToAdd <= 0) daysToAdd += 7; // Next week if the day has already passed
+        
+        specifiedDate = new Date();
+        specifiedDate.setDate(today.getDate() + daysToAdd);
+      }
+    }
 
     console.log("Extracted cities:", cities);
     console.log("Suggested time:", suggestedTime);
+    console.log("Specified date:", specifiedDate);
 
-    return { content, cities, suggestedTime };
+    return { content, cities, suggestedTime, specifiedDate };
   } catch (error) {
     console.error('Error processing message:', error);
     toast.error('Failed to process message. Please check your API key and try again.');

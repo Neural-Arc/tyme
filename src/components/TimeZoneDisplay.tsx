@@ -1,13 +1,12 @@
 
 import { useState, useEffect } from 'react';
+import { format, addHours, addMinutes } from 'date-fns';
 import { TimeZoneCard } from './TimeZoneCard';
-import { format } from 'date-fns';
 import { TimeScaleGraph } from './TimeScaleGraph';
 
 interface TimeZoneInfo {
   city: string;
   currentTime: string;
-  suggestedTime?: string;
   date?: string;
 }
 
@@ -16,15 +15,17 @@ export const TimeZoneDisplay = () => {
   const [bestCallTime, setBestCallTime] = useState<string>('');
   const [cities, setCities] = useState<string[]>([]);
   const [showDefaultCard, setShowDefaultCard] = useState<boolean>(true);
+  const [specifiedDate, setSpecifiedDate] = useState<Date | undefined>(undefined);
 
   useEffect(() => {
     // Handle updates from chat component
     const handleUpdateTimeZones = (event: CustomEvent) => {
-      const { cities, suggestedTime } = event.detail;
+      const { cities, suggestedTime, specifiedDate } = event.detail;
       
       if (cities && cities.length > 0) {
-        updateTimeZones(cities, suggestedTime);
+        updateTimeZones(cities, suggestedTime, specifiedDate);
         setCities(cities);
+        setSpecifiedDate(specifiedDate);
         setShowDefaultCard(false);
       }
     };
@@ -36,17 +37,68 @@ export const TimeZoneDisplay = () => {
     };
   }, []);
 
-  const updateTimeZones = (cities: string[], suggestedTime?: string) => {
-    const currentDate = new Date();
-    const formattedDate = format(currentDate, 'EEEE, MMMM do, yyyy');
+  const getCityOffset = (city: string): number => {
+    // Map cities to their approximate UTC offsets
+    const cityOffsets: Record<string, number> = {
+      'london': 0,
+      'new york': -5,
+      'los angeles': -8,
+      'san francisco': -8,
+      'tokyo': 9,
+      'sydney': 10,
+      'melbourne': 10,
+      'paris': 1,
+      'berlin': 1,
+      'dubai': 4,
+      'singapore': 8,
+      'hong kong': 8,
+      'beijing': 8,
+      'mumbai': 5.5,
+      'delhi': 5.5,
+      'toronto': -5,
+      'rio': -3,
+      'sao paulo': -3,
+      'cape town': 2,
+      'mexico city': -6,
+    };
+    
+    const lowerCity = city.toLowerCase();
+    
+    for (const [key, offset] of Object.entries(cityOffsets)) {
+      if (lowerCity.includes(key)) {
+        return offset;
+      }
+    }
+    
+    // Default to random offset for demo purposes
+    return Math.floor(Math.random() * 24) - 12;
+  };
+
+  const updateTimeZones = (cities: string[], suggestedTime?: string, userSpecifiedDate?: Date) => {
+    const baseDate = userSpecifiedDate || new Date();
+    const baseUtcHours = baseDate.getUTCHours();
+    const baseUtcMinutes = baseDate.getUTCMinutes();
     
     // Only add cities that were explicitly mentioned by the user
     const uniqueCities = [...new Set(cities)];
-    const cityTimeZones = uniqueCities.map(city => ({
-      city,
-      currentTime: format(currentDate, 'h:mm'),
-      date: formattedDate
-    }));
+    const cityTimeZones = uniqueCities.map(city => {
+      const offset = getCityOffset(city);
+      
+      // Calculate hours and handle partial hours like India (UTC+5.5)
+      const hours = Math.floor(offset);
+      const minutes = (offset - hours) * 60;
+      
+      // Create date for this city based on UTC offset
+      const cityDate = new Date(baseDate);
+      cityDate.setUTCHours(baseUtcHours + hours);
+      cityDate.setUTCMinutes(baseUtcMinutes + minutes);
+      
+      return {
+        city,
+        currentTime: format(cityDate, 'h:mm a'),
+        date: format(cityDate, 'EEEE, MMMM do, yyyy')
+      };
+    });
     
     setTimeZones(cityTimeZones);
     
@@ -64,7 +116,7 @@ export const TimeZoneDisplay = () => {
           <p className="text-2xl font-bold text-white">
             {bestCallTime}
             <span className="text-sm font-normal text-white/60 block mt-1">
-              {format(new Date(), 'EEEE, MMMM do, yyyy')}
+              {specifiedDate ? format(specifiedDate, 'EEEE, MMMM do, yyyy') : format(new Date(), 'EEEE, MMMM do, yyyy')}
             </span>
           </p>
         </div>
@@ -77,7 +129,7 @@ export const TimeZoneDisplay = () => {
           <TimeZoneCard
             key="default-location"
             city="Your Location"
-            currentTime={format(new Date(), 'h:mm')}
+            currentTime={format(new Date(), 'h:mm a')}
             date={format(new Date(), 'EEEE, MMMM do, yyyy')}
           />
         )}
@@ -97,6 +149,7 @@ export const TimeZoneDisplay = () => {
       {cities.length > 1 && (
         <TimeScaleGraph 
           cities={cities}
+          specifiedDate={specifiedDate}
         />
       )}
     </div>
