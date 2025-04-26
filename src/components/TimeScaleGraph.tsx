@@ -91,6 +91,9 @@ export const TimeScaleGraph = ({
               })
               .map((cityData) => {
                 const isCurrentLocation = cityData.city === defaultLocation;
+                // Calculate the city-specific local hour for the best time
+                const cityLocalHour = bestTimeRange ? 
+                  convertUtcToLocal(bestTimeRange.utcHour, cityData.offset) : null;
 
                 return (
                   <div key={cityData.city} className="space-y-1">
@@ -130,11 +133,11 @@ export const TimeScaleGraph = ({
                           );
                         })}
 
-                        {bestTimeRange && (
+                        {bestTimeRange && cityLocalHour !== null && (
                           <div
                             className="absolute top-0 bottom-0 bg-[#F97316] border border-[#F97316] rounded-sm transition-all duration-300"
                             style={{
-                              left: `${((bestTimeRange.localHour % 24) / 24) * 100}%`,
+                              left: `${((cityLocalHour % 24) / 24) * 100}%`,
                               width: `${(1 / 24) * 100}%`,
                               zIndex: 10
                             }}

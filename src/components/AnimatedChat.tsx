@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -144,6 +145,8 @@ export const AnimatedChat = ({
           onError={(e) => {
             console.error('Failed to load logo at /logo.png');
             e.currentTarget.style.display = 'none';
+            // Attempt to load the uploaded image directly
+            e.currentTarget.src = 'uploaded-logo.png';
           }}
         />
       </div>
