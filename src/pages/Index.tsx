@@ -1,12 +1,27 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import { Chat } from "@/components/Chat";
+import { Settings } from "@/components/Settings";
+import { TimeZoneCard } from "@/components/TimeZoneCard";
 
 const Index = () => {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen p-4 relative">
+      <Settings />
+      
+      <main className="container max-w-4xl mx-auto pt-16 space-y-12">
+        <Chat />
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <TimeZoneCard
+            city="San Francisco"
+            currentTime="9:41 AM PDT"
+          />
+          <TimeZoneCard
+            city="London"
+            currentTime="5:41 PM BST"
+          />
+        </div>
+      </main>
     </div>
   );
 };
