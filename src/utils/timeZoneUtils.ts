@@ -58,35 +58,35 @@ export const formatTimeZone = (offset: number): string => {
 
 // Get timezone acronym based on offset
 export const getTimeZoneAcronym = (offset: number): string => {
-  const timeZoneAcronyms: Record<number, string> = {
-    0: 'GMT',   // Greenwich Mean Time
-    1: 'CET',   // Central European Time
-    2: 'EET',   // Eastern European Time
-    3: 'MSK',   // Moscow Time
-    4: 'GST',   // Gulf Standard Time
-    5: 'PKT',   // Pakistan Standard Time
-    5.5: 'IST', // Indian Standard Time
-    6: 'BST',   // Bangladesh Standard Time
-    7: 'ICT',   // Indochina Time
-    8: 'CST',   // China Standard Time
-    9: 'JST',   // Japan Standard Time
-    10: 'AEST', // Australian Eastern Standard Time
-    11: 'SBT',  // Solomon Islands Time
-    12: 'NZST', // New Zealand Standard Time
-    -1: 'WAT',  // West Africa Time
-    -2: 'BRST', // Brasilia Summer Time
-    -3: 'ART',  // Argentina Time
-    -4: 'EDT',  // Eastern Daylight Time
-    -5: 'EST',  // Eastern Standard Time
-    -6: 'CST',  // Central Standard Time
-    -7: 'MST',  // Mountain Standard Time
-    -8: 'PST',  // Pacific Standard Time
-    -9: 'AKST', // Alaska Standard Time
-    -10: 'HST', // Hawaii Standard Time
-    -11: 'SST', // Samoa Standard Time
+  const timeZoneAcronyms: Record<string, string> = {
+    '0': 'GMT',   // Greenwich Mean Time
+    '1': 'CET',   // Central European Time
+    '2': 'EET',   // Eastern European Time
+    '3': 'MSK',   // Moscow Time
+    '4': 'GST',   // Gulf Standard Time
+    '5': 'PKT',   // Pakistan Standard Time
+    '5.5': 'IST', // Indian Standard Time
+    '6': 'BST',   // Bangladesh Standard Time
+    '7': 'ICT',   // Indochina Time
+    '8': 'CST',   // China Standard Time
+    '9': 'JST',   // Japan Standard Time
+    '10': 'AEST', // Australian Eastern Standard Time
+    '11': 'SBT',  // Solomon Islands Time
+    '12': 'NZST', // New Zealand Standard Time
+    '-1': 'WAT',  // West Africa Time
+    '-2': 'BRST', // Brasilia Summer Time
+    '-3': 'ART',  // Argentina Time
+    '-4': 'EDT',  // Eastern Daylight Time
+    '-5': 'EST',  // Eastern Standard Time
+    '-6': 'CST',  // Central Standard Time
+    '-7': 'MST',  // Mountain Standard Time
+    '-8': 'PST',  // Pacific Standard Time
+    '-9': 'AKST', // Alaska Standard Time
+    '-10': 'HST', // Hawaii Standard Time
+    '-11': 'SST', // Samoa Standard Time
   };
 
-  return timeZoneAcronyms[offset] || formatTimeZone(offset);
+  return timeZoneAcronyms[offset.toString()] || formatTimeZone(offset);
 };
 
 // Convert hour from one time zone to another
