@@ -6,12 +6,16 @@
 @layer base {
   body {
     @apply text-foreground antialiased;
-    background-color: black;
-    background-image: url('/lovable-uploads/ebbc6fb8-f161-4c23-9735-8603d3cd6db7.png');
-    background-position: center;
+    background: radial-gradient(
+      circle at bottom center,
+      rgba(255, 255, 160, 0.8) 0%,
+      rgba(255, 192, 203, 0.4) 20%,
+      rgba(144, 238, 144, 0.6) 50%,
+      rgba(0, 0, 0, 0.9) 100%
+    );
     background-repeat: no-repeat;
     background-size: cover;
-    min-height: 100vh;
+    height: 100vh;
     margin: 0;
     overflow-x: hidden;
   }
