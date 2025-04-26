@@ -197,7 +197,11 @@ export const generateHourLabels = (startHour: number, endHour: number, interval:
   return hours;
 };
 
-// Calculate best meeting time considering all cities' working hours
+// New utility function to check if a time is within working hours (8 AM - 9 PM)
+export const isTimeWithinWorkingHours = (localHour: number): boolean => {
+  return localHour >= 8 && localHour <= 21;
+};
+
 export const calculateBestMeetingTime = (
   cityHours: Array<{ city: string; workingHours: number[]; offset: number }>,
   defaultLocation: string,
@@ -208,72 +212,44 @@ export const calculateBestMeetingTime = (
   formattedLocal: string;
   cityTimes: Record<string, string>;
 } => {
-  // Count the number of cities that have each UTC hour as a working hour
-  const hourCounts = new Array(24).fill(0);
-  const cityTimes: Record<string, string> = {};
+  const bestHours: number[] = [];
   
-  // Find the default location's offset
-  const defaultLocationData = cityHours.find(cityData => cityData.city === defaultLocation);
-  const defaultOffset = defaultLocationData ? defaultLocationData.offset : userTimeZoneOffset;
-  
-  // Track which hours are working hours for the default location
-  const defaultLocationWorkingHours = new Set<number>();
-  if (defaultLocationData) {
-    defaultLocationData.workingHours.forEach(hour => {
-      defaultLocationWorkingHours.add(hour);
+  // Try each UTC hour (0-23) and check if it results in valid working hours for all cities
+  for (let utcHour = 0; utcHour < 24; utcHour++) {
+    const isValidHour = cityHours.every(({ offset }) => {
+      const cityLocalHour = convertUtcToLocal(utcHour, offset);
+      return isTimeWithinWorkingHours(cityLocalHour);
     });
-  }
-  
-  // Adjust the scoring algorithm to prioritize better overlap of working hours
-  cityHours.forEach(cityData => {
-    // Increase weight for default location
-    const weight = cityData.city === defaultLocation ? 3 : 1;
-    
-    cityData.workingHours.forEach(hour => {
-      hourCounts[hour] += weight;
-    });
-  });
 
-  // Find best UTC hour with highest overlap
-  let bestScore = -1;
-  let bestUtcHour = 12; // Default to noon UTC if no better option
-  
-  for (let hour = 0; hour < 24; hour++) {
-    // Skip hours outside default location's working hours if specified
-    if (defaultLocationData && defaultLocationWorkingHours.size > 0 && !defaultLocationWorkingHours.has(hour)) {
-      continue;
-    }
-    
-    const localHour = convertUtcToLocal(hour, userTimeZoneOffset);
-    const isIdealHour = localHour >= 9 && localHour <= 17; // 9 AM to 5 PM is ideal
-    const isWorkingHour = localHour >= 8 && localHour <= 19; // 8 AM to 7 PM is acceptable
-    
-    let score = hourCounts[hour];
-    
-    // Boost score for user's ideal and working hours
-    if (isIdealHour) score += 2;
-    else if (isWorkingHour) score += 1;
-    
-    if (score > bestScore) {
-      bestScore = score;
-      bestUtcHour = hour;
+    if (isValidHour) {
+      bestHours.push(utcHour);
     }
   }
 
-  // If no good overlap found, use a reasonable working hour for default location
-  if (bestScore < 0) {
-    // Try to find a time that works for default location (2 PM local time is a good default)
-    const defaultLocalHour = 14; // 2 PM
-    bestUtcHour = Math.floor((defaultLocalHour - defaultOffset + 24) % 24);
+  // If no valid hours found, prioritize default location's working hours
+  if (bestHours.length === 0) {
+    console.warn('No perfect overlapping working hours found for all cities');
+    const defaultCity = cityHours.find(c => c.city === defaultLocation);
+    if (defaultCity) {
+      const defaultOffset = defaultCity.offset;
+      // Convert default location's 2 PM (14:00) to UTC as a reasonable fallback
+      const defaultLocalHour = 14;
+      const utcHour = (defaultLocalHour - defaultOffset + 24) % 24;
+      bestHours.push(utcHour);
+    } else {
+      bestHours.push(12); // Default to noon UTC if no better option
+    }
   }
-  
-  // Convert best UTC hour to local time for user
+
+  // Choose the best hour (prioritize middle of the day)
+  const bestUtcHour = bestHours[Math.floor(bestHours.length / 2)];
   const localHour = convertUtcToLocal(bestUtcHour, userTimeZoneOffset);
-  
-  // Create formatted times for all cities
-  cityHours.forEach(cityData => {
-    const cityLocalHour = convertUtcToLocal(bestUtcHour, cityData.offset);
-    cityTimes[cityData.city] = formatTime(cityLocalHour);
+
+  // Generate times for all cities
+  const cityTimes: Record<string, string> = {};
+  cityHours.forEach(({ city, offset }) => {
+    const cityLocalHour = convertUtcToLocal(bestUtcHour, offset);
+    cityTimes[city] = formatTime(cityLocalHour);
   });
 
   return {

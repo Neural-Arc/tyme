@@ -1,10 +1,10 @@
-
 import { useState, useEffect } from 'react';
 import { 
   getCityOffset,
   convertUtcToLocal,
   formatTime,
-  calculateBestMeetingTime
+  calculateBestMeetingTime,
+  isTimeWithinWorkingHours
 } from '@/utils/timeZoneUtils';
 
 interface TimeZoneData {
@@ -36,20 +36,14 @@ export const useTimeZoneCalculations = (
       ? [defaultLocation, ...cities.filter(city => city !== defaultLocation)]
       : cities;
 
-    // Calculate working hours and offsets for each city
+    // Calculate working hours for each city in their local time
     const workingHoursData = allCities.map(city => {
       const offset = getCityOffset(city);
       const workingHours: number[] = [];
       
-      // Calculate local hours for working hours (8 AM to 9 PM)
+      // Store working hours in local time (8 AM to 9 PM)
       for (let h = 8; h <= 21; h++) {
-        // Convert local hour to UTC
-        let utcHour = h - offset;
-        // Then convert UTC hour to user's local time
-        let localHour = (utcHour + userTimeZoneOffset) % 24;
-        if (localHour < 0) localHour += 24;
-        
-        workingHours.push(Math.floor(localHour));
+        workingHours.push(h);
       }
 
       return { city, workingHours, offset };
@@ -73,25 +67,18 @@ export const useTimeZoneCalculations = (
         if (utcHour < 0) utcHour += 24;
         if (utcHour >= 24) utcHour -= 24;
         
-        recommendedTime = utcHour;
+        // Only use recommended time if it's within working hours for all cities
+        const isValidForAllCities = workingHoursData.every(({ city, offset }) => {
+          const cityLocalHour = convertUtcToLocal(utcHour, offset);
+          return isTimeWithinWorkingHours(cityLocalHour);
+        });
+
+        recommendedTime = isValidForAllCities ? utcHour : undefined;
       }
     }
 
     // Calculate best meeting time
-    const bestTime = recommendedTime !== undefined 
-      ? {
-          utcHour: recommendedTime,
-          localHour: convertUtcToLocal(recommendedTime, userTimeZoneOffset),
-          formattedLocal: formatTime(convertUtcToLocal(recommendedTime, userTimeZoneOffset)),
-          cityTimes: Object.fromEntries(
-            workingHoursData.map(({ city, offset }) => {
-              const localHour = convertUtcToLocal(recommendedTime, offset);
-              return [city, formatTime(localHour)];
-            })
-          )
-        }
-      : calculateBestMeetingTime(workingHoursData, defaultLocation, userTimeZoneOffset);
-
+    const bestTime = calculateBestMeetingTime(workingHoursData, defaultLocation, userTimeZoneOffset);
     setBestTimeRange(bestTime);
 
     // Set time zone data
