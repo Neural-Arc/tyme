@@ -1,12 +1,10 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Mic, MicOff, Send, Loader } from 'lucide-react';
 import { cn } from "@/lib/utils";
-
-// Explicitly import the global type for TypeScript clarity
-type SpeechRecognitionType = typeof window.SpeechRecognition | typeof window.webkitSpeechRecognition;
+import { useToast } from "@/components/ui/use-toast";
 
 interface AnimatedChatProps {
   input: string;
@@ -26,35 +24,60 @@ export const AnimatedChat = ({
   showResults 
 }: AnimatedChatProps) => {
   const [isListening, setIsListening] = useState(false);
-  const [recognition, setRecognition] = useState<SpeechRecognition | null>(null);
+  const [recognition, setRecognition] = useState<any>(null);
+  const { toast } = useToast();
 
   const startListening = () => {
-    const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
-    
-    if (SpeechRecognitionAPI) {
-      const recognitionInstance = new SpeechRecognitionAPI();
-      recognitionInstance.continuous = false;
-      recognitionInstance.interimResults = false;
+    try {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      
+      if (SpeechRecognition) {
+        const recognitionInstance = new SpeechRecognition();
+        recognitionInstance.continuous = false;
+        recognitionInstance.interimResults = false;
+        recognitionInstance.lang = 'en-US';
 
-      recognitionInstance.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
-        setInput(transcript);
-        setIsListening(false);
-      };
+        recognitionInstance.onresult = (event) => {
+          const transcript = event.results[0][0].transcript;
+          setInput(transcript);
+          setIsListening(false);
+          toast({
+            description: "Speech recognized successfully!",
+            duration: 2000
+          });
+        };
 
-      recognitionInstance.onerror = () => {
-        setIsListening(false);
-      };
+        recognitionInstance.onerror = (event) => {
+          console.error('Speech recognition error:', event.error);
+          setIsListening(false);
+          toast({
+            variant: "destructive",
+            description: "Error recognizing speech. Please try again.",
+            duration: 3000
+          });
+        };
 
-      recognitionInstance.onend = () => {
-        setIsListening(false);
-      };
+        recognitionInstance.onend = () => {
+          setIsListening(false);
+        };
 
-      setRecognition(recognitionInstance);
-      recognitionInstance.start();
-      setIsListening(true);
-    } else {
-      console.error("Speech recognition not supported in this browser");
+        setRecognition(recognitionInstance);
+        recognitionInstance.start();
+        setIsListening(true);
+      } else {
+        toast({
+          variant: "destructive",
+          description: "Speech recognition is not supported in your browser.",
+          duration: 3000
+        });
+      }
+    } catch (error) {
+      console.error('Speech recognition error:', error);
+      toast({
+        variant: "destructive",
+        description: "Failed to initialize speech recognition.",
+        duration: 3000
+      });
     }
   };
 
@@ -65,6 +88,15 @@ export const AnimatedChat = ({
     }
   };
 
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (recognition) {
+        recognition.stop();
+      }
+    };
+  }, [recognition]);
+
   return (
     <div className={cn(
       "w-full max-w-3xl mx-auto transition-all duration-500 ease-in-out",
@@ -74,9 +106,13 @@ export const AnimatedChat = ({
         <img 
           src="/logo.png" 
           alt="App Logo" 
-          width="90" 
-          height="90" 
-          className="object-contain" 
+          width={90} 
+          height={90} 
+          className="object-contain"
+          onError={(e) => {
+            e.currentTarget.style.display = 'none';
+            console.error('Failed to load logo');
+          }}
         />
       </div>
       
@@ -89,14 +125,14 @@ export const AnimatedChat = ({
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder={`e.g. New York, Tokyo for next Monday... (Your location: ${defaultLocation || 'Not set'})`}
-          className="bg-black/30 text-white border-white/10 text-2xl h-16 px-6"
+          className="bg-black text-white border-white/10 text-2xl h-16 px-6"
           disabled={isLoading || isListening}
         />
         <div className="flex gap-2">
           <Button 
             type="button" 
             variant="outline" 
-            className="bg-black/30 border-white/10 hover:bg-white/10 h-16 w-16"
+            className="bg-black border-white/10 hover:bg-white/10 h-16 w-16"
             onClick={isListening ? stopListening : startListening}
             disabled={isLoading}
           >
@@ -109,7 +145,7 @@ export const AnimatedChat = ({
           <Button 
             type="submit" 
             variant="outline" 
-            className="bg-black/30 border-white/10 hover:bg-white/10 h-16 w-16"
+            className="bg-black border-white/10 hover:bg-white/10 h-16 w-16"
             disabled={isLoading || !defaultLocation}
           >
             {isLoading ? (

@@ -40,7 +40,7 @@ export const TimeScaleGraph = ({
   const formatHour = (hour: number): string => hour.toString().padStart(2, '0');
 
   return (
-    <div className="glass-card p-6 animate-fade-up">
+    <div className="bg-black/40 border border-white/10 rounded-xl p-6 animate-fade-up">
       <div className="flex items-center gap-3 mb-6">
         <Clock className="h-5 w-5 text-white/60" />
         <h3 className="text-xl font-medium text-white">Working Hours (08:00 - 21:00)</h3>
@@ -122,7 +122,7 @@ export const TimeScaleGraph = ({
                             <div
                               key={hour}
                               className={`h-full ${
-                                isWorkingHour ? 'bg-[#3dd68c]/20 border-[#3dd68c]/20' : 'bg-white/5 border-white/10'
+                                isWorkingHour ? 'bg-[#3dd68c]/20 border-[#3dd68c]/20' : 'bg-black/40 border-white/10'
                               } border rounded-sm`}
                             />
                           );
@@ -130,9 +130,9 @@ export const TimeScaleGraph = ({
 
                         {bestTimeRange && (
                           <div
-                            className="absolute top-0 bottom-0 bg-[#F97316]/50 border border-[#F97316] rounded-sm"
+                            className="absolute top-0 bottom-0 bg-[#F97316] border border-[#F97316] rounded-sm"
                             style={{
-                              left: `${(bestTimeRange.localHour / 24) * 100}%`,
+                              left: `${(bestTimeRange.utcHour / 24) * 100}%`,
                               width: `${(1 / 24) * 100}%`,
                               zIndex: 10
                             }}
