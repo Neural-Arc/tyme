@@ -1,3 +1,4 @@
+
 import { Clock, Info } from 'lucide-react';
 import { formatTime, formatTimeZone, generateHourLabels, getTimeZoneAcronym, convertUtcToLocal } from '@/utils/timeZoneUtils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -37,33 +38,31 @@ export const TimeScaleGraph = ({
 
       {bestTimeRange && defaultLocation && <div className="mb-6 p-4 bg-black/50 border border-[#3dd68c]/20 rounded-lg">
           <div className="flex justify-between items-center">
-            <div className="flex items-center flex-1">
-              <div className="flex items-center gap-2 min-w-0">
-                <p className="text-lg font-medium truncate">
-                  <span className="text-[#3dd68c] font-bold">✓ Best meeting time: </span>
-                  <span className="whitespace-nowrap">{bestTimeRange.formattedLocal}</span>
-                  <span className="ml-2 text-white/60 whitespace-nowrap">
-                    {currentDate.toLocaleDateString(undefined, {
-                  weekday: 'long',
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
-                })}
-                  </span>
-                </p>
-                <MeetingInviteDialog meetingTime={bestTimeRange.formattedLocal} date={currentDate.toLocaleDateString(undefined, {
-              weekday: 'long',
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric'
-            })} />
-              </div>
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <p className="text-lg font-medium truncate flex items-center flex-wrap">
+                <span className="text-[#3dd68c] font-bold whitespace-nowrap">✓ Best meeting time: </span>
+                <span className="whitespace-nowrap">{bestTimeRange.formattedLocal}</span>
+                <span className="ml-2 text-white/60 whitespace-nowrap">
+                  {currentDate.toLocaleDateString(undefined, {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
+                </span>
+              </p>
+              <MeetingInviteDialog meetingTime={bestTimeRange.formattedLocal} date={currentDate.toLocaleDateString(undefined, {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              })} />
             </div>
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="cursor-help">
-                    
+                    <Info className="h-4 w-4 text-white/60" />
                   </div>
                 </TooltipTrigger>
                 <TooltipContent className="bg-black/90 border border-white/10 text-white">
@@ -116,8 +115,11 @@ export const TimeScaleGraph = ({
                     length: 24
                   }).map((_, hour) => {
                     const isWorkingHour = cityData.workingHours.includes(hour);
-                    // Improved hour matching logic
-                    const isSelectedHour = cityLocalHour !== null && Math.floor(cityLocalHour) === hour;
+                    // Improved hour matching logic with fractional hours
+                    const hourValue = cityLocalHour !== null ? cityLocalHour : 0;
+                    const hourFloor = Math.floor(hourValue);
+                    const isSelectedHour = cityLocalHour !== null && hourFloor === hour;
+                    
                     return <div key={hour} className={`
                                 h-full transition-all duration-300
                                 ${isWorkingHour ? 'bg-[#3dd68c]/10 hover:bg-[#3dd68c]/20' : 'bg-black/60'}

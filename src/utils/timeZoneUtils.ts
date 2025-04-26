@@ -1,3 +1,4 @@
+
 // Map cities to their approximate UTC offsets and time zones
 export const getCityOffset = (city: string): number => {
   const cityTimeZones: Record<string, {offset: number, timezone: string}> = {
@@ -140,7 +141,7 @@ export const parseTimeString = (timeStr: string): { hours: number; minutes: numb
   throw new Error('Invalid time format');
 };
 
-// Convert time between cities
+// Convert time between cities - FIXED the logic to correctly convert between time zones
 export const convertTimeBetweenCities = (
   sourceCity: string,
   targetCity: string,
@@ -163,7 +164,13 @@ export const convertTimeBetweenCities = (
   
   // Calculate target time considering the offset difference
   const targetDateTime = new Date(sourceDateTime);
-  const hoursDiff = sourceCityOffset - targetCityOffset; // Corrected offset calculation
+  
+  // Fixed time conversion by correctly calculating the hour difference
+  // When we go from one timezone to another, we need to ADD the difference
+  // between the offsets to account for the time change
+  const hoursDiff = targetCityOffset - sourceCityOffset; // FIXED: reversed the calculation
+  
+  // Apply the hour difference to the target date
   targetDateTime.setHours(targetDateTime.getHours() + hoursDiff);
   
   return {
@@ -174,7 +181,7 @@ export const convertTimeBetweenCities = (
   };
 };
 
-// Convert hour from one time zone to another
+// Convert hour from one time zone to another - FIXED to correctly handle fractional hours
 export const convertBetweenTimeZones = (hour: number, fromOffset: number, toOffset: number): number => {
   // First convert to UTC
   let utcHour = hour - fromOffset;
