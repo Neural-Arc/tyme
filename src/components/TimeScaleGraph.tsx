@@ -5,6 +5,7 @@ import { Clock } from 'lucide-react';
 interface TimeScaleGraphProps {
   cities: string[];
   specifiedDate?: Date;
+  suggestedTime?: string;
 }
 
 interface CityWorkingHours {
@@ -12,7 +13,7 @@ interface CityWorkingHours {
   workingHours: number[];
 }
 
-export const TimeScaleGraph = ({ cities, specifiedDate }: TimeScaleGraphProps) => {
+export const TimeScaleGraph = ({ cities, specifiedDate, suggestedTime }: TimeScaleGraphProps) => {
   const [cityHours, setCityHours] = useState<CityWorkingHours[]>([]);
   const [bestTimeRange, setBestTimeRange] = useState<{start: number; end: number} | null>(null);
   const baseDate = specifiedDate || new Date();
@@ -134,7 +135,26 @@ export const TimeScaleGraph = ({ cities, specifiedDate }: TimeScaleGraphProps) =
         setBestTimeRange(null);
       }
     }
-  }, [cities]);
+    
+    // If we have a suggested time, highlight it on the graph
+    if (suggestedTime) {
+      const timeRegex = /(\d{1,2}):(\d{2})\s*(am|pm)?/i;
+      const timeMatch = suggestedTime.match(timeRegex);
+      
+      if (timeMatch) {
+        let hours = parseInt(timeMatch[1]);
+        const minutes = parseInt(timeMatch[2]);
+        const period = timeMatch[3]?.toLowerCase();
+        
+        // Convert to 24-hour format if AM/PM is specified
+        if (period === 'pm' && hours < 12) hours += 12;
+        if (period === 'am' && hours === 12) hours = 0;
+        
+        // Highlight this time on the graph
+        setBestTimeRange({ start: hours, end: hours });
+      }
+    }
+  }, [cities, suggestedTime]);
 
   const formatHour = (hour: number): string => {
     return hour === 0 ? '24' : `${hour}`;
@@ -147,7 +167,7 @@ export const TimeScaleGraph = ({ cities, specifiedDate }: TimeScaleGraphProps) =
         <h3 className="text-xl font-medium text-white">Working Hours Overlap (8:00 - 21:00)</h3>
       </div>
       
-      {/* Best time range callout - Moved to the top */}
+      {/* Best time range callout - Moved above the graph */}
       {bestTimeRange && (
         <div className="mb-6 p-4 bg-black/50 border border-[#3dd68c]/20 rounded-lg transition-all duration-300">
           <p className="text-lg font-medium">
@@ -161,7 +181,7 @@ export const TimeScaleGraph = ({ cities, specifiedDate }: TimeScaleGraphProps) =
         </div>
       )}
       
-      <div className="relative h-[300px] w-full">
+      <div className="relative h-[280px] w-full">
         {/* Time scale */}
         <div className="absolute top-0 left-0 right-0 flex justify-between text-white/60 text-sm border-b border-white/10 pb-1">
           {[0, 6, 12, 18, 23].map(hour => (

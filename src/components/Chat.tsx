@@ -26,11 +26,13 @@ export const Chat = () => {
       const { cities, suggestedTime, specifiedDate } = await processMessage(input, apiKey);
       
       // Update time zones with the extracted cities, suggested time, and specified date
-      if (cities.length > 0) {
+      if (cities.length > 0 && suggestedTime) {
         const event = new CustomEvent('updateTimeZones', { 
           detail: { cities, suggestedTime, specifiedDate } 
         });
         window.dispatchEvent(event);
+      } else {
+        toast.error('Could not identify cities or meeting time from your message. Please be more specific.');
       }
     } catch (error) {
       console.error('Error:', error);

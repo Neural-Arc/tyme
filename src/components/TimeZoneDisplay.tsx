@@ -6,7 +6,7 @@ import { TimeScaleGraph } from './TimeScaleGraph';
 
 interface TimeZoneInfo {
   city: string;
-  currentTime: string;
+  meetingTime: string;
   date?: string;
 }
 
@@ -14,16 +14,18 @@ export const TimeZoneDisplay = () => {
   const [timeZones, setTimeZones] = useState<TimeZoneInfo[]>([]);
   const [cities, setCities] = useState<string[]>([]);
   const [specifiedDate, setSpecifiedDate] = useState<Date | undefined>(undefined);
+  const [suggestedTime, setSuggestedTime] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     // Handle updates from chat component
     const handleUpdateTimeZones = (event: CustomEvent) => {
       const { cities, suggestedTime, specifiedDate } = event.detail;
       
-      if (cities && cities.length > 0) {
+      if (cities && cities.length > 0 && suggestedTime) {
         updateTimeZones(cities, suggestedTime, specifiedDate);
         setCities(cities);
         setSpecifiedDate(specifiedDate);
+        setSuggestedTime(suggestedTime);
       }
     };
 
@@ -72,9 +74,28 @@ export const TimeZoneDisplay = () => {
   };
 
   const updateTimeZones = (cities: string[], suggestedTime?: string, userSpecifiedDate?: Date) => {
+    if (!suggestedTime) return;
+
+    // Parse the suggested meeting time
+    const timeRegex = /(\d{1,2}):(\d{2})\s*(am|pm)?/i;
+    const timeMatch = suggestedTime.match(timeRegex);
+    
+    if (!timeMatch) return;
+    
+    let hours = parseInt(timeMatch[1]);
+    const minutes = parseInt(timeMatch[2]);
+    const period = timeMatch[3]?.toLowerCase();
+    
+    // Convert to 24-hour format if AM/PM is specified
+    if (period === 'pm' && hours < 12) hours += 12;
+    if (period === 'am' && hours === 12) hours = 0;
+    
+    // Use specified date or current date
     const baseDate = userSpecifiedDate || new Date();
-    const baseUtcHours = baseDate.getUTCHours();
-    const baseUtcMinutes = baseDate.getUTCMinutes();
+    
+    // Set the base date to the suggested meeting time in UTC
+    const utcMeetingDate = new Date(baseDate);
+    utcMeetingDate.setUTCHours(hours, minutes, 0, 0);
     
     // Only add cities that were explicitly mentioned by the user
     const uniqueCities = [...new Set(cities)];
@@ -82,24 +103,23 @@ export const TimeZoneDisplay = () => {
       const offset = getCityOffset(city);
       
       // Calculate hours and handle partial hours like India (UTC+5.5)
-      const hours = Math.floor(offset);
-      const minutes = (offset - hours) * 60;
+      const offsetHours = Math.floor(offset);
+      const offsetMinutes = (offset - offsetHours) * 60;
       
-      // Create date for this city based on UTC offset
-      const cityDate = new Date(baseDate);
-      cityDate.setUTCHours(baseUtcHours + hours);
-      cityDate.setUTCMinutes(baseUtcMinutes + minutes);
+      // Create date for this city based on the meeting time
+      const cityDate = new Date(utcMeetingDate);
+      cityDate.setUTCHours(cityDate.getUTCHours() + offsetHours);
+      cityDate.setUTCMinutes(cityDate.getUTCMinutes() + offsetMinutes);
       
-      // Format time without AM/PM
+      // Format meeting time without seconds
       const timeFormatter = new Intl.DateTimeFormat('en', {
         hour: 'numeric',
         minute: 'numeric',
-        hour12: false
       });
       
       return {
         city,
-        currentTime: timeFormatter.format(cityDate),
+        meetingTime: timeFormatter.format(cityDate),
         date: format(cityDate, 'EEEE, MMMM do, yyyy')
       };
     });
@@ -116,7 +136,7 @@ export const TimeZoneDisplay = () => {
             <TimeZoneCard
               key={`${tz.city}-${index}`}
               city={tz.city}
-              currentTime={tz.currentTime}
+              meetingTime={tz.meetingTime}
               date={tz.date}
             />
           ))}
@@ -124,10 +144,11 @@ export const TimeZoneDisplay = () => {
       )}
       
       {/* Time Scale Graph - Only show when there are multiple cities */}
-      {cities.length > 1 && (
+      {cities.length > 1 && suggestedTime && (
         <TimeScaleGraph 
           cities={cities}
           specifiedDate={specifiedDate}
+          suggestedTime={suggestedTime}
         />
       )}
     </div>

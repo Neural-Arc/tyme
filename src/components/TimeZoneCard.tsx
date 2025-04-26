@@ -3,11 +3,11 @@ import { Clock } from 'lucide-react';
 
 interface TimeZoneCardProps {
   city: string;
-  currentTime: string;
+  meetingTime: string;
   date?: string;
 }
 
-export const TimeZoneCard = ({ city, currentTime, date }: TimeZoneCardProps) => {
+export const TimeZoneCard = ({ city, meetingTime, date }: TimeZoneCardProps) => {
   return (
     <div className="glass-card p-6 transition-all duration-300 hover:bg-white/5">
       <div className="flex items-center gap-3 mb-4">
@@ -16,7 +16,7 @@ export const TimeZoneCard = ({ city, currentTime, date }: TimeZoneCardProps) => 
       </div>
       
       <div className="space-y-2">
-        <p className="text-2xl font-medium text-white">{currentTime}</p>
+        <p className="text-2xl font-medium text-white">{meetingTime}</p>
         {date && (
           <p className="text-sm text-white/60">{date}</p>
         )}

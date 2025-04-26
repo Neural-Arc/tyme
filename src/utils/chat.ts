@@ -15,10 +15,11 @@ export async function processMessage(message: string, apiKey: string): Promise<{
           role: 'system',
           content: `You are a helpful assistant that helps find suitable meeting times across different time zones. 
                    Always respond with the following format:
-                   1. List each city mentioned and its current time (don't include time zone abbreviations like UTC, AEDT, etc.)
-                   2. Suggest 2-3 optimal meeting times that work well for all participants between 8:00 AM and 9:00 PM local time
+                   1. ONLY list cities that were explicitly mentioned by the user
+                   2. Suggest the optimal meeting time that works well for all participants, ensuring it falls between 8:00 AM and 9:00 PM local time for each participant
                    3. Keep responses concise and focused on time zone information
-                   4. Always return the best meeting time in the format "X:XX AM/PM" (e.g., "2:00 PM")`
+                   4. Always return ONE best meeting time in the format "HH:MM" (using 24-hour format) or "HH:MM AM/PM" (using 12-hour format)
+                   5. Do not include additional text like "UTC", "local time", or time zone abbreviations`
         }, {
           role: 'user',
           content: message
@@ -34,23 +35,31 @@ export async function processMessage(message: string, apiKey: string): Promise<{
     // Extract cities and suggested time from the response
     const content = data.choices[0].message.content;
     
-    // Better city extraction regex - exclude time indicators and common words
-    const cityRegex = /\b(?:(?!am|pm|time|about|currently)[A-Z][a-zA-Z\s]{2,})\b/g;
-    const cityMatches = content.match(cityRegex);
+    // Improved city extraction - specifically look for cities and not general nouns
+    const cityRegex = /\b(?:(?!am|pm|time|about|currently|between|from|to|at)[A-Z][a-zA-Z\s.]{2,}(?:,\s*[A-Z][a-zA-Z\s.]{2,})*)\b/g;
+    let cityMatches = content.match(cityRegex);
     let cities = cityMatches ? [...cityMatches] : [];
     
     // Clean up the extracted cities
-    cities = cities.map(city => city.trim().replace(/\s+/g, ' '));
+    cities = cities.map(city => city.trim().replace(/[\s.]+$/, '').replace(/\s+/g, ' '));
     
     // Remove duplicates and non-city words from the list
-    const nonCityWords = ['Best', 'Optimal', 'Meeting', 'Times', 'Suggested', 'Currently', 'Local'];
+    const nonCityWords = ['Best', 'Optimal', 'Meeting', 'Times', 'Suggested', 'Currently', 'Local', 'For', 'All', 'Participants'];
     cities = [...new Set(cities)].filter(city => 
-      !nonCityWords.some(word => city === word) && city.length > 2
+      !nonCityWords.some(word => city === word) && city.length > 2 && !city.match(/^\d/) // Filter out pure numbers
     );
     
-    // Improved time extraction for best call time
-    const suggestedTimeMatch = content.match(/(?:suggested|optimal|best|recommended)(?:\s+meeting)?\s+times?:?\s*([0-9]{1,2}:[0-9]{2}\s*[AP]M)/i);
-    const suggestedTime = suggestedTimeMatch ? suggestedTimeMatch[1].trim() : undefined;
+    // Improved time extraction for best call time - match both 12h and 24h formats
+    const timeRegex = /(?:(?:(?:suggested|optimal|best|recommended)(?:\s+meeting)?\s+times?:?\s*)|(?:at\s+))([0-9]{1,2}:[0-9]{2}(?:\s*[AP]M)?)/i;
+    const timeMatch = content.match(timeRegex);
+    let suggestedTime = timeMatch ? timeMatch[1].trim() : undefined;
+    
+    // If we don't find a match with the specific format, look for any time format
+    if (!suggestedTime) {
+      const generalTimeRegex = /\b([0-9]{1,2}:[0-9]{2}(?:\s*[AP]M)?)\b/i;
+      const generalTimeMatch = content.match(generalTimeRegex);
+      suggestedTime = generalTimeMatch ? generalTimeMatch[1].trim() : undefined;
+    }
     
     // Extract any date specified in the user's message
     const dateRegex = /(?:\b(?:on|for)\s+)?(\d{1,2})(?:st|nd|rd|th)?\s+(?:of\s+)?(January|February|March|April|May|June|July|August|September|October|November|December|Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sep|Oct|Nov|Dec)(?:\s+(\d{4}))?/i;
