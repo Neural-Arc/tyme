@@ -1,7 +1,7 @@
 
 import { toast } from "sonner";
 
-export async function processMessage(message: string, apiKey: string): Promise<string> {
+export async function processMessage(message: string, apiKey: string): Promise<{ content: string; cities: string[]; suggestedTime?: string }> {
   try {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -30,7 +30,13 @@ export async function processMessage(message: string, apiKey: string): Promise<s
       throw new Error(data.error?.message || 'Failed to process message');
     }
 
-    return data.choices[0].message.content;
+    // Extract cities and suggested time from the response
+    const content = data.choices[0].message.content;
+    const cities = content.match(/\b[A-Z][a-zA-Z\s]+(?=[\s,])/g) || [];
+    const suggestedTimeMatch = content.match(/(?:suggested|optimal|best) (?:meeting )?times?:?\s*([^\n]+)/i);
+    const suggestedTime = suggestedTimeMatch ? suggestedTimeMatch[1].trim() : undefined;
+
+    return { content, cities, suggestedTime };
   } catch (error) {
     console.error('Error processing message:', error);
     toast.error('Failed to process message. Please check your API key and try again.');

@@ -34,21 +34,21 @@ export const Chat = () => {
     setIsLoading(true);
 
     try {
-      const response = await processMessage(input, apiKey);
+      const { content, cities, suggestedTime } = await processMessage(input, apiKey);
       const assistantMessage: ChatMessage = {
         id: crypto.randomUUID(),
-        content: response,
+        content,
         role: 'assistant',
         timestamp: new Date()
       };
       setMessages(prev => [...prev, assistantMessage]);
 
-      // Parse cities from the response and update TimeZoneDisplay
-      // This is a simple example - you'll want to enhance this parsing
-      const cities = response.match(/\b[A-Z][a-zA-Z\s]+(?=[\s,])/g) || [];
+      // Update time zones with the extracted cities and suggested time
       if (cities.length > 0) {
-        // This event will be picked up by TimeZoneDisplay
-        window.dispatchEvent(new CustomEvent('updateTimeZones', { detail: cities }));
+        const event = new CustomEvent('updateTimeZones', { 
+          detail: { cities, suggestedTime } 
+        });
+        window.dispatchEvent(event);
       }
     } catch (error) {
       console.error('Error:', error);
