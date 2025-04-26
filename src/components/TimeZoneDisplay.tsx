@@ -2,8 +2,6 @@
 import { useState, useEffect } from 'react';
 import { TimeZoneCard } from './TimeZoneCard';
 import { format } from 'date-fns';
-import { Card } from './ui/card';
-import { MapPin } from 'lucide-react';
 import { TimeScaleGraph } from './TimeScaleGraph';
 
 interface TimeZoneInfo {
@@ -20,21 +18,17 @@ export const TimeZoneDisplay = () => {
   const [cities, setCities] = useState<string[]>([]);
 
   useEffect(() => {
-    // Get local timezone
     const local = Intl.DateTimeFormat().resolvedOptions().timeZone;
     setLocalTimeZone(local);
     
-    // Try to get user's city name from timezone
     const city = local.split('/').pop()?.replace(/_/g, ' ');
     setUserLocation(city || 'Local Time');
     
-    // Set initial local time card
     setTimeZones([{
       city: 'Your Location',
       currentTime: format(new Date(), 'h:mm a, EEEE, MMMM do, yyyy'),
     }]);
 
-    // Listen for updateTimeZones events
     const handleUpdateTimeZones = (event: CustomEvent) => {
       const { cities, suggestedTime } = event.detail;
       updateTimeZones(cities, suggestedTime);
@@ -48,13 +42,16 @@ export const TimeZoneDisplay = () => {
     };
   }, []);
 
-  // Update this function to handle incoming timezone data from Chat
   const updateTimeZones = (cities: string[], suggestedTime?: string) => {
     const now = new Date();
-    const newTimeZones = cities.map(city => ({
+    const newTimeZones = [{
+      city: 'Your Location',
+      currentTime: format(now, 'h:mm a, EEEE, MMMM do, yyyy'),
+    }, ...cities.map(city => ({
       city,
       currentTime: format(now, 'h:mm a, EEEE, MMMM do, yyyy'),
-    }));
+      suggestedTime
+    }))];
     setTimeZones(newTimeZones);
     if (suggestedTime) {
       setBestCallTime(suggestedTime);
@@ -84,7 +81,12 @@ export const TimeZoneDisplay = () => {
       {bestCallTime && (
         <div className="glass-card p-6 mt-6">
           <h3 className="text-lg font-medium mb-2">Best Time for the Call</h3>
-          <p className="text-xl font-bold text-white/90">{bestCallTime}</p>
+          <p className="text-xl font-bold text-white/90">
+            {bestCallTime}<br/>
+            <span className="text-sm font-normal text-white/60">
+              (Within 8 AM - 9 PM for all time zones)
+            </span>
+          </p>
         </div>
       )}
     </div>

@@ -9,7 +9,6 @@ import { toast } from 'sonner';
 
 export const Chat = () => {
   const [input, setInput] = useState('');
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -22,27 +21,11 @@ export const Chat = () => {
       return;
     }
 
-    const userMessage: ChatMessage = {
-      id: crypto.randomUUID(),
-      content: input,
-      role: 'user',
-      timestamp: new Date()
-    };
-
-    setMessages(prev => [...prev, userMessage]);
-    setInput('');
     setIsLoading(true);
 
     try {
       const { content, cities, suggestedTime } = await processMessage(input, apiKey);
-      const assistantMessage: ChatMessage = {
-        id: crypto.randomUUID(),
-        content,
-        role: 'assistant',
-        timestamp: new Date()
-      };
-      setMessages(prev => [...prev, assistantMessage]);
-
+      
       // Update time zones with the extracted cities and suggested time
       if (cities.length > 0) {
         const event = new CustomEvent('updateTimeZones', { 
@@ -53,6 +36,7 @@ export const Chat = () => {
     } catch (error) {
       console.error('Error:', error);
     } finally {
+      setInput('');
       setIsLoading(false);
     }
   };
@@ -63,31 +47,18 @@ export const Chat = () => {
         Type the cities and we'll find the best time for your global call.
       </p>
       
-      <div className="space-y-4 mb-4 min-h-[400px] overflow-y-auto">
-        {messages.map((message) => (
-          <div 
-            key={message.id}
-            className={`p-4 glass-card animate-fade-up ${
-              message.role === 'assistant' ? 'bg-white/5' : 'bg-white/10'
-            }`}
-          >
-            <p className="text-white/90 text-lg">{message.content}</p>
-          </div>
-        ))}
-      </div>
-
       <form onSubmit={handleSubmit} className="flex gap-2">
         <Input
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="e.g. Find a good time for San Francisco, London, and Tokyo..."
-          className="bg-muted text-white border-white/10 text-lg h-12"
+          className="bg-muted text-white border-white/10 text-xl h-14 px-6"
           disabled={isLoading}
         />
         <Button 
           type="submit" 
           variant="outline" 
-          className="bg-white/5 border-white/10 hover:bg-white/10 h-12 w-12"
+          className="bg-white/5 border-white/10 hover:bg-white/10 h-14 w-14"
           disabled={isLoading}
         >
           {isLoading ? (

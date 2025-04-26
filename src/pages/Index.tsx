@@ -8,9 +8,11 @@ const Index = () => {
     <div className="min-h-screen p-4 relative">
       <Settings />
       
-      <main className="container max-w-4xl mx-auto pt-16 space-y-12">
-        <Chat />
-        <TimeZoneDisplay />
+      <main className="container max-w-4xl mx-auto pt-16">
+        <div className="space-y-12">
+          <Chat />
+          <TimeZoneDisplay />
+        </div>
       </main>
     </div>
   );
