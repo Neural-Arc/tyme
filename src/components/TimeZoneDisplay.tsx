@@ -15,19 +15,13 @@ export const TimeZoneDisplay = () => {
   const [localTimeZone, setLocalTimeZone] = useState<string>('');
   const [timeZones, setTimeZones] = useState<TimeZoneInfo[]>([]);
   const [bestCallTime, setBestCallTime] = useState<string>('');
-  const [userLocation, setUserLocation] = useState<string>('Your Location');
   const [cities, setCities] = useState<string[]>([]);
 
   useEffect(() => {
     const local = Intl.DateTimeFormat().resolvedOptions().timeZone;
     setLocalTimeZone(local);
     
-    const city = local.split('/').pop()?.replace(/_/g, ' ');
-    if (city) {
-      setUserLocation('Your Location');
-    }
-    
-    // Show default time zone card for user's location
+    // Only show default time zone card if no other cities are present
     const currentDate = new Date();
     const defaultTimeZone: TimeZoneInfo = {
       city: 'Your Location',
@@ -56,14 +50,9 @@ export const TimeZoneDisplay = () => {
     const currentDate = new Date();
     const formattedDate = format(currentDate, 'EEEE, MMMM do, yyyy');
     
-    const timeZonesList: TimeZoneInfo[] = [{
-      city: 'Your Location',
-      currentTime: format(currentDate, 'h:mm a'),
-      suggestedTime,
-      date: formattedDate
-    }];
+    const timeZonesList: TimeZoneInfo[] = [];
     
-    // Add city time zones
+    // Only add cities that were explicitly mentioned
     const uniqueCities = [...new Set(cities)];
     const cityTimeZones = uniqueCities.map(city => ({
       city,
@@ -73,6 +62,17 @@ export const TimeZoneDisplay = () => {
     }));
     
     timeZonesList.push(...cityTimeZones);
+    
+    // Only show local time zone if no other cities are present
+    if (timeZonesList.length === 0) {
+      timeZonesList.push({
+        city: 'Your Location',
+        currentTime: format(currentDate, 'h:mm a'),
+        suggestedTime,
+        date: formattedDate
+      });
+    }
+    
     setTimeZones(timeZonesList);
     
     if (suggestedTime) {
@@ -85,8 +85,8 @@ export const TimeZoneDisplay = () => {
       {/* Best Call Time Card - Only show if we have a best call time */}
       {bestCallTime && (
         <div className="glass-card p-6">
-          <h3 className="text-xl font-medium mb-2">Best Time for the Call</h3>
-          <p className="text-2xl font-bold">
+          <h3 className="text-xl font-medium mb-2 text-white/90">Recommended Call Time</h3>
+          <p className="text-2xl font-bold text-white">
             {bestCallTime}
             <span className="text-sm font-normal text-white/60 block mt-1">
               {format(new Date(), 'EEEE, MMMM do, yyyy')}
@@ -95,7 +95,7 @@ export const TimeZoneDisplay = () => {
         </div>
       )}
 
-      {/* Time Cards Grid - Show at least the user's location card */}
+      {/* Time Cards Grid - Show only explicitly mentioned cities */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {timeZones.map((tz, index) => (
           <TimeZoneCard
@@ -108,10 +108,10 @@ export const TimeZoneDisplay = () => {
         ))}
       </div>
       
-      {/* Goldilocks Zone Graph - Only show when cities are present */}
-      {cities.length > 0 && (
+      {/* Time Scale Graph - Only show when there are multiple cities */}
+      {cities.length > 1 && (
         <TimeScaleGraph 
-          cities={['Your Location', ...cities]}
+          cities={cities}
         />
       )}
     </div>
