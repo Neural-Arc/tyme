@@ -27,7 +27,7 @@ export const AnimatedChat = ({
 
   const startListening = () => {
     // Check if browser supports SpeechRecognition
-    const SpeechRecognitionAPI = 
+    const SpeechRecognitionAPI: SpeechRecognitionConstructor | undefined = 
       window.SpeechRecognition || window.webkitSpeechRecognition;
     
     if (SpeechRecognitionAPI) {
