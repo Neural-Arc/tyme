@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { TimeZoneCard } from './TimeZoneCard';
 import { format } from 'date-fns';
 import { TimeScaleGraph } from './TimeScaleGraph';
+import { Card } from './ui/card';
 
 interface TimeZoneInfo {
   city: string;
@@ -29,7 +30,7 @@ export const TimeZoneDisplay = () => {
     const now = new Date();
     setTimeZones([{
       city: 'Your Location',
-      currentTime: format(now, 'h:mm a, EEEE, MMMM do, yyyy'),
+      currentTime: format(now, 'h:mm a'),
     }]);
 
     const handleUpdateTimeZones = (event: CustomEvent) => {
@@ -49,15 +50,14 @@ export const TimeZoneDisplay = () => {
     const now = new Date();
     const userLocTimeZone = {
       city: 'Your Location',
-      currentTime: format(now, 'h:mm a, EEEE, MMMM do, yyyy'),
+      currentTime: format(now, 'h:mm a'),
       suggestedTime
     };
     
-    // Only add cities specified by the user, avoid duplicates
     const uniqueCities = [...new Set(cities)];
     const cityTimeZones = uniqueCities.map(city => ({
       city,
-      currentTime: format(now, 'h:mm a, EEEE, MMMM do, yyyy'),
+      currentTime: format(now, 'h:mm a'),
       suggestedTime
     }));
     
@@ -70,6 +70,19 @@ export const TimeZoneDisplay = () => {
 
   return (
     <div className="space-y-8 animate-fade-up">
+      {/* Best Call Time Card - Moved to top */}
+      {bestCallTime && (
+        <div className="bg-white rounded-xl p-6 shadow-lg">
+          <h3 className="text-xl font-medium text-black mb-2">Best Time for the Call</h3>
+          <p className="text-2xl font-bold text-black">
+            {bestCallTime}
+            <span className="text-sm font-normal text-gray-600 block mt-1">
+              (Within 8 AM - 9 PM for all time zones)
+            </span>
+          </p>
+        </div>
+      )}
+
       {/* Time Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {timeZones.map((tz, index) => (
@@ -87,19 +100,6 @@ export const TimeZoneDisplay = () => {
         <TimeScaleGraph 
           cities={['Your Location', ...cities]} 
         />
-      )}
-      
-      {/* Best Call Time Section */}
-      {bestCallTime && (
-        <div className="glass-card p-6 mt-6">
-          <h3 className="text-xl font-medium mb-2">Best Time for the Call</h3>
-          <p className="text-2xl font-bold text-white/90">
-            {bestCallTime}<br/>
-            <span className="text-sm font-normal text-white/60">
-              (Within 8 AM - 9 PM for all time zones)
-            </span>
-          </p>
-        </div>
       )}
     </div>
   );

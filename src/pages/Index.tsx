@@ -5,7 +5,7 @@ import { TimeZoneDisplay } from "@/components/TimeZoneDisplay";
 
 const Index = () => {
   return (
-    <div className="min-h-screen p-4 relative bg-black">
+    <div className="min-h-screen p-4 relative">
       <Settings />
       
       <main className="container max-w-3xl mx-auto pt-12">
