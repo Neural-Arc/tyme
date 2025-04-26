@@ -14,7 +14,7 @@ export const TimeZoneDisplay = () => {
   const [localTimeZone, setLocalTimeZone] = useState<string>('');
   const [timeZones, setTimeZones] = useState<TimeZoneInfo[]>([]);
   const [bestCallTime, setBestCallTime] = useState<string>('');
-  const [userLocation, setUserLocation] = useState<string>('');
+  const [userLocation, setUserLocation] = useState<string>('Your Location');
   const [cities, setCities] = useState<string[]>([]);
 
   useEffect(() => {
@@ -22,11 +22,14 @@ export const TimeZoneDisplay = () => {
     setLocalTimeZone(local);
     
     const city = local.split('/').pop()?.replace(/_/g, ' ');
-    setUserLocation(city || 'Local Time');
+    if (city) {
+      setUserLocation('Your Location');
+    }
     
+    const now = new Date();
     setTimeZones([{
       city: 'Your Location',
-      currentTime: format(new Date(), 'h:mm a, EEEE, MMMM do, yyyy'),
+      currentTime: format(now, 'h:mm a, EEEE, MMMM do, yyyy'),
     }]);
 
     const handleUpdateTimeZones = (event: CustomEvent) => {
@@ -44,22 +47,27 @@ export const TimeZoneDisplay = () => {
 
   const updateTimeZones = (cities: string[], suggestedTime?: string) => {
     const now = new Date();
-    const newTimeZones = [{
+    const userLocTimeZone = {
       city: 'Your Location',
       currentTime: format(now, 'h:mm a, EEEE, MMMM do, yyyy'),
-    }, ...cities.map(city => ({
+      suggestedTime
+    };
+    
+    const cityTimeZones = cities.map(city => ({
       city,
       currentTime: format(now, 'h:mm a, EEEE, MMMM do, yyyy'),
       suggestedTime
-    }))];
-    setTimeZones(newTimeZones);
+    }));
+    
+    setTimeZones([userLocTimeZone, ...cityTimeZones]);
+    
     if (suggestedTime) {
       setBestCallTime(suggestedTime);
     }
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-fade-up">
       {/* Time Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {timeZones.map((tz, index) => (
@@ -80,8 +88,8 @@ export const TimeZoneDisplay = () => {
       {/* Best Call Time Section */}
       {bestCallTime && (
         <div className="glass-card p-6 mt-6">
-          <h3 className="text-lg font-medium mb-2">Best Time for the Call</h3>
-          <p className="text-xl font-bold text-white/90">
+          <h3 className="text-xl font-medium mb-2">Best Time for the Call</h3>
+          <p className="text-2xl font-bold text-white/90">
             {bestCallTime}<br/>
             <span className="text-sm font-normal text-white/60">
               (Within 8 AM - 9 PM for all time zones)

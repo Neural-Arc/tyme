@@ -49,6 +49,12 @@ export const TimeScaleGraph = ({ cities }: TimeScaleGraphProps) => {
       else if (city.toLowerCase().includes('los angeles')) offset = -3;
       else if (city.toLowerCase().includes('san francisco')) offset = -3;
       else if (city.toLowerCase().includes('beijing')) offset = 13;
+      else if (city.toLowerCase().includes('mumbai')) offset = 10;
+      else if (city.toLowerCase().includes('berlin')) offset = 6;
+      else if (city.toLowerCase().includes('toronto')) offset = 0;
+      else if (city.toLowerCase().includes('rio')) offset = 3;
+      else if (city.toLowerCase().includes('cape town')) offset = 7;
+      else if (city.toLowerCase().includes('mexico city')) offset = -1;
       else offset = Math.floor(Math.random() * 24);
 
       // Mark working hours (8 AM to 9 PM) for this city
@@ -65,20 +71,49 @@ export const TimeScaleGraph = ({ cities }: TimeScaleGraphProps) => {
     
     if (bestHours.length > 0) {
       const sortedHours = bestHours.sort((a, b) => a.hour - b.hour);
+      
+      // Find consecutive hours to form a zone
+      let startHour = sortedHours[0].hour;
+      let endHour = startHour;
+      let currentZoneLength = 1;
+      let maxZoneLength = 1;
+      let maxZoneStart = startHour;
+      
+      for (let i = 1; i < sortedHours.length; i++) {
+        if (sortedHours[i].hour === endHour + 1) {
+          // Part of the same zone
+          endHour = sortedHours[i].hour;
+          currentZoneLength++;
+          
+          if (currentZoneLength > maxZoneLength) {
+            maxZoneLength = currentZoneLength;
+            maxZoneStart = startHour;
+          }
+        } else {
+          // Start of a new zone
+          startHour = sortedHours[i].hour;
+          endHour = startHour;
+          currentZoneLength = 1;
+        }
+      }
+      
       setGoldilockZone({
-        start: sortedHours[0].hour,
-        end: sortedHours[sortedHours.length - 1].hour
+        start: maxZoneStart,
+        end: maxZoneStart + maxZoneLength - 1
       });
     }
 
     setHourData(hours);
   }, [cities]);
 
-  const getBarColor = (hour: number) => {
+  const getBarColor = (hour: number, overlap: number) => {
+    const maxOverlap = Math.max(...hourData.map(h => h.overlap));
     if (goldilockZone && hour >= goldilockZone.start && hour <= goldilockZone.end) {
       return '#3dd68c'; // Bright green for Goldilocks zone
     }
-    return '#ffffff20'; // Semi-transparent white for other times
+    if (overlap === 0) return '#ffffff10';
+    const opacity = 0.2 + (overlap / maxOverlap) * 0.8;
+    return `rgba(255, 255, 255, ${opacity})`;
   };
 
   const getBarHeight = (overlap: number) => {
@@ -93,7 +128,7 @@ export const TimeScaleGraph = ({ cities }: TimeScaleGraphProps) => {
         <h3 className="text-xl font-medium">Working Hours Overlap (8 AM - 9 PM)</h3>
       </div>
       
-      <div className="h-[250px] w-full">
+      <div className="h-[300px] w-full">
         <ChartContainer config={{
           hour: {
             theme: {
@@ -118,8 +153,8 @@ export const TimeScaleGraph = ({ cities }: TimeScaleGraphProps) => {
               <XAxis 
                 dataKey="displayHour" 
                 tick={{ fill: '#ffffff80' }} 
-                axisLine={{ stroke: '#ffffff20' }}
-                tickLine={{ stroke: '#ffffff20' }}
+                axisLine={{ stroke: '#ffffff40' }}
+                tickLine={{ stroke: '#ffffff40' }}
               />
               
               <ChartTooltip
@@ -130,7 +165,8 @@ export const TimeScaleGraph = ({ cities }: TimeScaleGraphProps) => {
                       <div>
                         <div className="mb-2 font-medium">{payload.displayHour}</div>
                         <div className="text-sm text-muted-foreground">
-                          Available cities: {payload.cities.join(', ')}
+                          <span className="font-bold">{payload.overlap}</span> cities available:<br/>
+                          <span className="text-sm text-white/70">{payload.cities.join(', ')}</span>
                         </div>
                       </div>
                     )}
@@ -142,11 +178,12 @@ export const TimeScaleGraph = ({ cities }: TimeScaleGraphProps) => {
                 dataKey="overlap" 
                 fill="#8884d8"
                 minPointSize={20}
+                radius={[4, 4, 0, 0]}
               >
                 {hourData.map((entry, index) => (
                   <Cell 
                     key={`cell-${index}`} 
-                    fill={getBarColor(entry.hour)}
+                    fill={getBarColor(entry.hour, entry.overlap)}
                     height={getBarHeight(entry.overlap)}
                   />
                 ))}
@@ -157,10 +194,14 @@ export const TimeScaleGraph = ({ cities }: TimeScaleGraphProps) => {
       </div>
 
       {goldilockZone && (
-        <div className="mt-4">
+        <div className="mt-6 p-4 bg-white/5 border border-white/10 rounded-lg">
           <p className="text-lg font-medium">
-            <span className="text-[#3dd68c]">Best meeting window: </span>
+            <span className="text-[#3dd68c] font-bold">✓ Best meeting window: </span>
             {hourData[goldilockZone.start].displayHour} - {hourData[goldilockZone.end < 23 ? goldilockZone.end + 1 : 0].displayHour}
+          </p>
+          <p className="text-sm text-white/60 mt-2">
+            This time range works well for {cities.length} {cities.length === 1 ? 'location' : 'locations'}, 
+            keeping the call within 8 AM - 9 PM for everyone.
           </p>
         </div>
       )}
