@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Mic, MicOff, Send, Loader } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/use-toast";
-
 interface AnimatedChatProps {
   input: string;
   setInput: (value: string) => void;
@@ -13,18 +12,19 @@ interface AnimatedChatProps {
   defaultLocation?: string;
   showResults: boolean;
 }
-
-export const AnimatedChat = ({ 
-  input, 
-  setInput, 
-  handleSubmit, 
-  isLoading, 
+export const AnimatedChat = ({
+  input,
+  setInput,
+  handleSubmit,
+  isLoading,
   defaultLocation,
-  showResults 
+  showResults
 }: AnimatedChatProps) => {
   const [isListening, setIsListening] = useState(false);
   const [recognition, setRecognition] = useState<SpeechRecognition | null>(null);
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
 
   // Define SpeechRecognition type for TypeScript
   interface SpeechRecognition extends EventTarget {
@@ -37,38 +37,30 @@ export const AnimatedChat = ({
     onerror: (event: SpeechRecognitionErrorEvent) => void;
     onend: () => void;
   }
-
   interface SpeechRecognitionEvent extends Event {
     results: SpeechRecognitionResultList;
   }
-
   interface SpeechRecognitionResultList {
     length: number;
     item(index: number): SpeechRecognitionResult;
   }
-
   interface SpeechRecognitionResult {
     [index: number]: SpeechRecognitionAlternative;
   }
-
   interface SpeechRecognitionAlternative {
     transcript: string;
   }
-
   interface SpeechRecognitionErrorEvent extends Event {
     error: string;
   }
-
   const startListening = () => {
     try {
       const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-      
       if (SpeechRecognition) {
         const recognitionInstance = new SpeechRecognition() as SpeechRecognition;
         recognitionInstance.continuous = false;
         recognitionInstance.interimResults = false;
         recognitionInstance.lang = 'en-US';
-
         recognitionInstance.onresult = (event: SpeechRecognitionEvent) => {
           const transcript = event.results[0][0].transcript;
           setInput(transcript);
@@ -78,7 +70,6 @@ export const AnimatedChat = ({
             duration: 2000
           });
         };
-
         recognitionInstance.onerror = (event: SpeechRecognitionErrorEvent) => {
           console.error('Speech recognition error:', event.error);
           setIsListening(false);
@@ -88,11 +79,9 @@ export const AnimatedChat = ({
             duration: 3000
           });
         };
-
         recognitionInstance.onend = () => {
           setIsListening(false);
         };
-
         setRecognition(recognitionInstance);
         recognitionInstance.start();
         setIsListening(true);
@@ -112,7 +101,6 @@ export const AnimatedChat = ({
       });
     }
   };
-
   const stopListening = () => {
     if (recognition) {
       recognition.stop();
@@ -128,24 +116,12 @@ export const AnimatedChat = ({
       }
     };
   }, [recognition]);
-
-  return (
-    <div className={cn(
-      "w-full max-w-3xl mx-auto transition-all duration-500 ease-in-out",
-      showResults ? "mt-8" : "mt-[20vh]"
-    )}>
+  return <div className={cn("w-full max-w-3xl mx-auto transition-all duration-500 ease-in-out", showResults ? "mt-8" : "mt-[20vh]")}>
       <div className="flex justify-center mb-8">
-        <img 
-          src="uploaded-logo.png"
-          alt="App Logo" 
-          width={80} 
-          height={80} 
-          className="mx-auto object-contain w-[80px] h-[80px]"
-          onError={(e) => {
-            console.error('Failed to load logo');
-            e.currentTarget.src = '/logo.png'; // Fallback to default logo
-          }}
-        />
+        <img alt="App Logo" width={80} height={80} className="mx-auto object-contain w-[80px] h-[80px]" onError={e => {
+        console.error('Failed to load logo');
+        e.currentTarget.src = '/logo.png'; // Fallback to default logo
+      }} src="/lovable-uploads/ac159691-f8bf-477a-839f-90e407f635a4.png" />
       </div>
       
       <p className="text-center text-xl mb-8 text-white/80">
@@ -153,41 +129,15 @@ export const AnimatedChat = ({
       </p>
       
       <form onSubmit={handleSubmit} className="flex gap-2">
-        <Input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder={`e.g. New York, Tokyo for next Monday... (Your location: ${defaultLocation || 'Not set'})`}
-          className="bg-black text-white border-white/10 text-2xl h-16 px-6"
-          disabled={isLoading || isListening}
-        />
+        <Input value={input} onChange={e => setInput(e.target.value)} placeholder={`e.g. New York, Tokyo for next Monday... (Your location: ${defaultLocation || 'Not set'})`} className="bg-black text-white border-white/10 text-2xl h-16 px-6" disabled={isLoading || isListening} />
         <div className="flex gap-2">
-          <Button 
-            type="button" 
-            variant="outline" 
-            className="bg-black border-white/10 hover:bg-white/10 h-16 w-16"
-            onClick={isListening ? stopListening : startListening}
-            disabled={isLoading}
-          >
-            {isListening ? (
-              <MicOff className="h-6 w-6 text-red-500" />
-            ) : (
-              <Mic className="h-6 w-6" />
-            )}
+          <Button type="button" variant="outline" className="bg-black border-white/10 hover:bg-white/10 h-16 w-16" onClick={isListening ? stopListening : startListening} disabled={isLoading}>
+            {isListening ? <MicOff className="h-6 w-6 text-red-500" /> : <Mic className="h-6 w-6" />}
           </Button>
-          <Button 
-            type="submit" 
-            variant="outline" 
-            className="bg-black border-white/10 hover:bg-white/10 h-16 w-16"
-            disabled={isLoading || !defaultLocation}
-          >
-            {isLoading ? (
-              <Loader className="h-6 w-6 animate-spin" />
-            ) : (
-              <Send className="h-6 w-6" />
-            )}
+          <Button type="submit" variant="outline" className="bg-black border-white/10 hover:bg-white/10 h-16 w-16" disabled={isLoading || !defaultLocation}>
+            {isLoading ? <Loader className="h-6 w-6 animate-spin" /> : <Send className="h-6 w-6" />}
           </Button>
         </div>
       </form>
-    </div>
-  );
+    </div>;
 };
