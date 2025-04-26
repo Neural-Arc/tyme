@@ -23,7 +23,7 @@ export const Chat = () => {
     setIsLoading(true);
 
     try {
-      const { content, cities, suggestedTime } = await processMessage(input, apiKey);
+      const { cities, suggestedTime } = await processMessage(input, apiKey);
       
       // Update time zones with the extracted cities and suggested time
       if (cities.length > 0) {
@@ -43,21 +43,21 @@ export const Chat = () => {
   return (
     <div className="w-full max-w-3xl mx-auto">
       <p className="text-center text-xl mb-8 text-white/80">
-        Type the cities and we'll find the best time for your global call.
+        Type cities or countries and we'll find your best call time...
       </p>
       
       <form onSubmit={handleSubmit} className="flex gap-2">
         <Input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="e.g. Find a good time for San Francisco, London, and Tokyo..."
-          className="bg-muted text-white border-white/10 text-2xl h-24 px-6"
+          placeholder="e.g. New York, London, Tokyo..."
+          className="bg-black/30 text-white border-white/10 text-2xl h-24 px-6"
           disabled={isLoading}
         />
         <Button 
           type="submit" 
           variant="outline" 
-          className="bg-white/5 border-white/10 hover:bg-white/10 h-24 w-16"
+          className="bg-black/30 border-white/10 hover:bg-white/10 h-24 w-16"
           disabled={isLoading}
         >
           {isLoading ? (

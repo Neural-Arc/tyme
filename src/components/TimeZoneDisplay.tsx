@@ -12,30 +12,20 @@ interface TimeZoneInfo {
 }
 
 export const TimeZoneDisplay = () => {
-  const [localTimeZone, setLocalTimeZone] = useState<string>('');
   const [timeZones, setTimeZones] = useState<TimeZoneInfo[]>([]);
   const [bestCallTime, setBestCallTime] = useState<string>('');
   const [cities, setCities] = useState<string[]>([]);
+  const [showDefaultCard, setShowDefaultCard] = useState<boolean>(true);
 
   useEffect(() => {
-    const local = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    setLocalTimeZone(local);
-    
-    // Only show default time zone card if no other cities are present
-    const currentDate = new Date();
-    const defaultTimeZone: TimeZoneInfo = {
-      city: 'Your Location',
-      currentTime: format(currentDate, 'h:mm a'),
-      date: format(currentDate, 'EEEE, MMMM do, yyyy')
-    };
-    
-    setTimeZones([defaultTimeZone]);
-
+    // Handle updates from chat component
     const handleUpdateTimeZones = (event: CustomEvent) => {
       const { cities, suggestedTime } = event.detail;
+      
       if (cities && cities.length > 0) {
         updateTimeZones(cities, suggestedTime);
         setCities(cities);
+        setShowDefaultCard(false);
       }
     };
 
@@ -50,30 +40,15 @@ export const TimeZoneDisplay = () => {
     const currentDate = new Date();
     const formattedDate = format(currentDate, 'EEEE, MMMM do, yyyy');
     
-    const timeZonesList: TimeZoneInfo[] = [];
-    
-    // Only add cities that were explicitly mentioned
+    // Only add cities that were explicitly mentioned by the user
     const uniqueCities = [...new Set(cities)];
     const cityTimeZones = uniqueCities.map(city => ({
       city,
-      currentTime: format(currentDate, 'h:mm a'),
-      suggestedTime,
+      currentTime: format(currentDate, 'h:mm'),
       date: formattedDate
     }));
     
-    timeZonesList.push(...cityTimeZones);
-    
-    // Only show local time zone if no other cities are present
-    if (timeZonesList.length === 0) {
-      timeZonesList.push({
-        city: 'Your Location',
-        currentTime: format(currentDate, 'h:mm a'),
-        suggestedTime,
-        date: formattedDate
-      });
-    }
-    
-    setTimeZones(timeZonesList);
+    setTimeZones(cityTimeZones);
     
     if (suggestedTime) {
       setBestCallTime(suggestedTime);
@@ -82,7 +57,7 @@ export const TimeZoneDisplay = () => {
 
   return (
     <div className="space-y-8 animate-fade-up">
-      {/* Best Call Time Card - Only show if we have a best call time */}
+      {/* Best Call Time Card - Only show if we have a suggested time */}
       {bestCallTime && (
         <div className="glass-card p-6">
           <h3 className="text-xl font-medium mb-2 text-white/90">Recommended Call Time</h3>
@@ -95,14 +70,24 @@ export const TimeZoneDisplay = () => {
         </div>
       )}
 
-      {/* Time Cards Grid - Show only explicitly mentioned cities */}
+      {/* Time Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Show default user location card only if no cities have been entered */}
+        {showDefaultCard && (
+          <TimeZoneCard
+            key="default-location"
+            city="Your Location"
+            currentTime={format(new Date(), 'h:mm')}
+            date={format(new Date(), 'EEEE, MMMM do, yyyy')}
+          />
+        )}
+        
+        {/* Show user-requested city cards */}
         {timeZones.map((tz, index) => (
           <TimeZoneCard
             key={`${tz.city}-${index}`}
             city={tz.city}
             currentTime={tz.currentTime}
-            suggestedTime={tz.suggestedTime}
             date={tz.date}
           />
         ))}
