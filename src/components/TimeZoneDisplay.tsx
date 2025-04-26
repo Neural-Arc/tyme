@@ -1,8 +1,8 @@
-
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { TimeZoneCard } from './TimeZoneCard';
 import { TimeScaleGraph } from './TimeScaleGraph';
+import { useLocation } from '@/hooks/useLocation';
 
 interface TimeZoneInfo {
   city: string;
@@ -15,22 +15,34 @@ export const TimeZoneDisplay = () => {
   const [cities, setCities] = useState<string[]>([]);
   const [specifiedDate, setSpecifiedDate] = useState<Date | undefined>(undefined);
   const [suggestedTime, setSuggestedTime] = useState<string | undefined>(undefined);
+  const { defaultLocation } = useLocation();
+
+  // Function to format current time for the default location
+  const getCurrentTimeString = () => {
+    return new Intl.DateTimeFormat('en', {
+      hour: 'numeric',
+      minute: 'numeric',
+    }).format(new Date());
+  };
+
+  // Function to format current date for the default location
+  const getCurrentDateString = () => {
+    return format(new Date(), 'EEEE, MMMM do, yyyy');
+  };
+
+  const handleUpdateTimeZones = (event: CustomEvent) => {
+    const { cities, suggestedTime, specifiedDate } = event.detail;
+    
+    if (cities && cities.length > 0 && suggestedTime) {
+      updateTimeZones(cities, suggestedTime, specifiedDate);
+      setCities(cities);
+      setSpecifiedDate(specifiedDate);
+      setSuggestedTime(suggestedTime);
+    }
+  };
 
   useEffect(() => {
-    // Handle updates from chat component
-    const handleUpdateTimeZones = (event: CustomEvent) => {
-      const { cities, suggestedTime, specifiedDate } = event.detail;
-      
-      if (cities && cities.length > 0 && suggestedTime) {
-        updateTimeZones(cities, suggestedTime, specifiedDate);
-        setCities(cities);
-        setSpecifiedDate(specifiedDate);
-        setSuggestedTime(suggestedTime);
-      }
-    };
-
     window.addEventListener('updateTimeZones', handleUpdateTimeZones as EventListener);
-
     return () => {
       window.removeEventListener('updateTimeZones', handleUpdateTimeZones as EventListener);
     };
@@ -129,17 +141,32 @@ export const TimeZoneDisplay = () => {
 
   return (
     <div className="space-y-8 animate-fade-up">
+      {/* Default Location Time Card - Always visible */}
+      {defaultLocation && (
+        <div className="mb-8">
+          <h3 className="text-white/60 mb-4 text-sm">Your Location</h3>
+          <TimeZoneCard
+            city={defaultLocation}
+            meetingTime={getCurrentTimeString()}
+            date={getCurrentDateString()}
+          />
+        </div>
+      )}
+
       {/* Time Cards Grid - only show user-requested city cards */}
       {timeZones.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {timeZones.map((tz, index) => (
-            <TimeZoneCard
-              key={`${tz.city}-${index}`}
-              city={tz.city}
-              meetingTime={tz.meetingTime}
-              date={tz.date}
-            />
-          ))}
+        <div>
+          <h3 className="text-white/60 mb-4 text-sm">Meeting Times</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {timeZones.map((tz, index) => (
+              <TimeZoneCard
+                key={`${tz.city}-${index}`}
+                city={tz.city}
+                meetingTime={tz.meetingTime}
+                date={tz.date}
+              />
+            ))}
+          </div>
         </div>
       )}
       
