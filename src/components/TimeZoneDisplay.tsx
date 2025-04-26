@@ -77,8 +77,8 @@ export const TimeZoneDisplay = () => {
     // Convert to UTC (for calculations)
     const utcMeetingHour = (hours - timeZoneOffset) % 24;
     
-    // Only add cities that were explicitly mentioned by the user
-    const uniqueCities = [...new Set(cities)];
+    // Add current location to the beginning of cities array if not already included
+    const uniqueCities = [...new Set([defaultLocation, ...cities])].filter(Boolean);
     const cityTimeZones = uniqueCities.map(city => {
       const offset = getCityOffset(city);
       
@@ -109,21 +109,19 @@ export const TimeZoneDisplay = () => {
     });
     
     setTimeZones(cityTimeZones);
+    setCities(uniqueCities);
   };
 
   return (
     <div className="space-y-8 animate-fade-up">
-      {/* Default Location Time Card - Always visible */}
-      {defaultLocation && !isLoading && (
-        <div className="mb-8">
-          <h3 className="text-white/60 mb-4 text-sm">Current Location</h3>
-          <TimeZoneCard
-            city={defaultLocation}
-            meetingTime={getCurrentTimeString()}
-            date={getCurrentDateString()}
-            timeZone={timeZoneName}
-          />
-        </div>
+      {/* Time Scale Graph - Now shown at the top if there are any cities */}
+      {cities.length > 0 && suggestedTime && (
+        <TimeScaleGraph 
+          cities={cities}
+          specifiedDate={specifiedDate}
+          suggestedTime={suggestedTime}
+          defaultLocation={defaultLocation}
+        />
       )}
 
       {/* Meeting Times Section */}
@@ -138,19 +136,11 @@ export const TimeZoneDisplay = () => {
                 meetingTime={tz.meetingTime}
                 date={tz.date}
                 timeZone={tz.timeZone}
+                isCurrentLocation={tz.city === defaultLocation}
               />
             ))}
           </div>
         </div>
-      )}
-      
-      {/* Time Scale Graph */}
-      {cities.length > 1 && suggestedTime && (
-        <TimeScaleGraph 
-          cities={cities}
-          specifiedDate={specifiedDate}
-          suggestedTime={suggestedTime}
-        />
       )}
     </div>
   );

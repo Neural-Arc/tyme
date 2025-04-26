@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Clock, Info } from 'lucide-react';
 import { useLocation } from '@/hooks/useLocation';
@@ -21,16 +20,11 @@ interface TimeScaleGraphProps {
   cities: string[];
   specifiedDate?: Date;
   suggestedTime?: string;
+  defaultLocation?: string;
 }
 
-interface CityWorkingHours {
-  city: string;
-  workingHours: number[];
-  offset: number;
-}
-
-export const TimeScaleGraph = ({ cities, specifiedDate, suggestedTime }: TimeScaleGraphProps) => {
-  const [cityHours, setCityHours] = useState<CityWorkingHours[]>([]);
+export const TimeScaleGraph = ({ cities, specifiedDate, suggestedTime, defaultLocation }: TimeScaleGraphProps) => {
+  const [cityHours, setCityHours] = useState<any[]>([]);
   const [bestTimeRange, setBestTimeRange] = useState<{start: number; end: number} | null>(null);
   const { timeZoneOffset, timeZoneName } = useLocation();
   const baseDate = specifiedDate || new Date();
@@ -38,10 +32,17 @@ export const TimeScaleGraph = ({ cities, specifiedDate, suggestedTime }: TimeSca
   // Convert suggested time to local hour if available
   const [suggestedLocalHour, setSuggestedLocalHour] = useState<number | null>(null);
 
+  const formatHour = (hour: number): string => {
+    return hour.toString().padStart(2, '0');
+  };
+
+  // Get time markers for the scale - every 3 hours, in 24-hour format
+  const timeMarkers = Array.from({ length: 9 }, (_, i) => i * 3);
+
   useEffect(() => {
     if (!cities || cities.length === 0) return;
     
-    const workingHoursData: CityWorkingHours[] = [];
+    const workingHoursData: any[] = [];
     
     cities.forEach(city => {
       const offset = getCityOffset(city);
@@ -156,10 +157,6 @@ export const TimeScaleGraph = ({ cities, specifiedDate, suggestedTime }: TimeSca
     }
   }, [cities, suggestedTime, timeZoneOffset]);
 
-  const formatHour = (hour: number): string => {
-    return hour === 0 ? '24' : `${hour}`;
-  };
-
   // Convert bestTimeRange UTC hours to local hours for display
   const getLocalBestTimeRange = () => {
     if (!bestTimeRange) return null;
@@ -187,15 +184,15 @@ export const TimeScaleGraph = ({ cities, specifiedDate, suggestedTime }: TimeSca
     <div className="glass-card p-6 animate-fade-up">
       <div className="flex items-center gap-3 mb-6">
         <Clock className="h-5 w-5 text-white/60" />
-        <h3 className="text-xl font-medium text-white">Working Hours Overlap (8:00 - 21:00)</h3>
+        <h3 className="text-xl font-medium text-white">Working Hours (08:00 - 21:00)</h3>
       </div>
 
-      {/* Best time range callout - Above the graph */}
+      {/* Best time range callout */}
       {localBestTimeRange && (
-        <div className="mb-6 p-4 bg-black/50 border border-[#3dd68c]/20 rounded-lg transition-all duration-300">
+        <div className="mb-6 p-4 bg-black/50 border border-[#3dd68c]/20 rounded-lg">
           <div className="flex justify-between items-center">
             <p className="text-lg font-medium">
-              <span className="text-[#3dd68c] font-bold">✓ Best meeting window: </span>
+              <span className="text-[#3dd68c] font-bold">✓ Best meeting time: </span>
               {localBestTimeRange.startFormatted} - {localBestTimeRange.endFormatted} {timeZoneName}
             </p>
             <TooltipProvider>
@@ -211,111 +208,77 @@ export const TimeScaleGraph = ({ cities, specifiedDate, suggestedTime }: TimeSca
               </Tooltip>
             </TooltipProvider>
           </div>
-          <p className="text-sm text-white/60 mt-2">
-            This time range works best for all {cities.length} {cities.length === 1 ? 'location' : 'locations'}, 
-            keeping everyone within their 8:00 - 21:00 working hours.
-          </p>
         </div>
       )}
       
-      <div className="relative h-[340px] w-full">
-        {/* Time scale */}
-        <div className="absolute top-0 left-0 right-0 flex justify-between text-white/60 text-sm border-b border-white/10 pb-1">
-          {timeMarkers.map(hour => {
-            // Convert UTC hour to local hour for display
-            const localHour = convertUtcToLocal(hour, timeZoneOffset);
-            return (
-              <div key={hour} className="text-center">
-                {formatTime(localHour).split(' ')[0]}
-                <span className="text-xs block">{formatTime(localHour).split(' ')[1]}</span>
-              </div>
-            );
-          })}
+      <div className="relative h-[340px]">
+        {/* Time scale - Now with better spacing and 24-hour format */}
+        <div className="absolute top-0 left-[140px] right-0 flex justify-between text-white/60 text-sm border-b border-white/10 pb-2">
+          {timeMarkers.map(hour => (
+            <div key={hour} className="text-center relative" style={{ width: '40px' }}>
+              <span className="absolute -left-5">{formatHour(hour)}:00</span>
+            </div>
+          ))}
         </div>
         
-        {/* City working hours bars */}
-        <div className="mt-12 space-y-8">
+        {/* City working hours bars - Now with fixed width for city names */}
+        <div className="mt-12 space-y-6">
           {cityHours.map((cityData, index) => {
-            const colorIndex = index % 5;
-            const colors = [
-              'bg-white/25 border-white/40',
-              'bg-white/20 border-white/30',
-              'bg-white/15 border-white/25',
-              'bg-white/10 border-white/20',
-              'bg-white/5 border-white/15'
-            ];
+            const isCurrentLocation = cityData.city === defaultLocation;
+            const order = isCurrentLocation ? -1 : index;
             
             return (
-              <div key={cityData.city} className="space-y-1">
+              <div key={cityData.city} className="space-y-1" style={{ order }}>
                 <div className="flex justify-between">
-                  <span className="text-white/80 text-sm">{cityData.city}</span>
+                  <span className="text-white/80 text-sm w-[120px] truncate">
+                    {cityData.city}
+                  </span>
                   <span className="text-white/60 text-xs">
-                    8:00 - 21:00 {formatTimeZone(cityData.offset)}
+                    {formatTimeZone(cityData.offset)}
                   </span>
                 </div>
                 
-                <div className="relative h-10 w-full bg-white/5 rounded">
+                <div className="relative h-10 ml-[140px]">
                   <div className="absolute inset-0 grid grid-cols-24 gap-px">
-                    {Array.from({ length: 24 }).map((_, hour) => (
-                      <div key={hour} className="h-full"></div>
-                    ))}
+                    {Array.from({ length: 24 }).map((_, hour) => {
+                      const isWorkingHour = hour >= 8 && hour <= 21;
+                      return (
+                        <div
+                          key={hour}
+                          className={`h-full ${
+                            isWorkingHour ? 'bg-[#3dd68c]/30 border-[#3dd68c]/50' : 'bg-white/10 border-white/20'
+                          } border rounded-sm`}
+                        />
+                      );
+                    })}
                   </div>
                   
-                  {cityData.workingHours.map(hour => {
-                    const isInBestTimeRange = 
-                      bestTimeRange && (hour >= bestTimeRange.start && hour <= bestTimeRange.end);
-                    
-                    // Convert UTC hour to city's local hour for tooltip
-                    const cityLocalHour = convertUtcToLocal(hour, cityData.offset);
-                    
-                    return (
-                      <TooltipProvider key={hour}>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <div 
-                              className={`absolute top-0 bottom-0 border ${
-                                isInBestTimeRange 
-                                  ? 'bg-[#3dd68c]/30 border-[#3dd68c]/50' 
-                                  : colors[colorIndex]
-                              } rounded-sm transition-all duration-300 cursor-default`}
-                              style={{
-                                left: `${(hour / 24) * 100}%`, 
-                                width: `${(1 / 24) * 100}%`
-                              }}
-                            >
-                              {isInBestTimeRange && (
-                                <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] whitespace-nowrap text-[#3dd68c]">
-                                  {formatTime(cityLocalHour)}
-                                </div>
-                              )}
-                            </div>
-                          </TooltipTrigger>
-                          <TooltipContent className="bg-black/90 border border-white/10 text-white">
-                            <p>{formatTime(cityLocalHour)} {cityData.city} local time</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    );
-                  })}
+                  {/* Highlight working hours */}
+                  {cityData.workingHours.map(hour => (
+                    <TooltipProvider key={hour}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div
+                            className="absolute top-0 bottom-0 bg-[#3dd68c]/30 border border-[#3dd68c]/50 rounded-sm transition-all duration-300"
+                            style={{
+                              left: `${(hour / 24) * 100}%`,
+                              width: `${(1 / 24) * 100}%`
+                            }}
+                          />
+                        </TooltipTrigger>
+                        <TooltipContent className="bg-black/90 border border-white/10 text-white">
+                          <p>{formatTime(convertUtcToLocal(hour, cityData.offset))} {cityData.city} local time</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  ))}
                 </div>
               </div>
             );
           })}
         </div>
-        
-        {/* Goldilocks zone overlay */}
-        {bestTimeRange && (
-          <div 
-            className="absolute top-12 h-[calc(100%-48px)] bg-[#3dd68c]/10 border-l border-r border-[#3dd68c]/20 transition-all duration-300 pointer-events-none"
-            style={{
-              left: `${(bestTimeRange.start / 24) * 100}%`,
-              width: `${((bestTimeRange.end - bestTimeRange.start + 1) / 24) * 100}%`
-            }}
-          ></div>
-        )}
       </div>
       
-      {/* Time zone legend */}
       <div className="mt-4 text-xs text-white/60 flex justify-center">
         <div className="flex items-center gap-2">
           <Clock className="h-4 w-4" />

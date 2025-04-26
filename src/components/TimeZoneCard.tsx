@@ -6,14 +6,22 @@ interface TimeZoneCardProps {
   meetingTime: string;
   date?: string;
   timeZone?: string;
+  isCurrentLocation?: boolean;
 }
 
-export const TimeZoneCard = ({ city, meetingTime, date, timeZone }: TimeZoneCardProps) => {
+export const TimeZoneCard = ({ city, meetingTime, date, timeZone, isCurrentLocation }: TimeZoneCardProps) => {
   return (
-    <div className="glass-card p-6 transition-all duration-300 hover:bg-white/5">
+    <div className={`glass-card p-6 transition-all duration-300 hover:bg-white/5 ${
+      isCurrentLocation ? 'border-[#3dd68c]/30' : ''
+    }`}>
       <div className="flex items-center gap-3 mb-4">
         <Clock className="h-5 w-5 text-white/60" />
-        <h3 className="text-lg font-medium text-white">{city}</h3>
+        <h3 className="text-lg font-medium text-white">
+          {city}
+          {isCurrentLocation && (
+            <span className="ml-2 text-xs text-[#3dd68c]">(Current Location)</span>
+          )}
+        </h3>
       </div>
       
       <div className="space-y-2">
