@@ -26,65 +26,73 @@ interface TimeScaleGraphProps {
 
 export const TimeScaleGraph = ({ cities, specifiedDate, suggestedTime, defaultLocation }: TimeScaleGraphProps) => {
   const [cityHours, setCityHours] = useState<any[]>([]);
-  const [bestTimeRange, setBestTimeRange] = useState<{start: number; end: number} | null>(null);
+  const [bestTimeRange, setBestTimeRange] = useState<{start: number; end: number; localStart: number; localEnd: number} | null>(null);
   const { timeZoneOffset, timeZoneName } = useLocation();
   const baseDate = specifiedDate || new Date();
   
-  // Convert suggested time to local hour if available
   const [suggestedLocalHour, setSuggestedLocalHour] = useState<number | null>(null);
+  const [recommendedTime, setRecommendedTime] = useState<number | null>(null);
 
   const formatHour = (hour: number): string => {
     return hour.toString().padStart(2, '0');
   };
 
-  // Get time markers for the scale - every 3 hours, in 24-hour format
-  // Removed the first timeMarkers declaration
-
   useEffect(() => {
     if (!cities || cities.length === 0) return;
     
-    const workingHoursData: any[] = [];
+    // Sort cities to ensure current location is first
+    const sortedCities = [...cities].sort((a, b) => {
+      if (a === defaultLocation) return -1;
+      if (b === defaultLocation) return 1;
+      return 0;
+    });
     
-    cities.forEach(city => {
+    const workingHoursData: any[] = [];
+    let totalHours = 0;
+    let hoursCount = 0;
+    
+    sortedCities.forEach(city => {
       const offset = getCityOffset(city);
       const workingHours: number[] = [];
       
       // Calculate working hours in UTC for this city (8 AM to 9 PM local time)
       for (let h = 8; h <= 21; h++) {
-        // Convert local hour to UTC hour
         let utcHour = (h - offset) % 24;
         if (utcHour < 0) utcHour += 24;
         workingHours.push(utcHour);
+        
+        // Add to median calculation
+        totalHours += utcHour;
+        hoursCount++;
       }
       
       workingHoursData.push({ city, workingHours, offset });
     });
     
+    // Calculate median time for recommendation
+    const recommendedHour = Math.round(totalHours / hoursCount) % 24;
+    setRecommendedTime(recommendedHour);
+    
     setCityHours(workingHoursData);
     
-    // Find overlapping hours with preference to user's local time zone
+    // Find overlapping hours with preference to current location
     if (workingHoursData.length > 0) {
       const hourCounts = new Array(24).fill(0);
       
-      workingHoursData.forEach(cityData => {
+      workingHoursData.forEach((cityData, index) => {
+        const weight = cityData.city === defaultLocation ? 1.5 : 1; // Give more weight to current location
         cityData.workingHours.forEach(hour => {
-          hourCounts[hour]++;
+          hourCounts[hour] += weight;
         });
       });
       
-      // Find the hours where most cities overlap
-      const allCitiesCount = workingHoursData.length;
+      // Find best hours
       let bestOverlapCount = 0;
       let bestHours: number[] = [];
       
       for (let hour = 0; hour < 24; hour++) {
-        // Convert UTC hour to user's local hour
         const localHour = convertUtcToLocal(hour, timeZoneOffset);
-        
-        // Prioritize hours during user's working day (8am-9pm)
         const isUserWorkingHour = localHour >= 8 && localHour <= 21;
-        
-        // Weight the score - give preference to user's working hours
         let score = hourCounts[hour];
         if (isUserWorkingHour) score += 0.5;
         
@@ -96,7 +104,7 @@ export const TimeScaleGraph = ({ cities, specifiedDate, suggestedTime, defaultLo
         }
       }
       
-      // Find the longest consecutive best hour range
+      // Find longest consecutive range
       if (bestHours.length > 0) {
         bestHours.sort((a, b) => a - b);
         let currentStart = bestHours[0];
@@ -108,7 +116,6 @@ export const TimeScaleGraph = ({ cities, specifiedDate, suggestedTime, defaultLo
         
         for (let i = 1; i < bestHours.length; i++) {
           if (bestHours[i] === bestHours[i-1] + 1) {
-            // Consecutive hour
             currentEnd = bestHours[i];
             currentLength++;
             
@@ -118,20 +125,26 @@ export const TimeScaleGraph = ({ cities, specifiedDate, suggestedTime, defaultLo
               maxEnd = currentEnd;
             }
           } else {
-            // Not consecutive, start a new sequence
             currentStart = bestHours[i];
             currentEnd = bestHours[i];
             currentLength = 1;
           }
         }
         
-        setBestTimeRange({ start: maxStart, end: maxEnd });
+        const localStart = convertUtcToLocal(maxStart, timeZoneOffset);
+        const localEnd = convertUtcToLocal(maxEnd, timeZoneOffset);
+        setBestTimeRange({ 
+          start: maxStart, 
+          end: maxEnd,
+          localStart,
+          localEnd
+        });
       } else {
         setBestTimeRange(null);
       }
     }
     
-    // If we have a suggested time, highlight it on the graph
+    // Handle suggested time
     if (suggestedTime) {
       const timeRegex = /(\d{1,2}):(\d{2})(?:\s*(am|pm))?/i;
       const timeMatch = suggestedTime.match(timeRegex);
@@ -141,45 +154,36 @@ export const TimeScaleGraph = ({ cities, specifiedDate, suggestedTime, defaultLo
         const minutes = parseInt(timeMatch[2]);
         const period = timeMatch[3]?.toLowerCase();
         
-        // Convert to 24-hour format if AM/PM is specified
         if (period === 'pm' && hours < 12) hours += 12;
         if (period === 'am' && hours === 12) hours = 0;
         
-        // Convert to UTC
         let utcHour = hours - timeZoneOffset;
         if (utcHour < 0) utcHour += 24;
         if (utcHour >= 24) utcHour -= 24;
         
         setSuggestedLocalHour(hours);
-        
-        // Highlight this time on the graph
-        setBestTimeRange({ start: utcHour, end: utcHour });
+        setBestTimeRange({ 
+          start: utcHour, 
+          end: utcHour,
+          localStart: hours,
+          localEnd: hours
+        });
       }
     }
-  }, [cities, suggestedTime, timeZoneOffset]);
+  }, [cities, suggestedTime, timeZoneOffset, defaultLocation]);
 
-  // Convert bestTimeRange UTC hours to local hours for display
   const getLocalBestTimeRange = () => {
     if (!bestTimeRange) return null;
     
-    const localStart = convertUtcToLocal(bestTimeRange.start, timeZoneOffset);
-    let localEnd = convertUtcToLocal(bestTimeRange.end, timeZoneOffset);
-    
-    // Add 1 to end time for display since we show ranges as inclusive-exclusive
-    localEnd = (localEnd + 1) % 24;
-    
     return {
-      start: localStart,
-      end: localEnd,
-      startFormatted: formatTime(localStart),
-      endFormatted: formatTime(localEnd)
+      start: bestTimeRange.localStart,
+      end: bestTimeRange.localEnd,
+      startFormatted: formatTime(bestTimeRange.localStart),
+      endFormatted: formatTime((bestTimeRange.localEnd + 1) % 24)
     };
   };
 
   const localBestTimeRange = getLocalBestTimeRange();
-  
-  // Get time markers for the scale - every 3 hours
-  // Use the generateHourLabels function to create time markers
   const timeMarkers = generateHourLabels(0, 23, 3);
 
   return (
@@ -189,7 +193,6 @@ export const TimeScaleGraph = ({ cities, specifiedDate, suggestedTime, defaultLo
         <h3 className="text-xl font-medium text-white">Working Hours (08:00 - 21:00)</h3>
       </div>
 
-      {/* Best time range callout */}
       {localBestTimeRange && (
         <div className="mb-6 p-4 bg-black/50 border border-[#3dd68c]/20 rounded-lg">
           <div className="flex justify-between items-center">
@@ -214,33 +217,35 @@ export const TimeScaleGraph = ({ cities, specifiedDate, suggestedTime, defaultLo
       )}
       
       <div className="relative h-[340px]">
-        {/* Time scale - Now with better spacing and 24-hour format */}
-        <div className="absolute top-0 left-[140px] right-0 flex justify-between text-white/60 text-sm border-b border-white/10 pb-2">
+        <div className="absolute top-0 left-[160px] right-0 flex justify-between text-white/60 text-sm border-b border-white/10 pb-2">
           {timeMarkers.map(hour => (
-            <div key={hour} className="text-center relative" style={{ width: '40px' }}>
-              <span className="absolute -left-5">{formatHour(hour)}:00</span>
+            <div key={hour} className="text-center relative" style={{ width: '45px' }}>
+              <span className="absolute -left-4">{formatHour(hour)}:00</span>
             </div>
           ))}
         </div>
         
-        {/* City working hours bars - Now with fixed width for city names */}
         <div className="mt-12 space-y-6">
           {cityHours.map((cityData, index) => {
             const isCurrentLocation = cityData.city === defaultLocation;
-            const order = isCurrentLocation ? -1 : index;
             
             return (
-              <div key={cityData.city} className="space-y-1" style={{ order }}>
+              <div key={cityData.city} className="space-y-1">
                 <div className="flex justify-between">
-                  <span className="text-white/80 text-sm w-[120px] truncate">
+                  <span className={`text-sm w-[140px] truncate ${
+                    isCurrentLocation ? 'text-white font-medium' : 'text-white/80'
+                  }`}>
                     {cityData.city}
+                    {isCurrentLocation && (
+                      <span className="ml-1 text-xs text-[#3dd68c]">(Current)</span>
+                    )}
                   </span>
                   <span className="text-white/60 text-xs">
                     {formatTimeZone(cityData.offset)}
                   </span>
                 </div>
                 
-                <div className="relative h-10 ml-[140px]">
+                <div className="relative h-10 ml-[160px]">
                   <div className="absolute inset-0 grid grid-cols-24 gap-px">
                     {Array.from({ length: 24 }).map((_, hour) => {
                       const isWorkingHour = hour >= 8 && hour <= 21;
@@ -255,13 +260,34 @@ export const TimeScaleGraph = ({ cities, specifiedDate, suggestedTime, defaultLo
                     })}
                   </div>
                   
-                  {/* Highlight working hours */}
+                  {/* Recommended time indicator */}
+                  {recommendedTime !== null && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div
+                            className="absolute top-0 bottom-0 bg-[#F97316]/30 border border-[#F97316]/50 rounded-sm"
+                            style={{
+                              left: `${(recommendedTime / 24) * 100}%`,
+                              width: `${(1 / 24) * 100}%`,
+                              zIndex: 10
+                            }}
+                          />
+                        </TooltipTrigger>
+                        <TooltipContent className="bg-black/90 border border-white/10 text-white">
+                          <p>Recommended meeting time</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
+                  
+                  {/* Working hours indicators */}
                   {cityData.workingHours.map(hour => (
                     <TooltipProvider key={hour}>
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <div
-                            className="absolute top-0 bottom-0 bg-[#3dd68c]/30 border border-[#3dd68c]/50 rounded-sm transition-all duration-300"
+                            className="absolute top-0 bottom-0 bg-[#3dd68c]/30 border border-[#3dd68c]/50 rounded-sm"
                             style={{
                               left: `${(hour / 24) * 100}%`,
                               width: `${(1 / 24) * 100}%`
