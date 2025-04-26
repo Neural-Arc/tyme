@@ -3,12 +3,13 @@ import { useState, useEffect } from 'react';
 import { TimeZoneCard } from './TimeZoneCard';
 import { format } from 'date-fns';
 import { TimeScaleGraph } from './TimeScaleGraph';
-import { Card } from './ui/card';
+import { DatePicker } from './ui/date-picker';
 
 interface TimeZoneInfo {
   city: string;
   currentTime: string;
   suggestedTime?: string;
+  date?: string;
 }
 
 export const TimeZoneDisplay = () => {
@@ -17,6 +18,7 @@ export const TimeZoneDisplay = () => {
   const [bestCallTime, setBestCallTime] = useState<string>('');
   const [userLocation, setUserLocation] = useState<string>('Your Location');
   const [cities, setCities] = useState<string[]>([]);
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
 
   useEffect(() => {
     const local = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -27,15 +29,11 @@ export const TimeZoneDisplay = () => {
       setUserLocation('Your Location');
     }
     
-    const now = new Date();
-    setTimeZones([{
-      city: 'Your Location',
-      currentTime: format(now, 'h:mm a'),
-    }]);
+    updateTimeZones([], undefined, selectedDate);
 
     const handleUpdateTimeZones = (event: CustomEvent) => {
       const { cities, suggestedTime } = event.detail;
-      updateTimeZones(cities, suggestedTime);
+      updateTimeZones(cities, suggestedTime, selectedDate);
       setCities(cities);
     };
 
@@ -44,21 +42,23 @@ export const TimeZoneDisplay = () => {
     return () => {
       window.removeEventListener('updateTimeZones', handleUpdateTimeZones as EventListener);
     };
-  }, []);
+  }, [selectedDate]);
 
-  const updateTimeZones = (cities: string[], suggestedTime?: string) => {
-    const now = new Date();
+  const updateTimeZones = (cities: string[], suggestedTime?: string, date: Date = new Date()) => {
+    const formattedDate = format(date, 'EEEE, MMMM do, yyyy');
     const userLocTimeZone = {
       city: 'Your Location',
-      currentTime: format(now, 'h:mm a'),
-      suggestedTime
+      currentTime: format(date, 'h:mm a'),
+      suggestedTime,
+      date: formattedDate
     };
     
     const uniqueCities = [...new Set(cities)];
     const cityTimeZones = uniqueCities.map(city => ({
       city,
-      currentTime: format(now, 'h:mm a'),
-      suggestedTime
+      currentTime: format(date, 'h:mm a'),
+      suggestedTime,
+      date: formattedDate
     }));
     
     setTimeZones([userLocTimeZone, ...cityTimeZones]);
@@ -70,14 +70,22 @@ export const TimeZoneDisplay = () => {
 
   return (
     <div className="space-y-8 animate-fade-up">
-      {/* Best Call Time Card - Moved to top */}
+      {/* Date Picker */}
+      <div className="flex justify-end">
+        <DatePicker 
+          date={selectedDate}
+          onSelect={(date) => date && setSelectedDate(date)}
+        />
+      </div>
+
+      {/* Best Call Time Card */}
       {bestCallTime && (
         <div className="bg-white rounded-xl p-6 shadow-lg">
           <h3 className="text-xl font-medium text-black mb-2">Best Time for the Call</h3>
           <p className="text-2xl font-bold text-black">
             {bestCallTime}
             <span className="text-sm font-normal text-gray-600 block mt-1">
-              (Within 8 AM - 9 PM for all time zones)
+              {format(selectedDate, 'EEEE, MMMM do, yyyy')}
             </span>
           </p>
         </div>
@@ -91,6 +99,7 @@ export const TimeZoneDisplay = () => {
             city={tz.city}
             currentTime={tz.currentTime}
             suggestedTime={tz.suggestedTime}
+            date={tz.date}
           />
         ))}
       </div>
@@ -98,7 +107,8 @@ export const TimeZoneDisplay = () => {
       {/* Goldilocks Zone Graph */}
       {cities.length > 0 && (
         <TimeScaleGraph 
-          cities={['Your Location', ...cities]} 
+          cities={['Your Location', ...cities]}
+          selectedDate={selectedDate}
         />
       )}
     </div>

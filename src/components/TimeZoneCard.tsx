@@ -5,9 +5,10 @@ interface TimeZoneCardProps {
   city: string;
   currentTime: string;
   suggestedTime?: string;
+  date?: string;
 }
 
-export const TimeZoneCard = ({ city, currentTime, suggestedTime }: TimeZoneCardProps) => {
+export const TimeZoneCard = ({ city, currentTime, suggestedTime, date }: TimeZoneCardProps) => {
   return (
     <div className="glass-card p-6 animate-fade-up transition-all duration-300 hover:bg-white/10">
       <div className="flex items-center gap-3 mb-4">
@@ -17,6 +18,9 @@ export const TimeZoneCard = ({ city, currentTime, suggestedTime }: TimeZoneCardP
       
       <div className="space-y-2">
         <p className="text-2xl font-medium">{currentTime}</p>
+        {date && (
+          <p className="text-sm text-white/60">{date}</p>
+        )}
       </div>
     </div>
   );
