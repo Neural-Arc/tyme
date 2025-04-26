@@ -127,8 +127,22 @@ export const calculateBestMeetingTime = (
   const hourCounts = new Array(24).fill(0);
   const cityTimes: Record<string, string> = {};
   
+  // Find the default location's offset
+  const defaultLocationData = cityHours.find(cityData => cityData.city === defaultLocation);
+  const defaultOffset = defaultLocationData ? defaultLocationData.offset : userTimeZoneOffset;
+  
+  // Track which hours are working hours for the default location
+  const defaultLocationWorkingHours = new Set<number>();
+  if (defaultLocationData) {
+    defaultLocationData.workingHours.forEach(hour => {
+      defaultLocationWorkingHours.add(hour);
+    });
+  }
+  
+  // Give much higher weight to the default location (3x instead of 1.5x)
   cityHours.forEach(cityData => {
-    const weight = cityData.city === defaultLocation ? 1.5 : 1; // More weight to current location
+    // Increase weight for current location significantly
+    const weight = cityData.city === defaultLocation ? 3 : 1; 
     cityData.workingHours.forEach(hour => {
       hourCounts[hour] += weight;
     });
@@ -139,12 +153,21 @@ export const calculateBestMeetingTime = (
   let bestUtcHour = 12; // Default to noon UTC if no better option
   
   for (let hour = 0; hour < 24; hour++) {
+    // Only consider hours that are working hours for the default location
+    if (defaultLocationData && !defaultLocationWorkingHours.has(hour)) {
+      continue; // Skip this hour if it's not a working hour for default location
+    }
+    
     const localHour = convertUtcToLocal(hour, userTimeZoneOffset);
+    // Give higher priority to user's reasonable working hours (9am-6pm)
+    const isIdealUserHour = localHour >= 9 && localHour <= 18;
     const isUserWorkingHour = localHour >= 8 && localHour <= 21;
+    
     let score = hourCounts[hour];
     
     // Give bonus to user's working hours
-    if (isUserWorkingHour) score += 0.5;
+    if (isIdealUserHour) score += 2;
+    else if (isUserWorkingHour) score += 1;
     
     if (score > bestScore) {
       bestScore = score;
@@ -152,6 +175,15 @@ export const calculateBestMeetingTime = (
     }
   }
 
+  // If no suitable time found (possibly because default location has no working hours in dataset),
+  // find a reasonable hour in the default location's working hours (8 AM - 9 PM)
+  if (bestScore < 0) {
+    // Default to 2 PM local time for the default location if no better option found
+    const defaultLocalHour = 14; // 2 PM
+    bestUtcHour = (defaultLocalHour - defaultOffset) % 24;
+    if (bestUtcHour < 0) bestUtcHour += 24;
+  }
+  
   // Convert best UTC hour to local time for user
   const localHour = convertUtcToLocal(bestUtcHour, userTimeZoneOffset);
   

@@ -11,11 +11,11 @@ interface TimeZoneCardProps {
 
 export const TimeZoneCard = ({ city, meetingTime, date, timeZone, isCurrentLocation }: TimeZoneCardProps) => {
   return (
-    <div className={`glass-card p-6 transition-all duration-300 hover:bg-white/5 ${
-      isCurrentLocation ? 'border-[#3dd68c]/30' : ''
+    <div className={`glass-card p-6 transition-all duration-300 ${
+      isCurrentLocation ? 'border-[#3dd68c]/50 bg-black/60' : 'hover:bg-white/5'
     }`}>
       <div className="flex items-center gap-3 mb-4">
-        <Clock className="h-5 w-5 text-white/60" />
+        <Clock className={`h-5 w-5 ${isCurrentLocation ? 'text-[#3dd68c]' : 'text-white/60'}`} />
         <h3 className="text-lg font-medium text-white">
           {city}
           {isCurrentLocation && (
@@ -26,7 +26,9 @@ export const TimeZoneCard = ({ city, meetingTime, date, timeZone, isCurrentLocat
       
       <div className="space-y-2">
         <div className="flex items-baseline gap-2">
-          <p className="text-2xl font-medium text-white">{meetingTime}</p>
+          <p className={`text-2xl font-medium ${isCurrentLocation ? 'text-[#3dd68c]' : 'text-white'}`}>
+            {meetingTime}
+          </p>
           {timeZone && <span className="text-xs text-white/60">{timeZone}</span>}
         </div>
         {date && (

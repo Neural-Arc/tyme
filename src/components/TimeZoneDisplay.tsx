@@ -38,7 +38,7 @@ export const TimeZoneDisplay = () => {
   const handleUpdateTimeZones = (event: CustomEvent) => {
     const { cities, suggestedTime, specifiedDate } = event.detail;
     
-    if (cities && cities.length > 0 && suggestedTime) {
+    if (cities && cities.length > 0) {
       updateTimeZones(cities, suggestedTime, specifiedDate);
       setCities(cities);
       setSpecifiedDate(specifiedDate);
@@ -54,39 +54,49 @@ export const TimeZoneDisplay = () => {
   }, []);
 
   const updateTimeZones = (cities: string[], suggestedTime?: string, userSpecifiedDate?: Date) => {
-    if (!suggestedTime) return;
-
-    // Parse the suggested meeting time
-    const timeRegex = /(\d{1,2}):(\d{2})(?:\s*(am|pm))?/i;
-    const timeMatch = suggestedTime.match(timeRegex);
-    
-    if (!timeMatch) return;
-    
-    let hours = parseInt(timeMatch[1]);
-    const minutes = parseInt(timeMatch[2]);
-    const period = timeMatch[3]?.toLowerCase();
-    
-    // Convert to 24-hour format if AM/PM is specified
-    if (period === 'pm' && hours < 12) hours += 12;
-    if (period === 'am' && hours === 12) hours = 0;
-    
     // Use specified date or current date
     const baseDate = userSpecifiedDate || new Date();
+    let utcMeetingHour: number;
     
-    // Set the base date to the suggested meeting time in the user's local time zone
-    const meetingDate = new Date(baseDate);
-    meetingDate.setHours(hours, minutes, 0, 0);
-    
-    // Convert to UTC (for calculations)
-    let utcMeetingHour = hours - timeZoneOffset;
-    if (utcMeetingHour < 0) utcMeetingHour += 24;
-    if (utcMeetingHour >= 24) utcMeetingHour -= 24;
+    // Parse the suggested meeting time if provided
+    if (suggestedTime) {
+      const timeRegex = /(\d{1,2}):(\d{2})(?:\s*(am|pm))?/i;
+      const timeMatch = suggestedTime.match(timeRegex);
+      
+      if (timeMatch) {
+        let hours = parseInt(timeMatch[1]);
+        const minutes = parseInt(timeMatch[2]);
+        const period = timeMatch[3]?.toLowerCase();
+        
+        // Convert to 24-hour format if AM/PM is specified
+        if (period === 'pm' && hours < 12) hours += 12;
+        if (period === 'am' && hours === 12) hours = 0;
+        
+        // Convert to UTC (for calculations)
+        utcMeetingHour = hours - timeZoneOffset;
+        if (utcMeetingHour < 0) utcMeetingHour += 24;
+        if (utcMeetingHour >= 24) utcMeetingHour -= 24;
+      } else {
+        // If no valid time format, default to current hour
+        utcMeetingHour = new Date().getUTCHours();
+      }
+    } else {
+      // If no suggested time, default to current hour
+      utcMeetingHour = new Date().getUTCHours();
+    }
     
     setMeetingUtcHour(utcMeetingHour);
     
-    // Add current location to the beginning of cities array if not already included
-    const uniqueCities = [...new Set([defaultLocation, ...cities])].filter(Boolean);
-    const cityTimeZones = uniqueCities.map(city => {
+    // Always ensure default location is first in the list
+    let uniqueCities: string[] = [];
+    
+    if (defaultLocation) {
+      uniqueCities = [defaultLocation, ...cities.filter(city => city !== defaultLocation)];
+    } else {
+      uniqueCities = [...new Set(cities)];
+    }
+    
+    const cityTimeZones = uniqueCities.filter(Boolean).map(city => {
       const offset = getCityOffset(city);
       
       // Calculate hours and handle partial hours like India (UTC+5.5)
@@ -98,17 +108,14 @@ export const TimeZoneDisplay = () => {
       
       // Create date for this city based on the meeting time
       const cityDate = new Date(baseDate);
-      cityDate.setHours(cityHour, minutes, 0, 0);
+      cityDate.setHours(cityHour, 0, 0, 0);
       
-      // Format meeting time without seconds
-      const timeFormatter = new Intl.DateTimeFormat('en', {
-        hour: 'numeric',
-        minute: 'numeric',
-      });
+      // Format meeting time
+      const meetingTime = formatTime(cityHour);
       
       return {
         city,
-        meetingTime: timeFormatter.format(cityDate),
+        meetingTime,
         date: format(cityDate, 'EEEE, MMMM do, yyyy'),
         timeZone: formatTimeZone(offset),
         timeZoneAcronym: getTimeZoneAcronym(offset)
@@ -122,7 +129,7 @@ export const TimeZoneDisplay = () => {
   return (
     <div className="space-y-8 animate-fade-up">
       {/* Time Scale Graph - Now shown at the top if there are any cities */}
-      {cities.length > 0 && suggestedTime && (
+      {cities.length > 0 && (
         <TimeScaleGraph 
           cities={cities}
           specifiedDate={specifiedDate}

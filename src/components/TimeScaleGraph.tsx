@@ -47,7 +47,7 @@ export const TimeScaleGraph = ({ cities, specifiedDate, suggestedTime, defaultLo
   useEffect(() => {
     if (!cities || cities.length === 0) return;
     
-    // Ensure current location is first (it will later be sorted to the top in rendering)
+    // Always ensure default location is included if provided
     const allCities = defaultLocation 
       ? [defaultLocation, ...cities.filter(city => city !== defaultLocation)]
       : cities;
@@ -73,11 +73,6 @@ export const TimeScaleGraph = ({ cities, specifiedDate, suggestedTime, defaultLo
     });
     
     setCityHours(workingHoursData);
-    
-    // Calculate best meeting time
-    const bestTime = calculateBestMeetingTime(workingHoursData, defaultLocation || '', timeZoneOffset);
-    setRecommendedTime(bestTime.utcHour);
-    setBestTimeRange(bestTime);
     
     // Handle suggested time if provided
     if (suggestedTime) {
@@ -115,9 +110,15 @@ export const TimeScaleGraph = ({ cities, specifiedDate, suggestedTime, defaultLo
           cityTimes
         });
       }
+    } else {
+      // Calculate best meeting time if no suggested time
+      const bestTime = calculateBestMeetingTime(workingHoursData, defaultLocation || '', timeZoneOffset);
+      setRecommendedTime(bestTime.utcHour);
+      setBestTimeRange(bestTime);
     }
   }, [cities, suggestedTime, timeZoneOffset, defaultLocation]);
 
+  // Use intervals of 3 hours for time markers
   const timeMarkers = generateHourLabels(0, 23, 3);
 
   return (
@@ -151,21 +152,23 @@ export const TimeScaleGraph = ({ cities, specifiedDate, suggestedTime, defaultLo
       )}
       
       <div className="relative h-[340px]">
+        {/* Time markers on top */}
         <div className="absolute top-0 left-[180px] right-0 flex justify-between text-white/60 text-sm border-b border-white/10 pb-2">
           {timeMarkers.map(hour => (
-            <div key={hour} className="text-center relative" style={{ width: '50px' }}>
-              <span className="absolute -left-6">{formatHour(hour)}:00</span>
+            <div key={hour} className="text-center" style={{ width: '36px' }}>
+              {formatHour(hour)}:00
             </div>
           ))}
         </div>
         
         <div className="mt-12 space-y-6">
+          {/* Always show current location first, then sort other cities alphabetically */}
           {cityHours
             .sort((a, b) => {
               // Always sort current location to the top
               if (a.city === defaultLocation) return -1;
               if (b.city === defaultLocation) return 1;
-              return 0;
+              return a.city.localeCompare(b.city);
             })
             .map((cityData, index) => {
               const isCurrentLocation = cityData.city === defaultLocation;
@@ -189,14 +192,14 @@ export const TimeScaleGraph = ({ cities, specifiedDate, suggestedTime, defaultLo
                     
                     {/* Local time at recommended hour */}
                     {recommendedTime !== null && bestTimeRange?.cityTimes[cityData.city] && (
-                      <div className="absolute right-0 text-xs text-[#F97316] font-medium">
+                      <div className="absolute right-2 text-xs text-[#F97316] font-medium">
                         {bestTimeRange.cityTimes[cityData.city]}
                       </div>
                     )}
                   </div>
                   
                   <div className="relative h-10 ml-[180px]">
-                    {/* Local working hours background grid */}
+                    {/* 24-hour time grid with highlighted working hours */}
                     <div className="absolute inset-0 grid grid-cols-24 gap-px">
                       {Array.from({ length: 24 }).map((_, hour) => {
                         const localHour = convertUtcToLocal(hour, cityData.offset);
@@ -205,7 +208,7 @@ export const TimeScaleGraph = ({ cities, specifiedDate, suggestedTime, defaultLo
                           <div
                             key={hour}
                             className={`h-full ${
-                              isWorkingHour ? 'bg-[#3dd68c]/30 border-[#3dd68c]/50' : 'bg-white/10 border-white/20'
+                              isWorkingHour ? 'bg-[#3dd68c]/20 border-[#3dd68c]/20' : 'bg-white/5 border-white/10'
                             } border rounded-sm`}
                           />
                         );
@@ -218,7 +221,7 @@ export const TimeScaleGraph = ({ cities, specifiedDate, suggestedTime, defaultLo
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <div
-                              className="absolute top-0 bottom-0 bg-[#F97316]/30 border border-[#F97316]/50 rounded-sm"
+                              className="absolute top-0 bottom-0 bg-[#F97316]/50 border border-[#F97316] rounded-sm"
                               style={{
                                 left: `${(recommendedTime / 24) * 100}%`,
                                 width: `${(1 / 24) * 100}%`,
@@ -227,31 +230,11 @@ export const TimeScaleGraph = ({ cities, specifiedDate, suggestedTime, defaultLo
                             />
                           </TooltipTrigger>
                           <TooltipContent className="bg-black/90 border border-white/10 text-white">
-                            <p>Recommended meeting time: {bestTimeRange?.cityTimes[cityData.city]}</p>
+                            <p>Recommended time: {bestTimeRange?.cityTimes[cityData.city]}</p>
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
                     )}
-                    
-                    {/* Working hours indicators */}
-                    {cityData.workingHours.map(hour => (
-                      <TooltipProvider key={`${cityData.city}-${hour}`}>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <div
-                              className="absolute top-0 bottom-0 bg-[#3dd68c]/30 border border-[#3dd68c]/50 rounded-sm"
-                              style={{
-                                left: `${(hour / 24) * 100}%`,
-                                width: `${(1 / 24) * 100}%`
-                              }}
-                            />
-                          </TooltipTrigger>
-                          <TooltipContent className="bg-black/90 border border-white/10 text-white">
-                            <p>{formatTime(convertUtcToLocal(hour, cityData.offset))} {cityData.city} local time</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    ))}
                   </div>
                 </div>
               );
