@@ -121,6 +121,59 @@ export const getTimeZoneAcronym = (offset: number): string => {
   return timeZoneAcronyms[offset.toString()] || formatTimeZone(offset);
 };
 
+// New function to parse time string
+export const parseTimeString = (timeStr: string): { hours: number; minutes: number; period?: string } => {
+  const timeRegex = /(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/i;
+  const match = timeStr.match(timeRegex);
+  
+  if (match) {
+    let hours = parseInt(match[1]);
+    const minutes = match[2] ? parseInt(match[2]) : 0;
+    const period = match[3]?.toLowerCase();
+    
+    if (period === 'pm' && hours < 12) hours += 12;
+    if (period === 'am' && hours === 12) hours = 0;
+    
+    return { hours, minutes, period };
+  }
+  
+  throw new Error('Invalid time format');
+};
+
+// Convert time between cities
+export const convertTimeBetweenCities = (
+  sourceCity: string,
+  targetCity: string,
+  sourceTime: string,
+  sourceDate: Date
+): {
+  sourceDateTime: Date;
+  targetDateTime: Date;
+  sourceCityOffset: number;
+  targetCityOffset: number;
+} => {
+  const sourceCityOffset = getCityOffset(sourceCity);
+  const targetCityOffset = getCityOffset(targetCity);
+  
+  const { hours, minutes } = parseTimeString(sourceTime);
+  
+  // Create date object for source time
+  const sourceDateTime = new Date(sourceDate);
+  sourceDateTime.setHours(hours, minutes, 0, 0);
+  
+  // Calculate target time
+  const targetDateTime = new Date(sourceDateTime);
+  const hoursDiff = targetCityOffset - sourceCityOffset;
+  targetDateTime.setHours(targetDateTime.getHours() - hoursDiff);
+  
+  return {
+    sourceDateTime,
+    targetDateTime,
+    sourceCityOffset,
+    targetCityOffset
+  };
+};
+
 // Convert hour from one time zone to another
 export const convertBetweenTimeZones = (hour: number, fromOffset: number, toOffset: number): number => {
   // First convert to UTC

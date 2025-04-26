@@ -1,10 +1,10 @@
-
 import { useState, useEffect } from 'react';
 import { TimeZoneCard } from './TimeZoneCard';
 import { TimeScaleGraph } from './TimeScaleGraph';
+import { TimeConversionCard } from './TimeConversionCard';
 import { useLocation } from '@/hooks/useLocation';
 import { useTimeZoneCalculations } from '@/hooks/useTimeZoneCalculations';
-import { formatTimeZone, getTimeZoneAcronym } from '@/utils/timeZoneUtils';
+import { formatTimeZone, getTimeZoneAcronym, convertTimeBetweenCities } from '@/utils/timeZoneUtils';
 
 export const TimeZoneDisplay = () => {
   const [cities, setCities] = useState<string[]>([]);
@@ -19,13 +19,40 @@ export const TimeZoneDisplay = () => {
     suggestedTime
   );
 
+  const [timeConversion, setTimeConversion] = useState<{
+    sourceCity: string;
+    targetCity: string;
+    sourceTime: Date;
+    targetTime: Date;
+    sourceCityOffset: number;
+    targetCityOffset: number;
+  } | null>(null);
+
   const handleUpdateTimeZones = (event: CustomEvent) => {
-    const { cities, suggestedTime, specifiedDate } = event.detail;
+    const { cities, suggestedTime, specifiedDate, timeConversionRequest } = event.detail;
     
-    if (cities && cities.length > 0) {
+    if (timeConversionRequest) {
+      const { sourceCity, time } = timeConversionRequest;
+      const result = convertTimeBetweenCities(
+        sourceCity,
+        defaultLocation,
+        time,
+        specifiedDate || new Date()
+      );
+      
+      setTimeConversion({
+        sourceCity,
+        targetCity: defaultLocation,
+        sourceTime: result.sourceDateTime,
+        targetTime: result.targetDateTime,
+        sourceCityOffset: result.sourceCityOffset,
+        targetCityOffset: result.targetCityOffset
+      });
+    } else if (cities && cities.length > 0) {
       setCities(cities);
       setSpecifiedDate(specifiedDate || new Date());
       setSuggestedTime(suggestedTime);
+      setTimeConversion(null);
     }
   };
 
@@ -38,6 +65,22 @@ export const TimeZoneDisplay = () => {
 
   return (
     <div className="space-y-8 animate-fade-up">
+      {timeConversion && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <TimeConversionCard
+            city={timeConversion.sourceCity}
+            time={timeConversion.sourceTime}
+            offset={timeConversion.sourceCityOffset}
+            isSource
+          />
+          <TimeConversionCard
+            city={timeConversion.targetCity}
+            time={timeConversion.targetTime}
+            offset={timeConversion.targetCityOffset}
+          />
+        </div>
+      )}
+
       {cities.length > 0 && (
         <TimeScaleGraph 
           timeZoneData={timeZoneData}

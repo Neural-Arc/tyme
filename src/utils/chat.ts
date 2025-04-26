@@ -1,7 +1,12 @@
-
 import { toast } from "sonner";
 
-export async function processMessage(message: string, apiKey: string): Promise<{ content: string; cities: string[]; suggestedTime?: string; specifiedDate?: Date }> {
+export async function processMessage(message: string, apiKey: string): Promise<{ 
+  content: string; 
+  cities: string[]; 
+  suggestedTime?: string; 
+  specifiedDate?: Date;
+  timeConversionRequest?: { sourceCity: string; time: string; };
+}> {
   try {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -13,15 +18,26 @@ export async function processMessage(message: string, apiKey: string): Promise<{
         model: 'gpt-4o',
         messages: [{
           role: 'system',
-          content: `You are a helpful assistant that helps find suitable meeting times across different time zones. 
+          content: `You are a helpful assistant that helps find suitable meeting times across different time zones and handles time conversion requests. 
                    Always respond with the following exact format:
+                   TYPE: [either "meeting" or "conversion"]
                    CITIES: [comma-separated list of cities explicitly mentioned by the user]
                    BEST_TIME: [optimal meeting time in format "HH:MM" (24-hour) or "HH:MM AM/PM" (12-hour)]
                    DATE: [date of meeting if specified, in format "YYYY-MM-DD"]
+                   SOURCE_CITY: [for conversion requests, the city where the time was specified]
+                   SOURCE_TIME: [for conversion requests, the specified time in format "HH:MM" or "HH:MM AM/PM"]
                    
-                   Example:
+                   Example for meeting:
+                   TYPE: meeting
                    CITIES: New York, London, Tokyo
                    BEST_TIME: 14:00
+                   DATE: 2025-05-01
+                   
+                   Example for conversion:
+                   TYPE: conversion
+                   CITIES: Sydney
+                   SOURCE_CITY: Sydney
+                   SOURCE_TIME: 10:00 AM
                    DATE: 2025-05-01`
         }, {
           role: 'user',
@@ -35,46 +51,59 @@ export async function processMessage(message: string, apiKey: string): Promise<{
       throw new Error(data.error?.message || 'Failed to process message');
     }
 
-    // Extract structured data from the response
     const content = data.choices[0].message.content;
     
-    // Parse cities using labeled format
+    // Parse type
+    const typeMatch = content.match(/TYPE:\s*(.*)/i);
+    const type = typeMatch ? typeMatch[1].trim().toLowerCase() : 'meeting';
+    
+    // Parse cities and other common fields
     const citiesMatch = content.match(/CITIES:\s*(.*)/i);
     const cities = citiesMatch ? 
       citiesMatch[1].split(',').map(city => city.trim()).filter(city => city.length > 0) : 
       [];
     
-    // Parse suggested time using labeled format
-    const timeMatch = content.match(/BEST_TIME:\s*(.*)/i);
-    const suggestedTime = timeMatch ? timeMatch[1].trim() : undefined;
-    
-    // Parse date using labeled format
+    // Parse date
     const dateMatch = content.match(/DATE:\s*(.*)/i);
     let specifiedDate: Date | undefined = undefined;
     
     if (dateMatch && dateMatch[1].trim() !== "") {
       const dateStr = dateMatch[1].trim();
-      // First try as ISO format YYYY-MM-DD
       if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
         specifiedDate = new Date(dateStr);
       }
-      // If not ISO format or invalid date, try to parse from message
       if (!specifiedDate || isNaN(specifiedDate.getTime())) {
         specifiedDate = parseDateFromMessage(message);
       }
     } else {
-      // If no date in structured response, try to parse from message
       specifiedDate = parseDateFromMessage(message);
     }
 
-    console.log("Extracted cities:", cities);
-    console.log("Suggested time:", suggestedTime);
-    console.log("Specified date:", specifiedDate);
+    if (type === 'conversion') {
+      // Parse source city and time for conversion requests
+      const sourceCityMatch = content.match(/SOURCE_CITY:\s*(.*)/i);
+      const sourceTimeMatch = content.match(/SOURCE_TIME:\s*(.*)/i);
+      
+      if (sourceCityMatch && sourceTimeMatch) {
+        return {
+          content,
+          cities,
+          specifiedDate,
+          timeConversionRequest: {
+            sourceCity: sourceCityMatch[1].trim(),
+            time: sourceTimeMatch[1].trim()
+          }
+        };
+      }
+    }
+
+    // For meeting requests, parse suggested time
+    const timeMatch = content.match(/BEST_TIME:\s*(.*)/i);
+    const suggestedTime = timeMatch ? timeMatch[1].trim() : undefined;
 
     return { content, cities, suggestedTime, specifiedDate };
   } catch (error) {
     console.error('Error processing message:', error);
-    toast.error('Failed to process message. Please check your API key and try again.');
     throw error;
   }
 }
