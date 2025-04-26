@@ -1,7 +1,4 @@
 
-import { ChatMessage } from '@/types/chat';
-import { toast } from 'sonner';
-
 export async function processMessage(message: string, apiKey: string): Promise<string> {
   try {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -14,7 +11,11 @@ export async function processMessage(message: string, apiKey: string): Promise<s
         model: 'gpt-4o',
         messages: [{
           role: 'system',
-          content: 'You are a helpful assistant that helps find suitable meeting times across different time zones.'
+          content: `You are a helpful assistant that helps find suitable meeting times across different time zones. 
+                   Always respond with the following format:
+                   1. List each city mentioned and its current time
+                   2. Suggest 2-3 optimal meeting times that work well for all participants
+                   3. Keep responses concise and focused on time zone information`
         }, {
           role: 'user',
           content: message
