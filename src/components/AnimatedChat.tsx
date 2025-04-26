@@ -140,10 +140,9 @@ export const AnimatedChat = ({
           alt="App Logo" 
           width={90} 
           height={90} 
-          className="object-contain"
-          style={{ display: 'block' }}
+          className="mx-auto object-contain"
           onError={(e) => {
-            console.error('Failed to load logo');
+            console.error('Failed to load logo at /logo.png');
             e.currentTarget.style.display = 'none';
           }}
         />
