@@ -39,7 +39,8 @@ export const TimeScaleGraph = ({ cities }: TimeScaleGraphProps) => {
       let offset = 0;
       
       // Simulate different time zones
-      if (city.toLowerCase().includes('new york')) offset = 0;
+      if (city.toLowerCase() === 'your location') offset = 0;
+      else if (city.toLowerCase().includes('new york')) offset = 0;
       else if (city.toLowerCase().includes('london')) offset = 5;
       else if (city.toLowerCase().includes('tokyo')) offset = 13;
       else if (city.toLowerCase().includes('sydney')) offset = 15;
@@ -112,14 +113,20 @@ export const TimeScaleGraph = ({ cities }: TimeScaleGraphProps) => {
       return '#3dd68c'; // Bright green for Goldilocks zone
     }
     if (overlap === 0) return '#ffffff10';
+    
+    // Enhanced color gradient for better visualization
+    const baseColor = '#9b87f5'; // Purple base color
     const opacity = 0.2 + (overlap / maxOverlap) * 0.8;
-    return `rgba(255, 255, 255, ${opacity})`;
+    return `rgba(155, 135, 245, ${opacity})`;
   };
 
   const getBarHeight = (overlap: number) => {
     if (overlap === 0) return 20;
-    return 20 + (overlap * 30); // Scale the height based on overlap
+    return 20 + (overlap * 35); // Scale the height based on overlap, increased effect
   };
+
+  // Add interactivity by highlighting bars on hover
+  const [activeHour, setActiveHour] = useState<number | null>(null);
 
   return (
     <div className="glass-card p-6 animate-fade-up">
@@ -149,6 +156,12 @@ export const TimeScaleGraph = ({ cities }: TimeScaleGraphProps) => {
             <BarChart 
               data={hourData} 
               margin={{ top: 20, right: 20, left: 20, bottom: 20 }}
+              onMouseMove={(data) => {
+                if (data.activeTooltipIndex !== undefined) {
+                  setActiveHour(data.activeTooltipIndex);
+                }
+              }}
+              onMouseLeave={() => setActiveHour(null)}
             >
               <XAxis 
                 dataKey="displayHour" 
@@ -179,12 +192,16 @@ export const TimeScaleGraph = ({ cities }: TimeScaleGraphProps) => {
                 fill="#8884d8"
                 minPointSize={20}
                 radius={[4, 4, 0, 0]}
+                animationDuration={800}
               >
                 {hourData.map((entry, index) => (
                   <Cell 
                     key={`cell-${index}`} 
                     fill={getBarColor(entry.hour, entry.overlap)}
                     height={getBarHeight(entry.overlap)}
+                    className={`transition-all duration-300 ${activeHour === index ? 'filter drop-shadow-lg scale-y-105' : ''}`}
+                    stroke={activeHour === index || (goldilockZone && index >= goldilockZone.start && index <= goldilockZone.end) ? '#ffffff' : 'transparent'}
+                    strokeWidth={1}
                   />
                 ))}
               </Bar>
@@ -194,7 +211,7 @@ export const TimeScaleGraph = ({ cities }: TimeScaleGraphProps) => {
       </div>
 
       {goldilockZone && (
-        <div className="mt-6 p-4 bg-white/5 border border-white/10 rounded-lg">
+        <div className="mt-6 p-4 bg-[#1A1F2C] border border-[#9b87f5]/30 rounded-lg transition-all duration-300 hover:border-[#9b87f5]/50">
           <p className="text-lg font-medium">
             <span className="text-[#3dd68c] font-bold">✓ Best meeting window: </span>
             {hourData[goldilockZone.start].displayHour} - {hourData[goldilockZone.end < 23 ? goldilockZone.end + 1 : 0].displayHour}

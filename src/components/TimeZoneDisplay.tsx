@@ -53,7 +53,9 @@ export const TimeZoneDisplay = () => {
       suggestedTime
     };
     
-    const cityTimeZones = cities.map(city => ({
+    // Only add cities specified by the user, avoid duplicates
+    const uniqueCities = [...new Set(cities)];
+    const cityTimeZones = uniqueCities.map(city => ({
       city,
       currentTime: format(now, 'h:mm a, EEEE, MMMM do, yyyy'),
       suggestedTime
@@ -82,7 +84,9 @@ export const TimeZoneDisplay = () => {
       
       {/* Goldilocks Zone Graph */}
       {cities.length > 0 && (
-        <TimeScaleGraph cities={cities} />
+        <TimeScaleGraph 
+          cities={['Your Location', ...cities]} 
+        />
       )}
       
       {/* Best Call Time Section */}
