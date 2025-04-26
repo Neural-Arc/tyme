@@ -54,12 +54,12 @@ interface SpeechRecognitionConstructor {
   prototype: SpeechRecognition;
 }
 
+// Make sure to declare these as global interfaces
 declare global {
-  var SpeechRecognition: SpeechRecognitionConstructor | undefined;
-  var webkitSpeechRecognition: SpeechRecognitionConstructor | undefined;
-  
   interface Window {
     SpeechRecognition: SpeechRecognitionConstructor | undefined;
     webkitSpeechRecognition: SpeechRecognitionConstructor | undefined;
   }
 }
+
+export {};
