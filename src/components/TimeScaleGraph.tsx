@@ -12,6 +12,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { MeetingInviteDialog } from './MeetingInviteDialog';
 
 interface TimeScaleGraphProps {
   timeZoneData: {
@@ -52,18 +53,29 @@ export const TimeScaleGraph = ({
       {bestTimeRange && defaultLocation && (
         <div className="mb-6 p-4 bg-black/50 border border-[#3dd68c]/20 rounded-lg">
           <div className="flex justify-between items-center">
-            <p className="text-lg font-medium">
-              <span className="text-[#3dd68c] font-bold">✓ Best meeting time: </span>
-              {bestTimeRange.formattedLocal}
-              <span className="ml-2 text-white/60">
-                {currentDate.toLocaleDateString(undefined, { 
+            <div className="flex items-center">
+              <p className="text-lg font-medium">
+                <span className="text-[#3dd68c] font-bold">✓ Best meeting time: </span>
+                {bestTimeRange.formattedLocal}
+                <span className="ml-2 text-white/60">
+                  {currentDate.toLocaleDateString(undefined, { 
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
+                </span>
+              </p>
+              <MeetingInviteDialog 
+                meetingTime={bestTimeRange.formattedLocal}
+                date={currentDate.toLocaleDateString(undefined, { 
                   weekday: 'long',
                   year: 'numeric',
                   month: 'long',
                   day: 'numeric'
                 })}
-              </span>
-            </p>
+              />
+            </div>
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>

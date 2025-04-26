@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Mic, MicOff, Send, Loader } from 'lucide-react';
 import { cn } from "@/lib/utils";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 interface AnimatedChatProps {
   input: string;
   setInput: (value: string) => void;
@@ -118,11 +118,18 @@ export const AnimatedChat = ({
   }, [recognition]);
   return <div className={cn("w-full max-w-3xl mx-auto transition-all duration-500 ease-in-out", showResults ? "mt-8" : "mt-[20vh]")}>
       <div className="flex justify-center mb-8">
-        <img alt="App Logo" width={80} height={80} className="mx-auto object-contain w-[80px] h-[80px]" onError={e => {
-        console.error('Failed to load logo');
-        const target = e.target as HTMLImageElement;
-        target.src = '/logo.png'; // Fallback to default logo
-      }} src="/lovable-uploads/e2afcc0e-1442-4c08-87c5-b436bb8440ef.png" />
+        <img 
+          alt="App Logo" 
+          width={120} 
+          height={120} 
+          className="mx-auto object-contain w-[120px] h-[120px]" 
+          onError={e => {
+            console.error('Failed to load logo');
+            const target = e.target as HTMLImageElement;
+            target.src = '/logo.png';
+          }} 
+          src="/lovable-uploads/e2afcc0e-1442-4c08-87c5-b436bb8440ef.png" 
+        />
       </div>
       
       <p className="text-center mb-8 text-white/80 text-lg">Our AI maps the perfect moment to meet.</p>
