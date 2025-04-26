@@ -124,7 +124,7 @@ export const AnimatedChat = ({
       }} src="/lovable-uploads/ac159691-f8bf-477a-839f-90e407f635a4.png" />
       </div>
       
-      <p className="text-center text-xl mb-8 text-white/80">Our AI maps the perfect moment to meet.</p>
+      <p className="text-center mb-8 text-white/80 text-lg">Our AI maps the perfect moment to meet.</p>
       
       <form onSubmit={handleSubmit} className="flex gap-2">
         <Input value={input} onChange={e => setInput(e.target.value)} placeholder={`e.g. New York, Tokyo for next Monday... (Your location: ${defaultLocation || 'Not set'})`} className="bg-black text-white border-white/10 text-2xl h-16 px-6" disabled={isLoading || isListening} />
