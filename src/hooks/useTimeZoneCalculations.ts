@@ -81,20 +81,20 @@ export const useTimeZoneCalculations = (
           localHour: convertUtcToLocal(recommendedTime, userTimeZoneOffset),
           formattedLocal: formatTime(convertUtcToLocal(recommendedTime, userTimeZoneOffset)),
           cityTimes: Object.fromEntries(
-            workingHoursData.map(({ city, offset }) => [
-              city,
-              formatTime(convertUtcToLocal(recommendedTime, offset))
-            ])
+            workingHoursData.map(({ city, offset }) => {
+              const localHour = convertUtcToLocal(recommendedTime, offset);
+              return [city, formatTime(localHour)];
+            })
           )
         }
       : calculateBestMeetingTime(workingHoursData, defaultLocation, userTimeZoneOffset);
 
     setBestTimeRange(bestTime);
 
-    // Set time zone data for all cities
+    // Set time zone data
     setTimeZoneData(workingHoursData.map(({ city, offset, workingHours }) => ({
       city,
-      localTime: bestTime ? bestTime.cityTimes[city] : '',
+      localTime: bestTime ? formatTime(convertUtcToLocal(bestTime.utcHour, offset)) : '',
       offset,
       workingHours
     })));

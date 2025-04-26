@@ -37,9 +37,14 @@ export const getCityOffset = (city: string): number => {
 
 // Format time in 12-hour format with AM/PM
 export const formatTime = (hour: number, minute: number = 0): string => {
-  const period = hour < 12 ? 'AM' : 'PM';
-  const displayHour = hour % 12 || 12;
-  return `${displayHour}:${minute.toString().padStart(2, '0')} ${period}`;
+  // Handle decimal hours (e.g., 2.5 -> 2:30)
+  const wholeHour = Math.floor(hour);
+  const decimalPart = hour % 1;
+  const minutes = minute || Math.round(decimalPart * 60);
+  
+  const period = wholeHour < 12 ? 'AM' : 'PM';
+  const displayHour = wholeHour % 12 || 12;
+  return `${displayHour}:${minutes.toString().padStart(2, '0')} ${period}`;
 };
 
 // Convert UTC hour to local hour based on offset
