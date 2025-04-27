@@ -1,4 +1,7 @@
 
+import { Chat } from "@/components/Chat";
+import { TimeZoneDisplay } from "@/components/TimeZoneDisplay";
+
 const Index = () => {
   return (
     <div className="bg-black min-h-screen flex items-center justify-center">
