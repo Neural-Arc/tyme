@@ -1,10 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Mic, MicOff, Send, Loader } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import { Link } from "react-router-dom";
+
 interface AnimatedChatProps {
   input: string;
   setInput: (value: string) => void;
@@ -13,6 +14,7 @@ interface AnimatedChatProps {
   defaultLocation?: string;
   showResults: boolean;
 }
+
 export const AnimatedChat = ({
   input,
   setInput,
@@ -117,6 +119,7 @@ export const AnimatedChat = ({
       }
     };
   }, [recognition]);
+
   const handleLogoClick = (e: React.MouseEvent) => {
     e.preventDefault();
     window.dispatchEvent(new CustomEvent('resetTimeZones'));
@@ -125,13 +128,13 @@ export const AnimatedChat = ({
       top: 0,
       behavior: 'smooth'
     });
+    window.location.reload();
   };
-  return <div className={cn("center-content", !showResults && "flex flex-col items-center justify-center")}>
+
+  return (
+    <div className={cn("center-content", !showResults && "flex flex-col items-center justify-center")}>
       <div className="flex justify-center mb-8">
-        <a href="/" onClick={(e) => {
-          e.preventDefault();
-          window.location.reload();
-        }} className="hover:scale-105 transition-transform">
+        <a href="/" onClick={handleLogoClick} className="hover:scale-105 transition-transform">
           <img alt="App Logo" width={120} height={120} className="mx-auto object-contain w-[120px] h-[120px]" src="/lovable-uploads/7ea42db7-8f3b-44cd-8337-e589c12f74fd.png" />
         </a>
       </div>
