@@ -33,16 +33,16 @@ export const TimeZoneCard = ({
   return <div className={`card-animate border border-white/10 rounded-lg p-6 transition-all duration-300 transform hover:scale-105 
         ${isCurrentLocation ? 'border-white/20 bg-black/60' : 'bg-black/40 hover:bg-white/5'}`}>
       <div className="flex items-center gap-3 mb-4">
-        <Clock className={`h-5 w-5 ${isCurrentLocation ? 'bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent' : 'text-white/60'}`} />
+        <Clock className="h-5 w-5 bg-gradient-to-r from-[#6EE7B7] via-[#3B82F6] to-[#9333EA] bg-clip-text text-transparent" />
         <h3 className="text-lg font-medium text-white">
           {city}
-          {isCurrentLocation && <span className="ml-2 text-xs bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">(Current Location)</span>}
+          {isCurrentLocation && <span className="ml-2 text-xs bg-gradient-to-r from-[#6EE7B7] via-[#3B82F6] to-[#9333EA] bg-clip-text text-transparent">(Current Location)</span>}
         </h3>
       </div>
       
       <div className="space-y-2">
         <div className="flex items-baseline gap-2">
-          <p className={`text-2xl font-medium ${isCurrentLocation ? 'text-blue-400' : 'text-white'}`}>
+          <p className={`text-2xl font-medium ${isCurrentLocation ? 'bg-gradient-to-r from-[#6EE7B7] via-[#3B82F6] to-[#9333EA] bg-clip-text text-transparent' : 'text-white'}`}>
             {meetingTime}
           </p>
           {timeZone && <span className="text-xs text-white/60">{timeZone}</span>}

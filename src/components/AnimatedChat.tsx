@@ -128,13 +128,34 @@ export const AnimatedChat = ({
       <p className="text-center mb-8 text-white/80 text-lg">Our AI maps the perfect moment to meet.</p>
       
       <form onSubmit={handleSubmit} className="flex gap-2">
-        <Input value={input} onChange={e => setInput(e.target.value)} placeholder={`e.g. New York, Tokyo for next Monday... ${defaultLocation ? `(Your location: ${defaultLocation})` : ''}`} className="bg-black text-white border-white/10 text-2xl h-16 px-6" disabled={isLoading || !defaultLocation || !localStorage.getItem('openai_api_key')} />
+        <Input 
+          value={input} 
+          onChange={e => setInput(e.target.value)} 
+          placeholder={`e.g. New York, Tokyo for next Monday... ${defaultLocation ? `(Your location: ${defaultLocation})` : ''}`} 
+          className="bg-black text-white border-white/10 text-2xl h-16 px-6" 
+          disabled={isLoading || !defaultLocation || !localStorage.getItem('openai_api_key')} 
+        />
         <div className="flex gap-2">
-          <Button type="button" variant="outline" className="bg-black border-white/10 hover:bg-white/10 h-16 w-16" onClick={isListening ? stopListening : startListening} disabled={isLoading || !defaultLocation || !localStorage.getItem('openai_api_key')}>
-            {isListening ? <MicOff className="h-6 w-6 text-red-500" /> : <Mic className="h-6 w-6" />}
+          <Button 
+            type="button" 
+            variant="outline" 
+            className="bg-black border-white/10 hover:bg-white/10 h-16 w-16" 
+            onClick={isListening ? stopListening : startListening} 
+            disabled={isLoading || !defaultLocation || !localStorage.getItem('openai_api_key')}
+          >
+            {isListening ? 
+              <MicOff className="h-6 w-6 text-red-500" /> : 
+              <Mic className="h-6 w-6 bg-gradient-to-r from-[#6EE7B7] via-[#3B82F6] to-[#9333EA] bg-clip-text text-transparent" />}
           </Button>
-          <Button type="submit" variant="outline" className="bg-black border-white/10 hover:bg-white/10 h-16 w-16" disabled={isLoading || !defaultLocation || !localStorage.getItem('openai_api_key')}>
-            {isLoading ? <Loader className="h-6 w-6 animate-spin" /> : <Send className="h-6 w-6" />}
+          <Button 
+            type="submit" 
+            variant="outline" 
+            className="bg-black border-white/10 hover:bg-white/10 h-16 w-16" 
+            disabled={isLoading || !defaultLocation || !localStorage.getItem('openai_api_key')}
+          >
+            {isLoading ? 
+              <Loader className="h-6 w-6 animate-spin" /> : 
+              <Send className="h-6 w-6 bg-gradient-to-r from-[#6EE7B7] via-[#3B82F6] to-[#9333EA] bg-clip-text text-transparent" />}
           </Button>
         </div>
       </form>
