@@ -1,3 +1,4 @@
+
 import { Clock, Info } from 'lucide-react';
 import { 
   formatTime, 
@@ -48,9 +49,7 @@ export const TimeScaleGraph = ({
     <div className="bg-black/40 border border-white/10 rounded-xl p-6 animate-fade-up">
       <div className="flex items-center gap-3 mb-6">
         <Clock className="h-5 w-5" style={{
-          background: 'linear-gradient(to right, #6EE7B7, #3B82F6, #9333EA)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent'
+          stroke: 'url(#gradientStroke)'
         }} />
         <h3 className="text-xl font-medium text-white">Working Hours (08:00 - 21:00)</h3>
       </div>
@@ -60,17 +59,13 @@ export const TimeScaleGraph = ({
           <div className="flex justify-between items-start flex-wrap gap-2">
             <div className="flex-1 min-w-0">
               <p className="text-lg font-medium">
-                <span className="font-bold" style={{
-                  background: 'linear-gradient(to right, #6EE7B7, #3B82F6, #9333EA)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent'
-                }}>Best meeting time:</span>
+                <span className="font-bold bg-gradient-to-r from-[#6EE7B7] via-[#3B82F6] to-[#9333EA] bg-clip-text text-transparent">
+                  Best meeting time:
+                </span>
                 <br />
-                <span style={{
-                  background: 'linear-gradient(to right, #6EE7B7, #3B82F6, #9333EA)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent'
-                }}>{bestTimeRange.formattedLocal}</span>
+                <span className="bg-gradient-to-r from-[#6EE7B7] via-[#3B82F6] to-[#9333EA] bg-clip-text text-transparent">
+                  {bestTimeRange.formattedLocal}
+                </span>
                 <br />
                 <span className="text-white/60">
                   {currentDate.toLocaleDateString(undefined, {
@@ -111,6 +106,16 @@ export const TimeScaleGraph = ({
 
       <div className="relative overflow-x-auto">
         <div className="min-w-[800px]">
+          <svg width="0" height="0">
+            <defs>
+              <linearGradient id="gradientStroke" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" style={{ stopColor: '#6EE7B7' }} />
+                <stop offset="50%" style={{ stopColor: '#3B82F6' }} />
+                <stop offset="100%" style={{ stopColor: '#9333EA' }} />
+              </linearGradient>
+            </defs>
+          </svg>
+
           <div className="absolute top-0 left-[180px] right-0 flex justify-between text-white/70 text-sm border-b border-white/10 pb-2">
             {timeMarkers.map(hour => (
               <div key={hour} className="text-center min-w-[36px]">
@@ -136,18 +141,14 @@ export const TimeScaleGraph = ({
                 >
                   <div className="flex justify-between items-center">
                     <div className="w-[160px]">
-                      <span className={`text-sm truncate block`} style={isCurrentLocation ? {
-                        background: 'linear-gradient(to right, #6EE7B7, #3B82F6, #9333EA)',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent'
-                      } : { color: 'rgba(255, 255, 255, 0.8)' }}>
+                      <span className={`text-sm truncate block ${
+                        isCurrentLocation ? 'bg-gradient-to-r from-[#6EE7B7] via-[#3B82F6] to-[#9333EA] bg-clip-text text-transparent' : 'text-white/80'
+                      }`}>
                         {cityData.city}
                         {isCurrentLocation && (
-                          <span className="ml-1 text-xs" style={{
-                            background: 'linear-gradient(to right, #6EE7B7, #3B82F6, #9333EA)',
-                            WebkitBackgroundClip: 'text',
-                            WebkitTextFillColor: 'transparent'
-                          }}>(Current)</span>
+                          <span className="ml-1 text-xs bg-gradient-to-r from-[#6EE7B7] via-[#3B82F6] to-[#9333EA] bg-clip-text text-transparent">
+                            (Current)
+                          </span>
                         )}
                       </span>
                       <span className="text-white/60 text-xs">
@@ -156,11 +157,7 @@ export const TimeScaleGraph = ({
                     </div>
 
                     {bestTimeRange?.cityTimes[cityData.city] && (
-                      <div className="absolute right-2 text-xs" style={{
-                        background: 'linear-gradient(to right, #6EE7B7, #3B82F6, #9333EA)',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent'
-                      }}>
+                      <div className="absolute right-2 text-xs bg-gradient-to-r from-[#6EE7B7] via-[#3B82F6] to-[#9333EA] bg-clip-text text-transparent">
                         {bestTimeRange.cityTimes[cityData.city]}
                       </div>
                     )}
@@ -197,7 +194,7 @@ export const TimeScaleGraph = ({
 
       <div className="mt-4 text-xs text-white/60 flex justify-center">
         <div className="flex items-center gap-2">
-          <Clock className="h-4 w-4 bg-gradient-to-r from-[#6EE7B7] via-[#3B82F6] to-[#9333EA] bg-clip-text text-transparent" />
+          <Clock className="h-4 w-4" style={{ stroke: 'url(#gradientStroke)' }} />
           <span>All times shown in your local time zone ({timeZoneName})</span>
         </div>
       </div>
