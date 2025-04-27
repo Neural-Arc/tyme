@@ -128,7 +128,10 @@ export const AnimatedChat = ({
   };
   return <div className={cn("center-content", !showResults && "flex flex-col items-center justify-center")}>
       <div className="flex justify-center mb-8">
-        <a href="/" onClick={handleLogoClick} className="hover:scale-105 transition-transform">
+        <a href="/" onClick={(e) => {
+          e.preventDefault();
+          window.location.reload();
+        }} className="hover:scale-105 transition-transform">
           <img alt="App Logo" width={120} height={120} className="mx-auto object-contain w-[120px] h-[120px]" src="/lovable-uploads/7ea42db7-8f3b-44cd-8337-e589c12f74fd.png" />
         </a>
       </div>
@@ -136,7 +139,16 @@ export const AnimatedChat = ({
       <p className="text-center mb-8 text-3xl font-medium text-zinc-50">Find Your Perfect Tyme</p>
 
       <form onSubmit={handleSubmit} className="flex gap-2 w-full">
-        <Input value={input} onChange={e => setInput(e.target.value)} placeholder={`e.g. New York, Tokyo for next Monday... ${defaultLocation ? `(Your location: ${defaultLocation})` : ''}`} className={cn("bg-black text-2xl h-16 px-6 border-white/10", input && "gradient-text")} disabled={isLoading || !defaultLocation || !localStorage.getItem('openai_api_key')} />
+        <Input 
+          value={input} 
+          onChange={e => setInput(e.target.value)} 
+          placeholder={`e.g. New York, Tokyo for next Monday... ${defaultLocation ? `(Your location: ${defaultLocation})` : ''}`} 
+          className={cn(
+            "bg-black text-2xl h-16 px-6 border-white/10 focus:ring-0 focus:ring-offset-0 focus:outline-none", 
+            input && "gradient-text"
+          )} 
+          disabled={isLoading || !defaultLocation || !localStorage.getItem('openai_api_key')} 
+        />
         
         <div className="flex gap-2">
           <div className="relative">
@@ -178,5 +190,6 @@ export const AnimatedChat = ({
           </Button>
         </div>
       </form>
-    </div>;
+    </div>
+  );
 };
