@@ -31,12 +31,12 @@ export const TimeZoneCard = ({
     }
   };
   return <div className={`card-animate border border-white/10 rounded-lg p-6 transition-all duration-300 transform hover:scale-105 
-        ${isCurrentLocation ? 'border-blue-400/50 bg-black/60' : 'bg-black/40 hover:bg-white/5'}`}>
+        ${isCurrentLocation ? 'border-white/20 bg-black/60' : 'bg-black/40 hover:bg-white/5'}`}>
       <div className="flex items-center gap-3 mb-4">
-        <Clock className={`h-5 w-5 ${isCurrentLocation ? 'text-blue-400' : 'text-white/60'}`} />
+        <Clock className={`h-5 w-5 ${isCurrentLocation ? 'bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent' : 'text-white/60'}`} />
         <h3 className="text-lg font-medium text-white">
           {city}
-          {isCurrentLocation && <span className="ml-2 text-xs text-blue-400">(Current Location)</span>}
+          {isCurrentLocation && <span className="ml-2 text-xs bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">(Current Location)</span>}
         </h3>
       </div>
       

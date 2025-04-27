@@ -45,18 +45,18 @@ export const TimeScaleGraph = ({
   }
 
   return (
-    <div className="bg-black/40 border border-blue-400/20 rounded-xl p-6 animate-fade-up">
+    <div className="bg-black/40 border border-white/10 rounded-xl p-6 animate-fade-up">
       <div className="flex items-center gap-3 mb-6">
-        <Clock className="h-5 w-5 text-blue-400" />
+        <Clock className="h-5 w-5 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent" />
         <h3 className="text-xl font-medium text-white">Working Hours (08:00 - 21:00)</h3>
       </div>
 
       {bestTimeRange && defaultLocation && (
-        <div className="mb-6 p-4 bg-black/50 border border-blue-400/20 rounded-lg">
+        <div className="mb-6 p-4 bg-black/50 border border-white/10 rounded-lg">
           <div className="flex justify-between items-start flex-wrap gap-2">
             <div className="flex-1 min-w-0">
               <p className="text-lg font-medium">
-                <span className="font-bold text-blue-400">Best meeting time:</span>
+                <span className="font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">Best meeting time:</span>
                 <br />
                 <span>{bestTimeRange.formattedLocal}</span>
                 <br />
@@ -175,7 +175,7 @@ export const TimeScaleGraph = ({
 
       <div className="mt-4 text-xs text-white/60 flex justify-center">
         <div className="flex items-center gap-2">
-          <Clock className="h-4 w-4" />
+          <Clock className="h-4 w-4 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent" />
           <span>All times shown in your local time zone ({timeZoneName})</span>
         </div>
       </div>

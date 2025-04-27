@@ -1,4 +1,3 @@
-
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Clock, CloudSun, Cloud, CloudRain } from 'lucide-react';
 import { getTimeZoneAcronym, formatTimeZone } from '@/utils/timeZoneUtils';
@@ -31,15 +30,15 @@ export const TimeConversionCard = ({ city, time, offset, isSource, weather, news
   return (
     <Card className={`card-animate border-white/10 transition-all duration-300 transform hover:scale-105 ${isSource ? 'bg-black/60' : 'bg-black/40'}`}>
       <CardHeader className="flex flex-row items-center gap-3 pb-2">
-        <Clock className={`h-5 w-5 ${isSource ? 'text-blue-400' : 'text-white/60'}`} />
+        <Clock className={`h-5 w-5 ${isSource ? 'bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent' : 'text-white/60'}`} />
         <CardTitle className="text-lg font-medium text-white">
           {city}
-          {isSource && <span className="ml-2 text-xs text-blue-400">(Source Time)</span>}
+          {isSource && <span className="ml-2 text-xs bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">(Source Time)</span>}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-2">
         <div className="flex items-baseline gap-2">
-          <p className={`text-2xl font-medium ${isSource ? 'text-blue-400' : 'text-white'}`}>
+          <p className={`text-2xl font-medium ${isSource ? 'bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent' : 'text-white'}`}>
             {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </p>
           <span className="text-xs text-white/60">
