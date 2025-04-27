@@ -13,6 +13,18 @@ interface BestTimeHeaderProps {
 }
 
 export const BestTimeHeader = ({ bestTimeRange, currentDate, timeZoneName }: BestTimeHeaderProps) => {
+  // Ensure the date is processed properly
+  const meetingDate = new Date(currentDate);
+  
+  // Format the date using the browser's timezone
+  const formattedDate = new Intl.DateTimeFormat('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+  }).format(meetingDate);
+
   return (
     <div className="mb-4 md:mb-6 glass-card p-3 md:p-5 border border-gradient rounded-lg relative overflow-hidden">
       <div className="absolute inset-0 opacity-20 bg-gradient"></div>
@@ -24,26 +36,14 @@ export const BestTimeHeader = ({ bestTimeRange, currentDate, timeZoneName }: Bes
               {bestTimeRange.formattedLocal},
             </span>
             <span className="text-white/60">
-              {new Intl.DateTimeFormat('en-US', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
-              }).format(currentDate)}
+              {formattedDate}
             </span>
           </div>
         </div>
         <div className="flex items-center gap-2 self-end md:self-auto">
           <MeetingInviteDialog 
             meetingTime={bestTimeRange.formattedLocal} 
-            date={new Intl.DateTimeFormat('en-US', {
-              weekday: 'long',
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-              timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
-            }).format(currentDate)} 
+            date={formattedDate}
           />
           <TooltipProvider>
             <Tooltip>

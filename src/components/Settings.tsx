@@ -12,25 +12,48 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Settings as SettingsIcon } from 'lucide-react';
 import { toast } from 'sonner';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const Settings = () => {
-  const [apiKey, setApiKey] = useState('');
+  const [openaiApiKey, setOpenaiApiKey] = useState('');
+  const [resendApiKey, setResendApiKey] = useState('');
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    const savedKey = localStorage.getItem('openai_api_key');
-    if (savedKey) {
-      setApiKey(savedKey);
+    const savedOpenaiKey = localStorage.getItem('openai_api_key');
+    const savedResendKey = localStorage.getItem('resend_api_key');
+    
+    if (savedOpenaiKey) {
+      setOpenaiApiKey(savedOpenaiKey);
+    }
+    
+    if (savedResendKey) {
+      setResendApiKey(savedResendKey);
     }
   }, []);
 
   const handleSave = () => {
-    if (!apiKey.startsWith('sk-')) {
+    // Validate OpenAI API key
+    if (openaiApiKey && !openaiApiKey.startsWith('sk-')) {
       toast.error('Please enter a valid OpenAI API key');
       return;
     }
 
-    localStorage.setItem('openai_api_key', apiKey);
+    // Validate Resend API key
+    if (resendApiKey && !resendApiKey.startsWith('re_')) {
+      toast.error('Please enter a valid Resend API key');
+      return;
+    }
+
+    // Save both keys
+    if (openaiApiKey) {
+      localStorage.setItem('openai_api_key', openaiApiKey);
+    }
+    
+    if (resendApiKey) {
+      localStorage.setItem('resend_api_key', resendApiKey);
+    }
+    
     toast.success('Settings saved successfully');
     setOpen(false);
   };
@@ -46,27 +69,51 @@ export const Settings = () => {
         <DialogHeader>
           <DialogTitle className="text-white">Settings</DialogTitle>
           <DialogDescription className="text-white/60">
-            Configure your API key
+            Configure your API keys
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-4">
-          <div>
-            <label className="text-sm text-white/60">OpenAI API Key</label>
-            <Input
-              type="password"
-              value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
-              className="bg-background border-white/10 text-white mt-2"
-              placeholder="sk-..."
-            />
-          </div>
-          <Button 
-            onClick={handleSave} 
-            className="w-full bg-white/5 border-white/10 hover:bg-white/10"
-          >
-            Save Settings
-          </Button>
-        </div>
+        <Tabs defaultValue="openai" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 bg-background/50">
+            <TabsTrigger value="openai">OpenAI</TabsTrigger>
+            <TabsTrigger value="resend">Resend Email</TabsTrigger>
+          </TabsList>
+          <TabsContent value="openai" className="mt-4">
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm text-white/60">OpenAI API Key</label>
+                <Input
+                  type="password"
+                  value={openaiApiKey}
+                  onChange={(e) => setOpenaiApiKey(e.target.value)}
+                  className="bg-background border-white/10 text-white mt-2"
+                  placeholder="sk-..."
+                />
+                <p className="text-xs text-white/50 mt-1">For AI-powered features</p>
+              </div>
+            </div>
+          </TabsContent>
+          <TabsContent value="resend" className="mt-4">
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm text-white/60">Resend API Key</label>
+                <Input
+                  type="password"
+                  value={resendApiKey}
+                  onChange={(e) => setResendApiKey(e.target.value)}
+                  className="bg-background border-white/10 text-white mt-2"
+                  placeholder="re_..."
+                />
+                <p className="text-xs text-white/50 mt-1">For sending email invitations</p>
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
+        <Button 
+          onClick={handleSave} 
+          className="w-full bg-white/5 border-white/10 hover:bg-white/10 mt-4"
+        >
+          Save Settings
+        </Button>
       </DialogContent>
     </Dialog>
   );

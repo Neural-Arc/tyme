@@ -1,11 +1,11 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, Copy, Send, Loader2 } from 'lucide-react';
+import { Mail, Copy, Send, Loader2, AlertTriangle } from 'lucide-react';
 import { Textarea } from "@/components/ui/textarea";
 
 interface MeetingInviteDialogProps {
@@ -23,8 +23,17 @@ export const MeetingInviteDialog = ({
   const [meetingLink, setMeetingLink] = useState('');
   const [description, setDescription] = useState('');
   const [isSending, setIsSending] = useState(false);
+  const [apiKey, setApiKey] = useState('');
   const [open, setOpen] = useState(false);
   const { toast } = useToast();
+  
+  useEffect(() => {
+    // Retrieve stored Resend API key when component mounts
+    const storedApiKey = localStorage.getItem('resend_api_key');
+    if (storedApiKey) {
+      setApiKey(storedApiKey);
+    }
+  }, []);
 
   const generateGoogleMeetLink = () => {
     const meetLink = `https://meet.google.com/${Math.random().toString(36).substring(2, 15)}`;
@@ -78,9 +87,28 @@ export const MeetingInviteDialog = ({
       return;
     }
 
+    // Check for API key
+    const resendApiKey = apiKey || localStorage.getItem('resend_api_key');
+    if (!resendApiKey) {
+      toast({
+        variant: "destructive",
+        description: "Please set your Resend API key in Settings first",
+        duration: 3000
+      });
+      return;
+    }
+
     setIsSending(true);
 
     try {
+      // Format the current date correctly
+      const formattedDate = new Date().toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+
       // Send email to each recipient
       for (const recipientEmail of recipients) {
         const emailContent = `
@@ -88,7 +116,7 @@ export const MeetingInviteDialog = ({
             <p>Hello,</p>
             <p>You have been invited to a meeting by ${senderName} (${senderEmail}).</p>
             <p><strong>Meeting Details:</strong></p>
-            <p>Date: ${date}</p>
+            <p>Date: ${formattedDate}</p>
             <p>Time: ${meetingTime}</p>
             <p>Meeting Link: <a href="${meetingLink}">${meetingLink}</a></p>
             <p><strong>Message:</strong></p>
@@ -102,7 +130,7 @@ export const MeetingInviteDialog = ({
           const response = await fetch('https://api.resend.com/emails', {
             method: 'POST',
             headers: {
-              'Authorization': 'Bearer re_VTZG7Eaa_JBrKDGivXkodXJ83UoSt5p3X',
+              'Authorization': `Bearer ${resendApiKey}`,
               'Content-Type': 'application/json'
             },
             body: JSON.stringify({
@@ -113,9 +141,14 @@ export const MeetingInviteDialog = ({
             })
           });
 
+          const data = await response.json().catch(() => null);
+          
           if (!response.ok) {
-            throw new Error(`Failed to send email to ${recipientEmail}`);
+            console.error('API response:', data);
+            throw new Error(`Failed to send email: ${data?.error?.message || response.statusText}`);
           }
+          
+          console.log('Email sent successfully:', data);
         } catch (error) {
           console.error('Email sending error:', error);
           throw error; // Re-throw to be caught by outer catch block
@@ -140,8 +173,8 @@ export const MeetingInviteDialog = ({
       console.error('Email sending error:', error);
       toast({
         variant: "destructive",
-        description: "Failed to send invitation. Please try again.",
-        duration: 3000
+        description: `Failed to send invitation: ${error.message || 'Please try again'}`,
+        duration: 5000
       });
     } finally {
       setIsSending(false);
@@ -168,6 +201,15 @@ export const MeetingInviteDialog = ({
         <div className="relative -mt-2 -mx-6 mb-0 py-0">
           <img alt="Meeting Banner" className="w-full h-[120px] md:h-[200px] object-cover" src="/lovable-uploads/018f957d-6791-4e60-8334-7c2b7ca353d4.png" />
         </div>
+
+        {!apiKey && !localStorage.getItem('resend_api_key') && (
+          <div className="bg-yellow-600/20 border border-yellow-600/30 rounded-md p-3 mb-4 flex items-center gap-2">
+            <AlertTriangle className="h-5 w-5 text-yellow-500" />
+            <p className="text-sm text-yellow-200">
+              Please add your Resend API key in the Settings panel before sending invites.
+            </p>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="grid gap-2">
@@ -221,7 +263,7 @@ export const MeetingInviteDialog = ({
               variant="outline" 
               size="icon" 
               onClick={handleCopyLink}
-              disabled={isSending}
+              disabled={isSending || !meetingLink}
               className="hover:bg-gradient-to-r hover:from-[#FFD93B] hover:via-[#FF4E9B] hover:to-[#2AC4F2]"
             >
               <Copy className="h-4 w-4" />
