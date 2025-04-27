@@ -1,5 +1,4 @@
 import { Clock, CloudSun, Cloud, CloudRain } from 'lucide-react';
-
 interface TimeZoneCardProps {
   city: string;
   meetingTime: string;
@@ -12,7 +11,6 @@ interface TimeZoneCardProps {
   };
   newsHeadline?: string;
 }
-
 export const TimeZoneCard = ({
   city,
   meetingTime,
@@ -32,31 +30,19 @@ export const TimeZoneCard = ({
       return <CloudSun className="h-4 w-4 text-yellow-400" />;
     }
   };
-
-  return (
-    <div className={`card-animate relative ${
-      isCurrentLocation ? 'p-[1px] bg-gradient' : 'border border-white/10'
-    } rounded-lg transition-all duration-300 transform hover:scale-105`}>
+  return <div className={`card-animate relative ${isCurrentLocation ? 'p-[1px] bg-gradient' : 'border border-white/10'} rounded-lg transition-all duration-300 transform hover:scale-105`}>
       <div className={`${isCurrentLocation ? 'bg-black' : 'bg-black/40'} rounded-lg p-6 h-full`}>
         <div className="flex items-center gap-3 mb-4">
           <Clock className="h-5 w-5 gradient-icon" />
           <h3 className="text-lg font-medium text-white">
             {city}
-            {isCurrentLocation && 
-              <span className="ml-2 text-xs bg-gradient bg-clip-text text-transparent">
-                (Current Location)
-              </span>
-            }
+            {isCurrentLocation}
           </h3>
         </div>
         
         <div className="space-y-2">
           <div className="flex items-baseline gap-2">
-            <p className={`text-2xl font-medium ${
-              isCurrentLocation ? 'bg-gradient bg-clip-text text-transparent' : 'text-white'
-            }`}>
-              {meetingTime}
-            </p>
+            
             {timeZone && <span className="text-xs text-white/60">{timeZone}</span>}
           </div>
           {date && <p className="text-sm text-white/60">{date}</p>}
@@ -72,6 +58,5 @@ export const TimeZoneCard = ({
             </div>}
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
