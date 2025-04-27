@@ -5,7 +5,6 @@ import { Mic, MicOff, Send, Loader } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
-
 interface AnimatedChatProps {
   input: string;
   setInput: (value: string) => void;
@@ -14,7 +13,6 @@ interface AnimatedChatProps {
   defaultLocation?: string;
   showResults: boolean;
 }
-
 export const AnimatedChat = ({
   input,
   setInput,
@@ -119,75 +117,66 @@ export const AnimatedChat = ({
       }
     };
   }, [recognition]);
-
   const handleLogoClick = (e: React.MouseEvent) => {
     e.preventDefault();
     window.dispatchEvent(new CustomEvent('resetTimeZones'));
     setInput('');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
   };
-
-  return (
-    <div className={cn(
-      "center-content",
-      !showResults && "flex flex-col items-center justify-center"
-    )}>
+  return <div className={cn("center-content", !showResults && "flex flex-col items-center justify-center")}>
       <div className="flex justify-center mb-8">
         <a href="/" onClick={handleLogoClick} className="hover:scale-105 transition-transform">
-          <img
-            alt="App Logo"
-            width={120}
-            height={120}
-            className="mx-auto object-contain w-[120px] h-[120px]"
-            src="/lovable-uploads/7ea42db7-8f3b-44cd-8337-e589c12f74fd.png"
-          />
+          <img alt="App Logo" width={120} height={120} className="mx-auto object-contain w-[120px] h-[120px]" src="/lovable-uploads/7ea42db7-8f3b-44cd-8337-e589c12f74fd.png" />
         </a>
       </div>
 
-      <p className="text-center mb-8 text-white/80 text-lg">Our AI maps the perfect moment to meet.</p>
+      <p className="text-center mb-8 text-3xl font-medium text-zinc-50">Find Your Perfect Tyme</p>
 
       <form onSubmit={handleSubmit} className="flex gap-2 w-full">
-        <Input 
-          value={input} 
-          onChange={e => setInput(e.target.value)} 
-          placeholder={`e.g. New York, Tokyo for next Monday... ${defaultLocation ? `(Your location: ${defaultLocation})` : ''}`} 
-          className={cn(
-            "bg-black text-2xl h-16 px-6 border-white/10",
-            input && "gradient-text"
-          )}
-          disabled={isLoading || !defaultLocation || !localStorage.getItem('openai_api_key')} 
-        />
+        <Input value={input} onChange={e => setInput(e.target.value)} placeholder={`e.g. New York, Tokyo for next Monday... ${defaultLocation ? `(Your location: ${defaultLocation})` : ''}`} className={cn("bg-black text-2xl h-16 px-6 border-white/10", input && "gradient-text")} disabled={isLoading || !defaultLocation || !localStorage.getItem('openai_api_key')} />
         
         <div className="flex gap-2">
           <div className="relative">
             <svg width="0" height="0">
               <defs>
                 <linearGradient id="iconGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" style={{ stopColor: '#FFD93B' }} />
-                  <stop offset="25%" style={{ stopColor: '#FF8A00' }} />
-                  <stop offset="50%" style={{ stopColor: '#FF4E9B' }} />
-                  <stop offset="75%" style={{ stopColor: '#A050F8' }} />
-                  <stop offset="100%" style={{ stopColor: '#2AC4F2' }} />
+                  <stop offset="0%" style={{
+                  stopColor: '#FFD93B'
+                }} />
+                  <stop offset="25%" style={{
+                  stopColor: '#FF8A00'
+                }} />
+                  <stop offset="50%" style={{
+                  stopColor: '#FF4E9B'
+                }} />
+                  <stop offset="75%" style={{
+                  stopColor: '#A050F8'
+                }} />
+                  <stop offset="100%" style={{
+                  stopColor: '#2AC4F2'
+                }} />
                 </linearGradient>
               </defs>
             </svg>
             <Button type="button" variant="outline" className="bg-black border-white/10 hover:bg-white/10 h-16 w-16" onClick={isListening ? stopListening : startListening} disabled={isLoading || !defaultLocation || !localStorage.getItem('openai_api_key')}>
               {isListening ? <MicOff className="h-6 w-6 stroke-red-500" /> : <Mic className="h-6 w-6" style={{
-                stroke: 'url(#iconGradient)',
-                fill: 'none',
-                strokeWidth: 2
-              }} />}
-            </Button>
-          </div>
-          <Button type="submit" variant="outline" className="bg-black border-white/10 hover:bg-white/10 h-16 w-16" disabled={isLoading || !defaultLocation || !localStorage.getItem('openai_api_key')}>
-            {isLoading ? <Loader className="h-6 w-6 animate-spin" /> : <Send className="h-6 w-6" style={{
               stroke: 'url(#iconGradient)',
               fill: 'none',
               strokeWidth: 2
             }} />}
+            </Button>
+          </div>
+          <Button type="submit" variant="outline" className="bg-black border-white/10 hover:bg-white/10 h-16 w-16" disabled={isLoading || !defaultLocation || !localStorage.getItem('openai_api_key')}>
+            {isLoading ? <Loader className="h-6 w-6 animate-spin" /> : <Send className="h-6 w-6" style={{
+            stroke: 'url(#iconGradient)',
+            fill: 'none',
+            strokeWidth: 2
+          }} />}
           </Button>
         </div>
       </form>
-    </div>
-  );
+    </div>;
 };
