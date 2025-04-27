@@ -38,13 +38,6 @@ export const TimeScaleGraph = ({
 
   return (
     <div className="glass-card p-6 animate-fade-up backdrop-blur-md">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="relative">
-          <Clock className="h-5 w-5 gradient-icon" />
-        </div>
-        <h3 className="text-xl font-medium text-white">Working Hours (08:00 - 21:00)</h3>
-      </div>
-
       {bestTimeRange && defaultLocation && (
         <BestTimeHeader 
           bestTimeRange={bestTimeRange}
@@ -69,29 +62,31 @@ export const TimeScaleGraph = ({
 
           <TimeMarkers startHour={0} endHour={23} interval={3} />
 
-          <div className="mt-14 space-y-6">
-            {timeZoneData.sort((a, b) => {
-              if (a.city === defaultLocation) return -1;
-              if (b.city === defaultLocation) return 1;
-              return a.city.localeCompare(b.city);
-            }).map((cityData, index) => (
-              <TimeZoneRow
-                key={cityData.city}
-                cityData={cityData}
-                bestTimeRange={bestTimeRange}
-                isCurrentLocation={cityData.city === defaultLocation}
-                index={index}
-              />
-            ))}
+          <div className="mt-14">
+            {timeZoneData.length > 0 && (
+              <h3 className="text-white/60 mb-4 text-sm">Meeting Times</h3>
+            )}
+            <div className="space-y-6">
+              {timeZoneData.sort((a, b) => {
+                if (a.city === defaultLocation) return -1;
+                if (b.city === defaultLocation) return 1;
+                return a.city.localeCompare(b.city);
+              }).map((cityData, index) => (
+                <TimeZoneRow
+                  key={cityData.city}
+                  cityData={cityData}
+                  bestTimeRange={bestTimeRange}
+                  isCurrentLocation={cityData.city === defaultLocation}
+                  index={index}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
       <div className="mt-6 text-xs text-white/60 flex justify-center">
-        <div className="flex items-center gap-2">
-          <Clock className="h-4 w-4 gradient-icon" />
-          <span>All times shown in your local time zone ({timeZoneName})</span>
-        </div>
+        <span>All times shown in your local time zone ({timeZoneName})</span>
       </div>
     </div>
   );
