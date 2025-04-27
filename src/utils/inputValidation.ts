@@ -1,6 +1,6 @@
 
 import { countries } from 'countries-list';
-import { cities as citiesList } from 'cities-list';
+import citiesList from 'cities-list';
 
 const countryNames = Object.values(countries).map(country => country.name.toLowerCase());
 const cityNames = Object.keys(citiesList).map(city => city.toLowerCase());

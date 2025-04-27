@@ -84,18 +84,21 @@ export const TimelineGraph = ({
   return (
     <div className="glass-card p-4 md:p-6 animate-fade-up backdrop-blur-md">
       {bestTimeRange && defaultLocation && (
-        <div className="mb-4 p-3 bg-black/30 rounded-lg border border-white/10">
-          <h3 className="text-sm md:text-base font-medium gradient-text flex items-center gap-2">
-            <Clock className="h-4 w-4" /> Best Meeting Time
-          </h3>
-          <p className="text-white/70 text-xs md:text-sm mt-1">
-            {bestTimeRange.formattedLocal} ({timeZoneName}) on {currentDate.toLocaleDateString(undefined, {
-              weekday: 'long',
-              month: 'long',
-              day: 'numeric',
-              year: 'numeric'
-            })}
-          </p>
+        <div className="mb-4 p-3 md:p-5 glass-card relative overflow-hidden border-gradient">
+          <div className="absolute inset-0 opacity-20 bg-gradient"></div>
+          <div className="relative z-10">
+            <h3 className="text-sm md:text-base font-medium gradient-text flex items-center gap-2">
+              <Clock className="h-4 w-4" /> Best Meeting Time
+            </h3>
+            <p className="text-white/70 text-xs md:text-sm mt-1">
+              {bestTimeRange.formattedLocal} ({timeZoneName}) on {currentDate.toLocaleDateString(undefined, {
+                weekday: 'long',
+                month: 'long',
+                day: 'numeric',
+                year: 'numeric'
+              })}
+            </p>
+          </div>
         </div>
       )}
 
@@ -107,7 +110,13 @@ export const TimelineGraph = ({
               key={`hour-${hour}`} 
               className="flex-shrink-0 w-12 text-center text-xs text-white/60"
             >
-              {hour % 3 === 0 && `${hour}:00`}
+              {hour === 0 || hour === 12 ? (
+                <span className="gradient-text font-medium">
+                  {hour === 0 ? '12 AM' : '12 PM'}
+                </span>
+              ) : (
+                `${hour > 12 ? hour - 12 : hour}${hour >= 12 ? 'PM' : 'AM'}`
+              )}
             </div>
           ))}
         </div>
@@ -115,7 +124,7 @@ export const TimelineGraph = ({
         {/* City timelines */}
         <div 
           ref={scrollRef}
-          className="max-w-full overflow-x-auto"
+          className="max-w-full overflow-x-auto timeline-scroll"
           onMouseDown={handleMouseDown}
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp}
