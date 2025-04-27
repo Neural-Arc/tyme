@@ -13,6 +13,21 @@ export const TimeZoneDisplay = () => {
   const [suggestedTime, setSuggestedTime] = useState<string | undefined>(undefined);
   const { defaultLocation, timeZoneOffset, timeZoneName, isLoading } = useLocation();
 
+  // Add reset event listener
+  useEffect(() => {
+    const handleReset = () => {
+      setCities([]);
+      setSuggestedTime(undefined);
+      setWeather({});
+      setNewsHeadline(null);
+    };
+
+    window.addEventListener('resetTimeZones', handleReset);
+    return () => {
+      window.removeEventListener('resetTimeZones', handleReset);
+    };
+  }, []);
+
   const { timeZoneData, bestTimeRange } = useTimeZoneCalculations(
     cities,
     defaultLocation,

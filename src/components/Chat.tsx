@@ -1,5 +1,4 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { processMessage } from '@/utils/chat';
 import { useLocation } from '@/hooks/useLocation';
@@ -15,6 +14,18 @@ export const Chat = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const { defaultLocation, isLoading: locationLoading } = useLocation();
+
+  useEffect(() => {
+    const handleReset = () => {
+      setShowResults(false);
+      setInput('');
+    };
+
+    window.addEventListener('resetTimeZones', handleReset);
+    return () => {
+      window.removeEventListener('resetTimeZones', handleReset);
+    };
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

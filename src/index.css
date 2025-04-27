@@ -2,6 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --app-gradient: linear-gradient(
+    to bottom,
+    #FFD93B 0%,   /* Bright Yellow */
+    #FF8A00 25%,  /* Orange */
+    #FF4E9B 50%,  /* Pink */
+    #A050F8 75%,  /* Vibrant Purple */
+    #2AC4F2 100%  /* Teal-Blue */
+  );
+}
+
 @layer base {
   body {
     @apply text-foreground antialiased;
@@ -83,8 +94,18 @@
   }
 }
 
+/* Update gradients */
 .gradient-border {
-  background: linear-gradient(90deg, #6EE7B7, #3B82F6, #9333EA);
+  background: var(--app-gradient);
   background-size: 200% 200%;
   animation: gradient-border 3s ease infinite;
+}
+
+/* Center layout classes */
+.center-layout {
+  @apply min-h-screen flex flex-col items-center justify-center;
+}
+
+.center-content {
+  @apply w-full max-w-3xl mx-auto transition-all duration-500 ease-in-out;
 }
