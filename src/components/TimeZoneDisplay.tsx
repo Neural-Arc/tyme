@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { TimeZoneCard } from './TimeZoneCard';
 import { TimeScaleGraph } from './TimeScaleGraph';

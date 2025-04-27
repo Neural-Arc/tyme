@@ -76,8 +76,8 @@ export const Chat = () => {
   return (
     <>
       {(!defaultLocation || defaultLocation === 'Unknown Location') && !locationLoading && (
-        <Alert className="mb-4 bg-black border-yellow-600/50 text-white">
-          <Info className="h-5 w-5 text-yellow-600" />
+        <Alert className="mb-4 bg-black border-orange-400/20 text-white">
+          <Info className="h-5 w-5 text-orange-400" />
           <AlertTitle>Location Access Required</AlertTitle>
           <AlertDescription>
             Please allow location access to use the app. This helps us calculate accurate meeting times.
@@ -86,22 +86,27 @@ export const Chat = () => {
       )}
       
       {!localStorage.getItem('openai_api_key') && (
-        <Alert className="mb-4 bg-black border-blue-600/50 text-white flex items-center justify-between">
+        <Alert className="mb-4 bg-black border-orange-400/20 text-white flex items-center justify-between">
           <div className="flex-1">
-            <Info className="h-5 w-5 text-blue-600" />
+            <Info className="h-5 w-5 text-orange-400" />
             <AlertTitle>API Key Required</AlertTitle>
-            <AlertDescription>
-              Please add your OpenAI API key in settings to use the chat.
+            <AlertDescription className="flex items-center gap-2">
+              Please add your OpenAI API key to use the chat.
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className="ml-2 bg-orange-400/10 border-orange-400/20 text-orange-400 hover:bg-orange-400/20"
+                  >
+                    <Settings className="h-4 w-4 mr-2" />
+                    Open Settings
+                  </Button>
+                </DialogTrigger>
+                <SettingsComponent />
+              </Dialog>
             </AlertDescription>
           </div>
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="outline" size="icon" className="ml-4">
-                <Settings className="h-4 w-4" />
-              </Button>
-            </DialogTrigger>
-            <SettingsComponent />
-          </Dialog>
         </Alert>
       )}
       

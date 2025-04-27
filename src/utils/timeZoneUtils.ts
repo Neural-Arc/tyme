@@ -1,4 +1,3 @@
-
 // Map cities to their approximate UTC offsets and time zones
 export const getCityOffset = (city: string): number => {
   const cityTimeZones: Record<string, {offset: number, timezone: string}> = {
@@ -26,38 +25,32 @@ export const getCityOffset = (city: string): number => {
   
   const lowerCity = city.toLowerCase();
   
-  // Try to find the city in our dictionary
   for (const [key, data] of Object.entries(cityTimeZones)) {
     if (lowerCity.includes(key)) {
-      // Try to get the current offset using Intl API for more accuracy (handles DST)
       try {
+        const date = new Date();
         const formatter = new Intl.DateTimeFormat('en-US', {
           timeZone: data.timezone,
-          timeZoneName: 'shortOffset'
+          timeZoneName: 'longOffset'
         });
         
-        // Extract the UTC offset from the formatted string
-        const tzString = formatter.format(new Date());
-        const match = tzString.match(/UTC([+-]\d+)(?::(\d+))?/);
+        const tzString = formatter.formatToParts(date)
+          .find(part => part.type === 'timeZoneName')?.value || '';
         
+        const match = tzString.match(/GMT([+-])(\d{2}):?(\d{2})/);
         if (match) {
-          const hours = parseInt(match[1], 10);
-          const minutes = match[2] ? parseInt(match[2], 10) / 60 : 0;
-          return hours >= 0 ? hours + minutes : hours - minutes;
+          const [, sign, hours, minutes] = match;
+          const offset = parseInt(hours) + (parseInt(minutes) / 60);
+          return sign === '-' ? -offset : offset;
         }
       } catch (e) {
-        console.log(`Could not determine accurate timezone for ${city}, using default offset.`);
+        console.warn(`Fallback to static offset for ${city}:`, e);
       }
-      
-      // Fall back to hardcoded offset if Intl API fails
       return data.offset;
     }
   }
   
-  // For unknown cities, try to make an educated guess using the browser's timezone
-  console.log(`Unknown city: ${city}, using default timezone offset.`);
-  const localOffset = -(new Date().getTimezoneOffset() / 60);
-  return localOffset;
+  return -(new Date().getTimezoneOffset() / 60);
 };
 
 // Format time in 12-hour format with AM/PM
@@ -75,12 +68,10 @@ export const formatTime = (hour: number): string => {
   return `${displayHour}:${minutes.toString().padStart(2, '0')} ${period}`;
 };
 
-// Convert UTC hour to local hour based on offset
+// Improved time conversion with better accuracy
 export const convertUtcToLocal = (utcHour: number, offset: number): number => {
-  let localHour = utcHour + offset;
-  if (localHour >= 24) localHour -= 24;
-  if (localHour < 0) localHour += 24;
-  return localHour;
+  const totalHours = utcHour + offset;
+  return ((totalHours % 24) + 24) % 24;
 };
 
 // Format time zone name based on offset
@@ -209,6 +200,7 @@ export const isTimeWithinWorkingHours = (localHour: number): boolean => {
   return localHour >= 8 && localHour <= 21;
 };
 
+// Improved calculation for best meeting time
 export const calculateBestMeetingTime = (
   cityHours: Array<{ city: string; workingHours: number[]; offset: number }>,
   defaultLocation: string,
@@ -219,46 +211,40 @@ export const calculateBestMeetingTime = (
   formattedLocal: string;
   cityTimes: Record<string, string>;
 } => {
-  const bestHours: number[] = [];
+  const workingHoursIntersection: number[] = [];
   
-  // Try each UTC hour (0-23) and check if it results in valid working hours for all cities
+  // Find hours that work for all cities
   for (let utcHour = 0; utcHour < 24; utcHour++) {
-    const isValidHour = cityHours.every(({ offset }) => {
-      const cityLocalHour = convertUtcToLocal(utcHour, offset);
-      return isTimeWithinWorkingHours(cityLocalHour);
+    const isValidForAll = cityHours.every(({ offset }) => {
+      const localHour = convertUtcToLocal(utcHour, offset);
+      return localHour >= 8 && localHour <= 21; // Working hours: 8 AM to 9 PM
     });
-
-    if (isValidHour) {
-      bestHours.push(utcHour);
+    
+    if (isValidForAll) {
+      workingHoursIntersection.push(utcHour);
     }
   }
-
-  // If no valid hours found, prioritize default location's working hours
-  if (bestHours.length === 0) {
-    console.warn('No perfect overlapping working hours found for all cities');
+  
+  // Choose the most suitable hour (prioritize afternoon in default location)
+  let bestUtcHour = workingHoursIntersection[Math.floor(workingHoursIntersection.length / 2)];
+  if (!bestUtcHour && defaultLocation) {
     const defaultCity = cityHours.find(c => c.city === defaultLocation);
     if (defaultCity) {
-      const defaultOffset = defaultCity.offset;
-      // Convert default location's 2 PM (14:00) to UTC as a reasonable fallback
-      const defaultLocalHour = 14;
-      const utcHour = (defaultLocalHour - defaultOffset + 24) % 24;
-      bestHours.push(utcHour);
+      bestUtcHour = 14 - defaultCity.offset; // Aim for 2 PM in default location
     } else {
-      bestHours.push(12); // Default to noon UTC if no better option
+      bestUtcHour = 14; // Fallback to 2 PM UTC
     }
   }
-
-  // Choose the best hour (prioritize middle of the day)
-  const bestUtcHour = bestHours[Math.floor(bestHours.length / 2)];
+  
   const localHour = convertUtcToLocal(bestUtcHour, userTimeZoneOffset);
-
-  // Generate times for all cities
+  
+  // Generate formatted times for all cities
   const cityTimes: Record<string, string> = {};
   cityHours.forEach(({ city, offset }) => {
     const cityLocalHour = convertUtcToLocal(bestUtcHour, offset);
     cityTimes[city] = formatTime(cityLocalHour);
   });
-
+  
   return {
     utcHour: bestUtcHour,
     localHour,
