@@ -14,16 +14,16 @@ interface BestTimeHeaderProps {
 
 export const BestTimeHeader = ({ bestTimeRange, currentDate, timeZoneName }: BestTimeHeaderProps) => {
   return (
-    <div className="mb-6 glass-card p-5 border border-white/10 rounded-lg relative overflow-hidden">
-      <div className="absolute inset-0 opacity-20 best-time-glow"></div>
+    <div className="mb-6 glass-card p-5 border border-gradient rounded-lg relative overflow-hidden">
+      <div className="absolute inset-0 opacity-20 bg-gradient"></div>
       <div className="flex justify-between items-start flex-wrap gap-2 relative z-10">
         <div className="flex-1 min-w-0">
           <p className="text-lg font-medium space-y-1">
-            <span className="font-bold gradient-text inline-block">
+            <span className="font-bold text-white">
               Best meeting time:
             </span>
             <br />
-            <span className="gradient-text text-2xl inline-block shimmer-text">
+            <span className="text-2xl text-white inline-block">
               {bestTimeRange.formattedLocal}
             </span>
             <br />

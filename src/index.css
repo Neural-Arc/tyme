@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -152,17 +151,9 @@
 
 .best-time-cell {
   position: relative;
-  background-image: var(--app-gradient);
+  background: var(--app-gradient);
   border-radius: 6px;
   box-shadow: 0 0 15px rgba(255, 217, 59, 0.3);
-  animation: shimmer 3s infinite linear;
-  overflow: hidden;
-}
-
-.best-time-glow {
-  background: var(--app-gradient);
-  filter: blur(20px);
-  animation: pulse-subtle 4s infinite ease-in-out;
 }
 
 @keyframes shimmer {
@@ -222,4 +213,12 @@
 /* Add subtle animation to time cells */
 .animate-pulse-subtle {
   animation: pulse-subtle 4s infinite ease-in-out;
+}
+
+.bg-gradient {
+  background: var(--app-gradient);
+}
+
+.border-gradient {
+  border-image: var(--app-gradient) 1;
 }

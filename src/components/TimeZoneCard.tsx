@@ -1,4 +1,4 @@
-import { Clock, Cloud, CloudSun, CloudRain } from 'lucide-react';
+import { Clock, CloudSun, Cloud, CloudRain } from 'lucide-react';
 
 interface TimeZoneCardProps {
   city: string;
@@ -33,23 +33,28 @@ export const TimeZoneCard = ({
     }
   };
 
-  return <div className={`card-animate relative ${isCurrentLocation ? 'p-[1px] bg-gradient-to-r from-[#6EE7B7] via-[#3B82F6] to-[#9333EA]' : 'border border-white/10'} rounded-lg transition-all duration-300 transform hover:scale-105`}>
+  return (
+    <div className={`card-animate relative ${
+      isCurrentLocation ? 'p-[1px] bg-gradient' : 'border border-white/10'
+    } rounded-lg transition-all duration-300 transform hover:scale-105`}>
       <div className={`${isCurrentLocation ? 'bg-black' : 'bg-black/40'} rounded-lg p-6 h-full`}>
         <div className="flex items-center gap-3 mb-4">
-          <Clock className="h-5 w-5" style={{
-            stroke: 'url(#iconGradient)',
-            fill: 'none',
-            strokeWidth: 2
-          }} />
+          <Clock className="h-5 w-5 gradient-icon" />
           <h3 className="text-lg font-medium text-white">
             {city}
-            {isCurrentLocation && <span className="ml-2 text-xs bg-gradient-to-r from-[#6EE7B7] via-[#3B82F6] to-[#9333EA] bg-clip-text text-transparent">(Current Location)</span>}
+            {isCurrentLocation && 
+              <span className="ml-2 text-xs bg-gradient bg-clip-text text-transparent">
+                (Current Location)
+              </span>
+            }
           </h3>
         </div>
         
         <div className="space-y-2">
           <div className="flex items-baseline gap-2">
-            <p className={`text-2xl font-medium ${isCurrentLocation ? 'bg-gradient-to-r from-[#6EE7B7] via-[#3B82F6] to-[#9333EA] bg-clip-text text-transparent' : 'text-white'}`}>
+            <p className={`text-2xl font-medium ${
+              isCurrentLocation ? 'bg-gradient bg-clip-text text-transparent' : 'text-white'
+            }`}>
               {meetingTime}
             </p>
             {timeZone && <span className="text-xs text-white/60">{timeZone}</span>}
@@ -67,5 +72,6 @@ export const TimeZoneCard = ({
             </div>}
         </div>
       </div>
-    </div>;
+    </div>
+  );
 };

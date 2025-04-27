@@ -122,10 +122,9 @@ export const AnimatedChat = ({
 
   const handleLogoClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    // Dispatch a custom event to reset the results
     window.dispatchEvent(new CustomEvent('resetTimeZones'));
-    // Clear the input
     setInput('');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (

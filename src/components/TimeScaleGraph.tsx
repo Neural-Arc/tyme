@@ -1,4 +1,3 @@
-
 import { Clock } from 'lucide-react';
 import { TimeMarkers } from './time-scale/TimeMarkers';
 import { BestTimeHeader } from './time-scale/BestTimeHeader';
@@ -41,10 +40,9 @@ export const TimeScaleGraph = ({
     <div className="glass-card p-6 animate-fade-up backdrop-blur-md">
       <div className="flex items-center gap-3 mb-6">
         <div className="relative">
-          <Clock className="h-5 w-5 gradient-icon animate-pulse-subtle" />
-          <div className="absolute inset-0 blur-sm opacity-50 gradient-icon animate-pulse-subtle"></div>
+          <Clock className="h-5 w-5 gradient-icon" />
         </div>
-        <h3 className="text-xl font-medium gradient-text">Working Hours (08:00 - 21:00)</h3>
+        <h3 className="text-xl font-medium text-white">Working Hours (08:00 - 21:00)</h3>
       </div>
 
       {bestTimeRange && defaultLocation && (
