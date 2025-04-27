@@ -131,7 +131,7 @@ export const AnimatedChat = ({
   return (
     <div className={cn(
       "center-content",
-      showResults ? "mt-8" : "mt-0"
+      !showResults && "flex flex-col items-center justify-center"
     )}>
       <div className="flex justify-center mb-8">
         <a href="/" onClick={handleLogoClick} className="hover:scale-105 transition-transform">
@@ -147,16 +147,28 @@ export const AnimatedChat = ({
 
       <p className="text-center mb-8 text-white/80 text-lg">Our AI maps the perfect moment to meet.</p>
 
-      <form onSubmit={handleSubmit} className="flex gap-2">
-        <Input value={input} onChange={e => setInput(e.target.value)} placeholder={`e.g. New York, Tokyo for next Monday... ${defaultLocation ? `(Your location: ${defaultLocation})` : ''}`} className="bg-black text-white border-white/10 text-2xl h-16 px-6" disabled={isLoading || !defaultLocation || !localStorage.getItem('openai_api_key')} />
+      <form onSubmit={handleSubmit} className="flex gap-2 w-full">
+        <Input 
+          value={input} 
+          onChange={e => setInput(e.target.value)} 
+          placeholder={`e.g. New York, Tokyo for next Monday... ${defaultLocation ? `(Your location: ${defaultLocation})` : ''}`} 
+          className={cn(
+            "bg-black text-2xl h-16 px-6 border-white/10",
+            input && "gradient-text"
+          )}
+          disabled={isLoading || !defaultLocation || !localStorage.getItem('openai_api_key')} 
+        />
+        
         <div className="flex gap-2">
           <div className="relative">
             <svg width="0" height="0">
               <defs>
-                <linearGradient id="iconGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" style={{ stopColor: '#6EE7B7' }} />
-                  <stop offset="50%" style={{ stopColor: '#3B82F6' }} />
-                  <stop offset="100%" style={{ stopColor: '#9333EA' }} />
+                <linearGradient id="iconGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" style={{ stopColor: '#FFD93B' }} />
+                  <stop offset="25%" style={{ stopColor: '#FF8A00' }} />
+                  <stop offset="50%" style={{ stopColor: '#FF4E9B' }} />
+                  <stop offset="75%" style={{ stopColor: '#A050F8' }} />
+                  <stop offset="100%" style={{ stopColor: '#2AC4F2' }} />
                 </linearGradient>
               </defs>
             </svg>

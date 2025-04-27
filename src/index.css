@@ -101,6 +101,22 @@
   animation: gradient-border 3s ease infinite;
 }
 
+/* Gradient text animation */
+.gradient-text {
+  background: var(--app-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  background-size: 200% auto;
+  animation: text-shine 2s linear infinite;
+}
+
+@keyframes text-shine {
+  to {
+    background-position: 200% center;
+  }
+}
+
 /* Center layout classes */
 .center-layout {
   @apply min-h-screen flex flex-col items-center justify-center;
@@ -108,4 +124,21 @@
 
 .center-content {
   @apply w-full max-w-3xl mx-auto transition-all duration-500 ease-in-out;
+}
+
+/* Initial load animation */
+.initial-load {
+  animation: fade-in-up 0.8s ease-out forwards;
+  opacity: 0;
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
