@@ -6,12 +6,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useToast } from "@/hooks/use-toast";
 import { Mail, Copy, Send, Calendar } from 'lucide-react';
 import { Textarea } from "@/components/ui/textarea";
-
 interface MeetingInviteDialogProps {
   meetingTime: string;
   date: string;
 }
-
 export const MeetingInviteDialog = ({
   meetingTime,
   date
@@ -69,7 +67,6 @@ export const MeetingInviteDialog = ({
       duration: 3000
     });
   };
-
   return <Dialog>
     <DialogTrigger asChild>
       <Button variant="outline" size="sm" className="ml-4 mx-[8px]">
@@ -78,37 +75,20 @@ export const MeetingInviteDialog = ({
       </Button>
     </DialogTrigger>
     <DialogContent className="sm:max-w-[600px] h-[90vh] bg-black/90 text-white border border-white/10 overflow-y-auto">
-      <div className="relative -mt-6 -mx-6 mb-6">
-        <img 
-          src="/lovable-uploads/0e13e483-522a-48bc-b9a2-fd71561b7856.png" 
-          alt="Meeting Banner" 
-          className="w-full h-[200px] object-cover"
-        />
-        <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/90 to-transparent">
-          <DialogTitle className="text-white text-2xl">Send Meeting Invite</DialogTitle>
-        </div>
+      <div className="relative -mt-6 -mx-6 mb-6 my-[2px] py-0">
+        <img alt="Meeting Banner" className="w-full h-[200px] object-cover" src="/lovable-uploads/c26b2a6a-457a-486f-8af0-e8f7531bc8a9.png" />
+        
       </div>
 
       <div className="grid gap-4 py-4">
         <div className="grid grid-cols-2 gap-4">
           <div className="grid gap-2">
             <Label htmlFor="sender-name">Your Name</Label>
-            <Input 
-              id="sender-name" 
-              value={senderName} 
-              onChange={e => setSenderName(e.target.value)} 
-              className="bg-black/50 border-white/20 text-white" 
-            />
+            <Input id="sender-name" value={senderName} onChange={e => setSenderName(e.target.value)} className="bg-black/50 border-white/20 text-white" />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="sender-email">Your Email</Label>
-            <Input 
-              id="sender-email" 
-              type="email" 
-              value={senderEmail} 
-              onChange={e => setSenderEmail(e.target.value)} 
-              className="bg-black/50 border-white/20 text-white" 
-            />
+            <Input id="sender-email" type="email" value={senderEmail} onChange={e => setSenderEmail(e.target.value)} className="bg-black/50 border-white/20 text-white" />
           </div>
         </div>
         
@@ -141,10 +121,7 @@ export const MeetingInviteDialog = ({
         </div>
 
         <div className="flex gap-2">
-          <Button 
-            onClick={handleSendInvite} 
-            className="flex-1 text-white bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 transition-all duration-300"
-          >
+          <Button onClick={handleSendInvite} className="flex-1 text-white bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 transition-all duration-300">
             <Send className="mr-2 h-4 w-4" />
             Send Invitation
           </Button>
