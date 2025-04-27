@@ -117,62 +117,44 @@ export const AnimatedChat = ({
       }
     };
   }, [recognition]);
-  return <div className={cn("w-full max-w-3xl mx-auto transition-all duration-500 ease-in-out", 
-    showResults ? "mt-8" : "mt-[10vh]")}>
+  return <div className={cn("w-full max-w-3xl mx-auto transition-all duration-500 ease-in-out", showResults ? "mt-8" : "mt-[10vh]")}>
     <div className="flex justify-center mb-8">
       <Link to="/" className="hover:scale-105 transition-transform">
-        <img 
-          alt="App Logo" 
-          width={120} 
-          height={120} 
-          className="mx-auto object-contain w-[120px] h-[120px]" 
-          src="/lovable-uploads/97a170c6-860a-464b-a41f-38b2f2f7c5ca.png" 
-        />
+        <img alt="App Logo" width={120} height={120} className="mx-auto object-contain w-[120px] h-[120px]" src="/lovable-uploads/7ea42db7-8f3b-44cd-8337-e589c12f74fd.png" />
       </Link>
     </div>
     
     <p className="text-center mb-8 text-white/80 text-lg">Our AI maps the perfect moment to meet.</p>
     
     <form onSubmit={handleSubmit} className="flex gap-2">
-      <Input 
-        value={input} 
-        onChange={e => setInput(e.target.value)} 
-        placeholder={`e.g. New York, Tokyo for next Monday... ${defaultLocation ? `(Your location: ${defaultLocation})` : ''}`} 
-        className="bg-black text-white border-white/10 text-2xl h-16 px-6" 
-        disabled={isLoading || !defaultLocation || !localStorage.getItem('openai_api_key')} 
-      />
+      <Input value={input} onChange={e => setInput(e.target.value)} placeholder={`e.g. New York, Tokyo for next Monday... ${defaultLocation ? `(Your location: ${defaultLocation})` : ''}`} className="bg-black text-white border-white/10 text-2xl h-16 px-6" disabled={isLoading || !defaultLocation || !localStorage.getItem('openai_api_key')} />
       <div className="flex gap-2">
         <div className="relative">
           <svg width="0" height="0">
             <defs>
               <linearGradient id="iconGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" style={{ stopColor: '#6EE7B7' }} />
-                <stop offset="50%" style={{ stopColor: '#3B82F6' }} />
-                <stop offset="100%" style={{ stopColor: '#9333EA' }} />
+                <stop offset="0%" style={{
+                  stopColor: '#6EE7B7'
+                }} />
+                <stop offset="50%" style={{
+                  stopColor: '#3B82F6'
+                }} />
+                <stop offset="100%" style={{
+                  stopColor: '#9333EA'
+                }} />
               </linearGradient>
             </defs>
           </svg>
-          <Button 
-            type="button" 
-            variant="outline" 
-            className="bg-black border-white/10 hover:bg-white/10 h-16 w-16" 
-            onClick={isListening ? stopListening : startListening} 
-            disabled={isLoading || !defaultLocation || !localStorage.getItem('openai_api_key')}
-          >
-            {isListening ? 
-              <MicOff className="h-6 w-6 stroke-red-500" /> : 
-              <Mic className="h-6 w-6" style={{ stroke: 'url(#iconGradient)' }} />}
+          <Button type="button" variant="outline" className="bg-black border-white/10 hover:bg-white/10 h-16 w-16" onClick={isListening ? stopListening : startListening} disabled={isLoading || !defaultLocation || !localStorage.getItem('openai_api_key')}>
+            {isListening ? <MicOff className="h-6 w-6 stroke-red-500" /> : <Mic className="h-6 w-6" style={{
+              stroke: 'url(#iconGradient)'
+            }} />}
           </Button>
         </div>
-        <Button 
-          type="submit" 
-          variant="outline" 
-          className="bg-black border-white/10 hover:bg-white/10 h-16 w-16" 
-          disabled={isLoading || !defaultLocation || !localStorage.getItem('openai_api_key')}
-        >
-          {isLoading ? 
-            <Loader className="h-6 w-6 animate-spin" /> : 
-            <Send className="h-6 w-6" style={{ stroke: 'url(#iconGradient)' }} />}
+        <Button type="submit" variant="outline" className="bg-black border-white/10 hover:bg-white/10 h-16 w-16" disabled={isLoading || !defaultLocation || !localStorage.getItem('openai_api_key')}>
+          {isLoading ? <Loader className="h-6 w-6 animate-spin" /> : <Send className="h-6 w-6" style={{
+            stroke: 'url(#iconGradient)'
+          }} />}
         </Button>
       </div>
     </form>
