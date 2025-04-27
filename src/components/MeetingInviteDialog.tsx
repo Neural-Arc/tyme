@@ -1,10 +1,11 @@
+
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, Copy, Send, Calendar } from 'lucide-react';
+import { Mail, Copy, Send } from 'lucide-react';
 import { Textarea } from "@/components/ui/textarea";
 
 interface MeetingInviteDialogProps {
@@ -72,17 +73,17 @@ export const MeetingInviteDialog = ({
 
   return <Dialog>
     <DialogTrigger asChild>
-      <Button variant="outline" size="sm" className="ml-4 mx-[8px] hover:bg-gradient-to-r hover:from-blue-500 hover:via-purple-500 hover:to-pink-500">
+      <Button variant="outline" size="sm" className="ml-4 mx-[8px] hover:bg-gradient-to-r hover:from-[#FFD93B] hover:via-[#FF4E9B] hover:to-[#2AC4F2]">
         <Mail className="mr-2 h-4 w-4" />
         Send Invite
       </Button>
     </DialogTrigger>
     <DialogContent className="sm:max-w-[600px] h-[90vh] bg-black/90 text-white border border-white/10 overflow-y-auto">
-      <div className="relative -mt-2 -mx-6 mb-1 py-0">
+      <div className="relative -mt-2 -mx-6 mb-0 py-0">
         <img alt="Meeting Banner" className="w-full h-[200px] object-cover" src="/lovable-uploads/c26b2a6a-457a-486f-8af0-e8f7531bc8a9.png" />
       </div>
 
-      <div className="grid gap-4 py-2">
+      <div className="grid gap-3 py-2">
         <div className="grid grid-cols-2 gap-4">
           <div className="grid gap-2">
             <Label htmlFor="sender-name">Your Name</Label>
@@ -124,21 +125,21 @@ export const MeetingInviteDialog = ({
               value={meetingLink} 
               onChange={e => setMeetingLink(e.target.value)} 
               placeholder="Your meeting link will appear here" 
-              className="bg-black/50 border-white/20 text-white flex-1" 
+              className="bg-black/50 border-white/20 flex-1 bg-gradient-to-r from-[#FFD93B] via-[#FF4E9B] to-[#2AC4F2] bg-clip-text text-transparent" 
               readOnly 
             />
             <Button 
               variant="outline" 
               size="icon" 
               onClick={handleCopyLink}
-              className="hover:bg-gradient-to-r hover:from-blue-500 hover:via-purple-500 hover:to-pink-500"
+              className="hover:bg-gradient-to-r hover:from-[#FFD93B] hover:via-[#FF4E9B] hover:to-[#2AC4F2]"
             >
               <Copy className="h-4 w-4" />
             </Button>
             <Button 
               variant="outline" 
               onClick={generateGoogleMeetLink}
-              className="hover:bg-gradient-to-r hover:from-blue-500 hover:via-purple-500 hover:to-pink-500"
+              className="hover:bg-gradient-to-r hover:from-[#FFD93B] hover:via-[#FF4E9B] hover:to-[#2AC4F2]"
             >
               Generate Meet Link
             </Button>
@@ -151,12 +152,12 @@ export const MeetingInviteDialog = ({
             id="description" 
             value={description} 
             onChange={e => setDescription(e.target.value)} 
-            className="bg-black/50 border-white/20 text-white min-h-[200px]" 
+            className="bg-black/50 border-white/20 text-white min-h-[150px]" 
             placeholder="Enter meeting agenda and details..." 
           />
         </div>
 
-        <div className="text-sm bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent mt-2">
+        <div className="text-sm text-white mt-2">
           <p>Meeting Time: {meetingTime}</p>
           <p>Date: {date}</p>
         </div>
@@ -164,7 +165,7 @@ export const MeetingInviteDialog = ({
         <div className="flex gap-2">
           <Button 
             onClick={handleSendInvite} 
-            className="flex-1 text-white bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 transition-all duration-300"
+            className="flex-1 text-white bg-gradient-to-r from-[#FFD93B] via-[#FF4E9B] to-[#2AC4F2] hover:opacity-90 transition-all duration-300"
           >
             <Send className="mr-2 h-4 w-4" />
             Send Invitation
