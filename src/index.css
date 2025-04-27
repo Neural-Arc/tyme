@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -151,8 +152,7 @@
 
 .best-time-cell {
   position: relative;
-  background: var(--app-gradient);
-  border-radius: 6px;
+  border: 1px solid rgba(255, 217, 59, 0.5);
   box-shadow: 0 0 15px rgba(255, 217, 59, 0.3);
 }
 
@@ -221,4 +221,28 @@
 
 .border-gradient {
   border-image: var(--app-gradient) 1;
+}
+
+/* Timeline specific styles */
+.timeline-hour-marker {
+  @apply absolute top-0 w-px h-full bg-white/10;
+}
+
+/* Scrollbar styles for timeline */
+.timeline-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+
+.timeline-scroll::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+.timeline-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.timeline-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
 }

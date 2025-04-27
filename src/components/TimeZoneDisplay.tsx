@@ -1,6 +1,7 @@
+
 import { useState, useEffect } from 'react';
 import { TimeZoneCard } from './TimeZoneCard';
-import { TimeScaleGraph } from './TimeScaleGraph';
+import { TimelineGraph } from './TimelineGraph';
 import { TimeConversionCard } from './TimeConversionCard';
 import { useLocation } from '@/hooks/useLocation';
 import { useTimeZoneCalculations } from '@/hooks/useTimeZoneCalculations';
@@ -145,7 +146,7 @@ export const TimeZoneDisplay = () => {
       )}
 
       {cities.length > 0 && (
-        <TimeScaleGraph 
+        <TimelineGraph 
           timeZoneData={timeZoneData}
           bestTimeRange={bestTimeRange}
           defaultLocation={defaultLocation}
