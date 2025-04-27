@@ -1,4 +1,3 @@
-
 import { Clock } from 'lucide-react';
 import { TimeMarkers } from './time-scale/TimeMarkers';
 import { BestTimeHeader } from './time-scale/BestTimeHeader';

@@ -78,7 +78,7 @@ export const MeetingInviteDialog = ({
       </Button>
     </DialogTrigger>
     <DialogContent className="sm:max-w-[600px] h-[90vh] bg-black/90 text-white border border-white/10 overflow-y-auto">
-      <div className="relative -mt-6 -mx-6 mb-2 py-0">
+      <div className="relative -mt-2 -mx-6 mb-1 py-0">
         <img alt="Meeting Banner" className="w-full h-[200px] object-cover" src="/lovable-uploads/c26b2a6a-457a-486f-8af0-e8f7531bc8a9.png" />
       </div>
 

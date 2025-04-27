@@ -18,11 +18,11 @@ export const BestTimeHeader = ({ bestTimeRange, currentDate, timeZoneName }: Bes
       <div className="flex justify-between items-start flex-wrap gap-2">
         <div className="flex-1 min-w-0">
           <p className="text-lg font-medium">
-            <span className="font-bold bg-gradient-to-r from-[#6EE7B7] via-[#3B82F6] to-[#9333EA] bg-clip-text text-transparent">
+            <span className="font-bold gradient-text">
               Best meeting time:
             </span>
             <br />
-            <span className="bg-gradient-to-r from-[#6EE7B7] via-[#3B82F6] to-[#9333EA] bg-clip-text text-transparent">
+            <span className="gradient-text">
               {bestTimeRange.formattedLocal}
             </span>
             <br />
