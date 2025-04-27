@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Mic, MicOff, Send, Loader } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { Link } from "react-router-dom";
 interface AnimatedChatProps {
   input: string;
   setInput: (value: string) => void;
@@ -118,11 +119,20 @@ export const AnimatedChat = ({
   }, [recognition]);
   return <div className={cn("w-full max-w-3xl mx-auto transition-all duration-500 ease-in-out", showResults ? "mt-8" : "mt-[20vh]")}>
       <div className="flex justify-center mb-8">
-        <img alt="App Logo" width={120} height={120} className="mx-auto object-contain w-[120px] h-[120px]" onError={e => {
-        console.error('Failed to load logo');
-        const target = e.target as HTMLImageElement;
-        target.src = '/logo.png';
-      }} src="/lovable-uploads/97a170c6-860a-464b-a41f-38b2f2f7c5ca.png" />
+        <Link to="/" className="hover:scale-105 transition-transform">
+          <img 
+            alt="App Logo" 
+            width={120} 
+            height={120} 
+            className="mx-auto object-contain w-[120px] h-[120px]" 
+            onError={e => {
+              console.error('Failed to load logo');
+              const target = e.target as HTMLImageElement;
+              target.src = '/logo.png';
+            }} 
+            src="/lovable-uploads/97a170c6-860a-464b-a41f-38b2f2f7c5ca.png" 
+          />
+        </Link>
       </div>
       
       <p className="text-center mb-8 text-white/80 text-lg">Our AI maps the perfect moment to meet.</p>
@@ -145,7 +155,7 @@ export const AnimatedChat = ({
           >
             {isListening ? 
               <MicOff className="h-6 w-6 text-red-500" /> : 
-              <Mic className="h-6 w-6 bg-gradient-to-r from-[#6EE7B7] via-[#3B82F6] to-[#9333EA] bg-clip-text text-transparent" />}
+              <Mic className="h-6 w-6 fill-transparent stroke-[1.5] bg-gradient-to-r from-[#6EE7B7] via-[#3B82F6] to-[#9333EA] bg-clip-text text-transparent" />}
           </Button>
           <Button 
             type="submit" 
@@ -155,7 +165,7 @@ export const AnimatedChat = ({
           >
             {isLoading ? 
               <Loader className="h-6 w-6 animate-spin" /> : 
-              <Send className="h-6 w-6 bg-gradient-to-r from-[#6EE7B7] via-[#3B82F6] to-[#9333EA] bg-clip-text text-transparent" />}
+              <Send className="h-6 w-6 fill-transparent stroke-[1.5] bg-gradient-to-r from-[#6EE7B7] via-[#3B82F6] to-[#9333EA] bg-clip-text text-transparent" />}
           </Button>
         </div>
       </form>

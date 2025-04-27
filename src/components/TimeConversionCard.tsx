@@ -1,3 +1,4 @@
+
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Clock, CloudSun, Cloud, CloudRain } from 'lucide-react';
 import { getTimeZoneAcronym, formatTimeZone } from '@/utils/timeZoneUtils';
@@ -28,46 +29,52 @@ export const TimeConversionCard = ({ city, time, offset, isSource, weather, news
   };
   
   return (
-    <Card className={`card-animate border-white/10 transition-all duration-300 transform hover:scale-105 ${isSource ? 'bg-black/60' : 'bg-black/40'}`}>
-      <CardHeader className="flex flex-row items-center gap-3 pb-2">
-        <Clock className={`h-5 w-5 ${isSource ? 'bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent' : 'text-white/60'}`} />
-        <CardTitle className="text-lg font-medium text-white">
-          {city}
-          {isSource && <span className="ml-2 text-xs bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">(Source Time)</span>}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-2">
-        <div className="flex items-baseline gap-2">
-          <p className={`text-2xl font-medium ${isSource ? 'bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent' : 'text-white'}`}>
-            {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-          </p>
-          <span className="text-xs text-white/60">
-            {getTimeZoneAcronym(offset)} ({formatTimeZone(offset)})
-          </span>
+    <Card className={`card-animate transition-all duration-300 transform hover:scale-105 
+      ${isSource ? 
+        'bg-black/60 border-[2px] border-transparent bg-gradient-to-r from-[#6EE7B7] via-[#3B82F6] to-[#9333EA] p-[1px]' : 
+        'bg-black/40 border border-white/10'}`}
+    >
+      <div className={`h-full w-full rounded-lg ${isSource ? 'bg-black/95' : ''} p-6`}>
+        <div className="flex items-center gap-3 pb-2">
+          <Clock className={`h-5 w-5 ${isSource ? 'bg-gradient-to-r from-[#6EE7B7] via-[#3B82F6] to-[#9333EA] bg-clip-text text-transparent' : 'text-white/60'}`} />
+          <CardTitle className="text-lg font-medium text-white">
+            {city}
+            {isSource && <span className="ml-2 text-xs bg-gradient-to-r from-[#6EE7B7] via-[#3B82F6] to-[#9333EA] bg-clip-text text-transparent">Source Time</span>}
+          </CardTitle>
         </div>
-        <p className="text-sm text-white/60">
-          {time.toLocaleDateString(undefined, {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-          })}
-        </p>
-        
-        {weather && (
-          <div className="mt-3 pt-3 border-t border-white/10 flex items-center gap-2">
-            {getWeatherIcon(weather.condition)}
-            <span className="text-sm text-white/80">{weather.temperature}°C | {weather.condition}</span>
+        <div className="space-y-2">
+          <div className="flex items-baseline gap-2">
+            <p className={`text-2xl font-medium ${isSource ? 'bg-gradient-to-r from-[#6EE7B7] via-[#3B82F6] to-[#9333EA] bg-clip-text text-transparent' : 'text-white'}`}>
+              {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </p>
+            <span className="text-xs text-white/60">
+              {getTimeZoneAcronym(offset)} ({formatTimeZone(offset)})
+            </span>
           </div>
-        )}
-        
-        {newsHeadline && (
-          <div className="mt-3 pt-3 border-t border-white/10">
-            <p className="text-xs font-medium text-white/80">Business News:</p>
-            <p className="text-sm text-white/90 italic">{newsHeadline}</p>
-          </div>
-        )}
-      </CardContent>
+          <p className="text-sm text-white/60">
+            {time.toLocaleDateString(undefined, {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            })}
+          </p>
+          
+          {weather && (
+            <div className="mt-3 pt-3 border-t border-white/10 flex items-center gap-2">
+              {getWeatherIcon(weather.condition)}
+              <span className="text-sm text-white/80">{weather.temperature}°C | {weather.condition}</span>
+            </div>
+          )}
+          
+          {newsHeadline && (
+            <div className="mt-3 pt-3 border-t border-white/10">
+              <p className="text-xs font-medium text-white/80">Business News:</p>
+              <p className="text-sm text-white/90 italic">{newsHeadline}</p>
+            </div>
+          )}
+        </div>
+      </div>
     </Card>
   );
 };

@@ -38,7 +38,7 @@ export const TimeScaleGraph = ({
 
   if (timeZoneData.length > 4) {
     return (
-      <div className="bg-black/40 border border-blue-400/20 rounded-xl p-6 animate-fade-up">
+      <div className="bg-black/40 border border-white/10 rounded-xl p-6 animate-fade-up">
         <p className="text-white text-center">Please select 4 or fewer cities for optimal display.</p>
       </div>
     );
@@ -99,7 +99,7 @@ export const TimeScaleGraph = ({
 
       <div className="relative overflow-x-auto">
         <div className="min-w-[800px]">
-          <div className="absolute top-0 left-[180px] right-0 flex justify-between text-white/70 text-sm border-b border-blue-400/20 pb-2">
+          <div className="absolute top-0 left-[180px] right-0 flex justify-between text-white/70 text-sm border-b border-white/10 pb-2">
             {timeMarkers.map(hour => (
               <div key={hour} className="text-center min-w-[36px]">
                 {hour.toString().padStart(2, '0')}:00
@@ -156,10 +156,9 @@ export const TimeScaleGraph = ({
                             key={hour}
                             className={`
                               h-full transition-all duration-300
-                              ${isWorkingHour ? 'bg-gradient-to-r from-[#6EE7B7]/10 via-[#3B82F6]/10 to-[#9333EA]/10 hover:from-[#6EE7B7]/20 hover:via-[#3B82F6]/20 hover:to-[#9333EA]/20' : 'bg-black/60'}
-                              ${isBestTimeHour ? 'timeline-highlight !bg-gradient-to-r !from-[#6EE7B7]/90 !via-[#3B82F6]/90 !to-[#9333EA]/90 hover:!from-[#6EE7B7] hover:!via-[#3B82F6] hover:!to-[#9333EA]' : ''}
-                              border rounded-sm
-                              ${isWorkingHour ? 'border-white/10' : 'border-white/5'}
+                              ${isWorkingHour ? 'bg-gradient-to-r from-[#6EE7B7]/10 via-[#3B82F6]/10 to-[#9333EA]/10' : 'bg-black/60'}
+                              ${isBestTimeHour ? '!bg-gradient-to-r !from-[#6EE7B7] !via-[#3B82F6] !to-[#9333EA]' : ''}
+                              border border-white/5 rounded-sm
                             `}
                           />
                         );
@@ -175,7 +174,7 @@ export const TimeScaleGraph = ({
 
       <div className="mt-4 text-xs text-white/60 flex justify-center">
         <div className="flex items-center gap-2">
-          <Clock className="h-4 w-4 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent" />
+          <Clock className="h-4 w-4 bg-gradient-to-r from-[#6EE7B7] via-[#3B82F6] to-[#9333EA] bg-clip-text text-transparent" />
           <span>All times shown in your local time zone ({timeZoneName})</span>
         </div>
       </div>
