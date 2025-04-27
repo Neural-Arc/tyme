@@ -77,17 +77,18 @@ export const MeetingInviteDialog = ({
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="ml-4 mx-[8px] hover:bg-gradient-to-r hover:from-[#FFD93B] hover:via-[#FF4E9B] hover:to-[#2AC4F2]">
+        <Button variant="outline" size="sm" className="ml-2 md:ml-4 mx-[4px] md:mx-[8px] hover:bg-gradient-to-r hover:from-[#FFD93B] hover:via-[#FF4E9B] hover:to-[#2AC4F2]">
           <Mail className="mr-2 h-4 w-4" />
-          Send Invite
+          <span className="hidden sm:inline">Send Invite</span>
+          <span className="sm:hidden">Invite</span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px] h-[90vh] bg-black/90 text-white border border-white/10 overflow-y-auto">
+      <DialogContent className="w-[95vw] max-w-[600px] h-[90vh] bg-black/90 text-white border border-white/10 overflow-y-auto mx-2">
         <div className="relative -mt-2 -mx-6 mb-0 py-0">
-          <img alt="Meeting Banner" className="w-full h-[200px] object-cover" src="/lovable-uploads/018f957d-6791-4e60-8334-7c2b7ca353d4.png" />
+          <img alt="Meeting Banner" className="w-full h-[120px] md:h-[200px] object-cover" src="/lovable-uploads/018f957d-6791-4e60-8334-7c2b7ca353d4.png" />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="grid gap-2">
             <Label htmlFor="sender-name">Your Name</Label>
             <Input id="sender-name" value={senderName} onChange={e => setSenderName(e.target.value)} className="bg-black/50 border-white/20 text-white" />
@@ -122,14 +123,21 @@ export const MeetingInviteDialog = ({
         </div>
 
         <div className="text-sm text-white mt-2">
-          <p>Meeting Time: {meetingTime}</p>
-          <p>Date: {date}</p>
+          <p className="flex flex-wrap gap-2">
+            <span>Meeting Time:</span>
+            <span className="text-white/90">{meetingTime}</span>
+          </p>
+          <p className="flex flex-wrap gap-2">
+            <span>Date:</span>
+            <span className="text-white/90">{date}</span>
+          </p>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 mt-4">
           <Button onClick={handleSendInvite} className="flex-1 text-white bg-gradient-to-r from-[#FFD93B] via-[#FF4E9B] to-[#2AC4F2] hover:opacity-90 transition-all duration-300">
             <Send className="mr-2 h-4 w-4" />
-            Send Invitation
+            <span className="hidden sm:inline">Send Invitation</span>
+            <span className="sm:hidden">Send</span>
           </Button>
         </div>
       </DialogContent>

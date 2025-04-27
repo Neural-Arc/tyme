@@ -124,9 +124,9 @@ export const TimeZoneDisplay = () => {
   }
 
   return (
-    <div className="space-y-8 animate-fade-up">
+    <div className="space-y-4 md:space-y-8 w-full px-2 md:px-4 animate-fade-up">
       {timeConversion && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-4">
           <TimeConversionCard
             city={timeConversion.targetCity}
             time={timeConversion.targetTime}
@@ -156,8 +156,8 @@ export const TimeZoneDisplay = () => {
 
       {timeZoneData.length > 0 && (
         <div>
-          <h3 className="text-white/60 mb-4 text-sm">Meeting Times</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <h3 className="text-white/60 mb-2 md:mb-4 text-sm px-2">Meeting Times</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-4">
             {timeZoneData.map((tzData, index) => (
               <TimeZoneCard
                 key={`${tzData.city}-${index}`}

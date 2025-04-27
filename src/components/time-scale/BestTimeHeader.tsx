@@ -14,38 +14,36 @@ interface BestTimeHeaderProps {
 
 export const BestTimeHeader = ({ bestTimeRange, currentDate, timeZoneName }: BestTimeHeaderProps) => {
   return (
-    <div className="mb-6 glass-card p-5 border border-gradient rounded-lg relative overflow-hidden">
+    <div className="mb-4 md:mb-6 glass-card p-3 md:p-5 border border-gradient rounded-lg relative overflow-hidden">
       <div className="absolute inset-0 opacity-20 bg-gradient"></div>
-      <div className="flex justify-between items-start flex-wrap gap-2 relative z-10">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 relative z-10">
         <div className="flex-1 min-w-0">
-          <p className="text-lg font-medium space-y-1">
-            <span className="font-bold text-white">
-              Best meeting time:
+          <div className="flex items-center flex-wrap gap-2">
+            <span className="font-bold text-white whitespace-nowrap">Best meeting time:</span>
+            <span className="text-2xl text-white">
+              {bestTimeRange.formattedLocal},
             </span>
-            <br />
-            <span className="text-2xl text-white inline-block">
-              {bestTimeRange.formattedLocal}
-            </span>
-            <br />
-            <span className="text-white/60 text-sm">
-              {currentDate.toLocaleDateString(undefined, {
+            <span className="text-white/60">
+              {new Intl.DateTimeFormat('en-US', {
                 weekday: 'long',
                 year: 'numeric',
                 month: 'long',
-                day: 'numeric'
-              })}
+                day: 'numeric',
+                timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+              }).format(currentDate)}
             </span>
-          </p>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 self-end md:self-auto">
           <MeetingInviteDialog 
             meetingTime={bestTimeRange.formattedLocal} 
-            date={currentDate.toLocaleDateString(undefined, {
+            date={new Intl.DateTimeFormat('en-US', {
               weekday: 'long',
               year: 'numeric',
               month: 'long',
-              day: 'numeric'
-            })} 
+              day: 'numeric',
+              timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+            }).format(currentDate)} 
           />
           <TooltipProvider>
             <Tooltip>
