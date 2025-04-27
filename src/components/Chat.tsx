@@ -5,7 +5,10 @@ import { processMessage } from '@/utils/chat';
 import { useLocation } from '@/hooks/useLocation';
 import { AnimatedChat } from './AnimatedChat';
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { Info } from 'lucide-react';
+import { Info, Settings } from 'lucide-react';
+import { Button } from './ui/button';
+import { Dialog, DialogTrigger } from './ui/dialog';
+import { Settings as SettingsComponent } from './Settings';
 
 export const Chat = () => {
   const [input, setInput] = useState('');
@@ -83,12 +86,22 @@ export const Chat = () => {
       )}
       
       {!localStorage.getItem('openai_api_key') && (
-        <Alert className="mb-4 bg-black border-blue-600/50 text-white">
-          <Info className="h-5 w-5 text-blue-600" />
-          <AlertTitle>API Key Required</AlertTitle>
-          <AlertDescription>
-            Please add your OpenAI API key in the settings (top-right gear icon) to use the chat.
-          </AlertDescription>
+        <Alert className="mb-4 bg-black border-blue-600/50 text-white flex items-center justify-between">
+          <div className="flex-1">
+            <Info className="h-5 w-5 text-blue-600" />
+            <AlertTitle>API Key Required</AlertTitle>
+            <AlertDescription>
+              Please add your OpenAI API key in settings to use the chat.
+            </AlertDescription>
+          </div>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="icon" className="ml-4">
+                <Settings className="h-4 w-4" />
+              </Button>
+            </DialogTrigger>
+            <SettingsComponent />
+          </Dialog>
         </Alert>
       )}
       

@@ -76,8 +76,8 @@ export const TimeZoneDisplay = () => {
       setNewsHeadline(news);
       
     } else if (cities && cities.length > 0) {
-      // Limit to 3 cities
-      const limitedCities = cities.slice(0, 3);
+      // Limit to 4 cities
+      const limitedCities = cities.slice(0, 4);
       setCities(limitedCities);
       setSpecifiedDate(specifiedDate || new Date());
       setSuggestedTime(suggestedTime);

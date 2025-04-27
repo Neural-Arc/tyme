@@ -32,13 +32,19 @@ export const TimeScaleGraph = ({
   const timeMarkers = generateHourLabels(0, 23, 3);
   
   // Check if there are too many cities
-  if (timeZoneData.length > 3) {
+  if (timeZoneData.length > 4) {
     return (
       <div className="bg-black/40 border border-white/10 rounded-xl p-6 animate-fade-up">
-        <p className="text-white text-center">Please select 3 or fewer cities for optimal display.</p>
+        <p className="text-white text-center">Please select 4 or fewer cities for optimal display.</p>
       </div>
     );
   }
+
+  const calculateTimeSlot = (cityOffset: number, bestTimeUtc: number): number => {
+    const localHour = convertUtcToLocal(bestTimeUtc, cityOffset);
+    // Round to nearest hour for better accuracy
+    return Math.round(localHour);
+  };
   
   return (
     <div className="bg-black/40 border border-white/10 rounded-xl p-6 animate-fade-up">
@@ -141,11 +147,8 @@ export const TimeScaleGraph = ({
                     <div className="absolute inset-0 grid grid-cols-24 gap-px">
                       {Array.from({ length: 24 }).map((_, hour) => {
                         const isWorkingHour = cityData.workingHours.includes(hour);
-                        
-                        // Improved calculation for matching the best time hour
-                        const isBestTimeHour = bestTimeRange && (
-                          Math.floor(convertUtcToLocal(bestTimeRange.utcHour, cityData.offset)) === hour
-                        );
+                        const isBestTimeHour = bestTimeRange && 
+                          calculateTimeSlot(cityData.offset, bestTimeRange.utcHour) === hour;
 
                         return (
                           <div 
