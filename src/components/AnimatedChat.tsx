@@ -125,11 +125,6 @@ export const AnimatedChat = ({
             width={120} 
             height={120} 
             className="mx-auto object-contain w-[120px] h-[120px]" 
-            onError={e => {
-              console.error('Failed to load logo');
-              const target = e.target as HTMLImageElement;
-              target.src = '/logo.png';
-            }} 
             src="/lovable-uploads/97a170c6-860a-464b-a41f-38b2f2f7c5ca.png" 
           />
         </Link>
@@ -154,8 +149,12 @@ export const AnimatedChat = ({
             disabled={isLoading || !defaultLocation || !localStorage.getItem('openai_api_key')}
           >
             {isListening ? 
-              <MicOff className="h-6 w-6 text-red-500" /> : 
-              <Mic className="h-6 w-6 fill-transparent stroke-[1.5] bg-gradient-to-r from-[#6EE7B7] via-[#3B82F6] to-[#9333EA] bg-clip-text text-transparent" />}
+              <MicOff className="h-6 w-6 stroke-red-500" /> : 
+              <Mic className="h-6 w-6 stroke-[#6EE7B7] stroke-[2]" style={{
+                background: 'linear-gradient(to right, #6EE7B7, #3B82F6, #9333EA)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent'
+              }} />}
           </Button>
           <Button 
             type="submit" 
@@ -165,7 +164,11 @@ export const AnimatedChat = ({
           >
             {isLoading ? 
               <Loader className="h-6 w-6 animate-spin" /> : 
-              <Send className="h-6 w-6 fill-transparent stroke-[1.5] bg-gradient-to-r from-[#6EE7B7] via-[#3B82F6] to-[#9333EA] bg-clip-text text-transparent" />}
+              <Send className="h-6 w-6 stroke-[#6EE7B7] stroke-[2]" style={{
+                background: 'linear-gradient(to right, #6EE7B7, #3B82F6, #9333EA)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent'
+              }} />}
           </Button>
         </div>
       </form>

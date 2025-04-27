@@ -47,7 +47,11 @@ export const TimeScaleGraph = ({
   return (
     <div className="bg-black/40 border border-white/10 rounded-xl p-6 animate-fade-up">
       <div className="flex items-center gap-3 mb-6">
-        <Clock className="h-5 w-5 bg-gradient-to-r from-[#6EE7B7] via-[#3B82F6] to-[#9333EA] bg-clip-text text-transparent" />
+        <Clock className="h-5 w-5" style={{
+          background: 'linear-gradient(to right, #6EE7B7, #3B82F6, #9333EA)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent'
+        }} />
         <h3 className="text-xl font-medium text-white">Working Hours (08:00 - 21:00)</h3>
       </div>
 
@@ -56,9 +60,17 @@ export const TimeScaleGraph = ({
           <div className="flex justify-between items-start flex-wrap gap-2">
             <div className="flex-1 min-w-0">
               <p className="text-lg font-medium">
-                <span className="font-bold bg-gradient-to-r from-[#6EE7B7] via-[#3B82F6] to-[#9333EA] bg-clip-text text-transparent">Best meeting time:</span>
+                <span className="font-bold" style={{
+                  background: 'linear-gradient(to right, #6EE7B7, #3B82F6, #9333EA)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent'
+                }}>Best meeting time:</span>
                 <br />
-                <span className="bg-gradient-to-r from-[#6EE7B7] via-[#3B82F6] to-[#9333EA] bg-clip-text text-transparent">{bestTimeRange.formattedLocal}</span>
+                <span style={{
+                  background: 'linear-gradient(to right, #6EE7B7, #3B82F6, #9333EA)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent'
+                }}>{bestTimeRange.formattedLocal}</span>
                 <br />
                 <span className="text-white/60">
                   {currentDate.toLocaleDateString(undefined, {
@@ -124,12 +136,18 @@ export const TimeScaleGraph = ({
                 >
                   <div className="flex justify-between items-center">
                     <div className="w-[160px]">
-                      <span className={`text-sm truncate block ${
-                        isCurrentLocation ? 'bg-gradient-to-r from-[#6EE7B7] via-[#3B82F6] to-[#9333EA] bg-clip-text text-transparent font-medium' : 'text-white/80'
-                      }`}>
+                      <span className={`text-sm truncate block`} style={isCurrentLocation ? {
+                        background: 'linear-gradient(to right, #6EE7B7, #3B82F6, #9333EA)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent'
+                      } : { color: 'rgba(255, 255, 255, 0.8)' }}>
                         {cityData.city}
                         {isCurrentLocation && (
-                          <span className="ml-1 text-xs bg-gradient-to-r from-[#6EE7B7] via-[#3B82F6] to-[#9333EA] bg-clip-text text-transparent">(Current)</span>
+                          <span className="ml-1 text-xs" style={{
+                            background: 'linear-gradient(to right, #6EE7B7, #3B82F6, #9333EA)',
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent'
+                          }}>(Current)</span>
                         )}
                       </span>
                       <span className="text-white/60 text-xs">
@@ -138,7 +156,11 @@ export const TimeScaleGraph = ({
                     </div>
 
                     {bestTimeRange?.cityTimes[cityData.city] && (
-                      <div className="absolute right-2 text-xs bg-gradient-to-r from-[#6EE7B7] via-[#3B82F6] to-[#9333EA] bg-clip-text text-transparent font-medium">
+                      <div className="absolute right-2 text-xs" style={{
+                        background: 'linear-gradient(to right, #6EE7B7, #3B82F6, #9333EA)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent'
+                      }}>
                         {bestTimeRange.cityTimes[cityData.city]}
                       </div>
                     )}
@@ -148,7 +170,8 @@ export const TimeScaleGraph = ({
                     <div className="absolute inset-0 grid grid-cols-24 gap-px">
                       {Array.from({ length: 24 }).map((_, hour) => {
                         const isWorkingHour = cityData.workingHours.includes(hour);
-                        const cityLocalHour = convertUtcToLocal(bestTimeRange?.utcHour || 0, cityData.offset);
+                        const cityLocalHour = bestTimeRange?.utcHour !== undefined ? 
+                          ((hour + cityData.offset + 24) % 24) : hour;
                         const isBestTimeHour = bestTimeRange && hour === cityLocalHour;
                         
                         return (
