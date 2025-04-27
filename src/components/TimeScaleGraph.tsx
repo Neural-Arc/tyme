@@ -1,3 +1,4 @@
+
 import { Clock } from 'lucide-react';
 import { TimeMarkers } from './time-scale/TimeMarkers';
 import { BestTimeHeader } from './time-scale/BestTimeHeader';
@@ -30,19 +31,20 @@ export const TimeScaleGraph = ({
 }: TimeScaleGraphProps) => {
   if (timeZoneData.length > 4) {
     return (
-      <div className="bg-black/40 border border-white/10 rounded-xl p-6 animate-fade-up">
+      <div className="glass-card p-6 animate-fade-up">
         <p className="text-white text-center">Please select 4 or fewer cities for optimal display.</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-black/40 border border-white/10 rounded-xl p-6 animate-fade-up">
+    <div className="glass-card p-6 animate-fade-up backdrop-blur-md">
       <div className="flex items-center gap-3 mb-6">
-        <Clock className="h-5 w-5" style={{
-          stroke: 'url(#gradientStroke)'
-        }} />
-        <h3 className="text-xl font-medium text-white">Working Hours (08:00 - 21:00)</h3>
+        <div className="relative">
+          <Clock className="h-5 w-5 gradient-icon animate-pulse-subtle" />
+          <div className="absolute inset-0 blur-sm opacity-50 gradient-icon animate-pulse-subtle"></div>
+        </div>
+        <h3 className="text-xl font-medium gradient-text">Working Hours (08:00 - 21:00)</h3>
       </div>
 
       {bestTimeRange && defaultLocation && (
@@ -58,16 +60,18 @@ export const TimeScaleGraph = ({
           <svg width="0" height="0">
             <defs>
               <linearGradient id="gradientStroke" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" style={{ stopColor: '#6EE7B7' }} />
-                <stop offset="50%" style={{ stopColor: '#3B82F6' }} />
-                <stop offset="100%" style={{ stopColor: '#9333EA' }} />
+                <stop offset="0%" stopColor="#FFD93B" />
+                <stop offset="25%" stopColor="#FF8A00" />
+                <stop offset="50%" stopColor="#FF4E9B" />
+                <stop offset="75%" stopColor="#A050F8" />
+                <stop offset="100%" stopColor="#2AC4F2" />
               </linearGradient>
             </defs>
           </svg>
 
           <TimeMarkers startHour={0} endHour={23} interval={3} />
 
-          <div className="mt-12 space-y-6">
+          <div className="mt-14 space-y-6">
             {timeZoneData.sort((a, b) => {
               if (a.city === defaultLocation) return -1;
               if (b.city === defaultLocation) return 1;
@@ -85,9 +89,9 @@ export const TimeScaleGraph = ({
         </div>
       </div>
 
-      <div className="mt-4 text-xs text-white/60 flex justify-center">
+      <div className="mt-6 text-xs text-white/60 flex justify-center">
         <div className="flex items-center gap-2">
-          <Clock className="h-4 w-4" style={{ stroke: 'url(#gradientStroke)' }} />
+          <Clock className="h-4 w-4 gradient-icon" />
           <span>All times shown in your local time zone ({timeZoneName})</span>
         </div>
       </div>

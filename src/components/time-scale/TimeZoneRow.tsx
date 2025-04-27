@@ -18,7 +18,7 @@ interface TimeZoneRowProps {
 export const TimeZoneRow = ({ cityData, bestTimeRange, isCurrentLocation, index }: TimeZoneRowProps) => {
   return (
     <div 
-      className="card-animate space-y-1" 
+      className="card-animate space-y-2" 
       style={{
         animationDelay: `${index * 0.1}s`
       }}
@@ -26,11 +26,11 @@ export const TimeZoneRow = ({ cityData, bestTimeRange, isCurrentLocation, index 
       <div className="flex justify-between items-center">
         <div className="w-[160px]">
           <span className={`text-sm truncate block ${
-            isCurrentLocation ? 'bg-gradient-to-r from-[#6EE7B7] via-[#3B82F6] to-[#9333EA] bg-clip-text text-transparent' : 'text-white/80'
+            isCurrentLocation ? 'gradient-text font-medium' : 'text-white/90'
           }`}>
             {cityData.city}
             {isCurrentLocation && (
-              <span className="ml-1 text-xs bg-gradient-to-r from-[#6EE7B7] via-[#3B82F6] to-[#9333EA] bg-clip-text text-transparent">
+              <span className="ml-1 text-xs gradient-text">
                 (Current)
               </span>
             )}
@@ -41,13 +41,13 @@ export const TimeZoneRow = ({ cityData, bestTimeRange, isCurrentLocation, index 
         </div>
 
         {bestTimeRange?.cityTimes[cityData.city] && (
-          <div className="absolute right-2 text-xs bg-gradient-to-r from-[#6EE7B7] via-[#3B82F6] to-[#9333EA] bg-clip-text text-transparent">
+          <div className="absolute right-2 text-xs gradient-text font-medium">
             {bestTimeRange.cityTimes[cityData.city]}
           </div>
         )}
       </div>
 
-      <div className="relative h-10 ml-[180px]">
+      <div className="relative h-10 ml-[160px]">
         <div className="absolute inset-0 grid grid-cols-24 gap-px">
           {Array.from({ length: 24 }).map((_, hour) => {
             const isWorkingHour = cityData.workingHours.includes(hour);
@@ -59,12 +59,16 @@ export const TimeZoneRow = ({ cityData, bestTimeRange, isCurrentLocation, index 
               <div
                 key={hour}
                 className={`
-                  h-full transition-all duration-300
-                  ${isWorkingHour ? 'bg-gradient-to-r from-[#6EE7B7]/10 via-[#3B82F6]/10 to-[#9333EA]/10' : 'bg-black/60'}
-                  ${isBestTimeHour ? '!bg-gradient-to-r !from-[#6EE7B7] !via-[#3B82F6] !to-[#9333EA]' : ''}
-                  border border-white/5 rounded-sm
+                  h-full rounded-md transition-all duration-300
+                  ${isWorkingHour ? 'bg-white/5 backdrop-blur-sm' : 'bg-black/60'}
+                  ${isBestTimeHour ? 'best-time-cell' : ''}
+                  border border-white/5
                 `}
-              />
+              >
+                {isBestTimeHour && (
+                  <div className="absolute inset-0 best-time-glow opacity-50"></div>
+                )}
+              </div>
             );
           })}
         </div>
