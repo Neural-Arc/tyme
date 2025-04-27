@@ -5,6 +5,7 @@ import { Mic, MicOff, Send, Loader } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
+
 interface AnimatedChatProps {
   input: string;
   setInput: (value: string) => void;
@@ -13,6 +14,7 @@ interface AnimatedChatProps {
   defaultLocation?: string;
   showResults: boolean;
 }
+
 export const AnimatedChat = ({
   input,
   setInput,
@@ -132,28 +134,26 @@ export const AnimatedChat = ({
         <div className="relative">
           <svg width="0" height="0">
             <defs>
-              <linearGradient id="iconGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" style={{
-                  stopColor: '#6EE7B7'
-                }} />
-                <stop offset="50%" style={{
-                  stopColor: '#3B82F6'
-                }} />
-                <stop offset="100%" style={{
-                  stopColor: '#9333EA'
-                }} />
+              <linearGradient id="iconGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style={{ stopColor: '#6EE7B7' }} />
+                <stop offset="50%" style={{ stopColor: '#3B82F6' }} />
+                <stop offset="100%" style={{ stopColor: '#9333EA' }} />
               </linearGradient>
             </defs>
           </svg>
           <Button type="button" variant="outline" className="bg-black border-white/10 hover:bg-white/10 h-16 w-16" onClick={isListening ? stopListening : startListening} disabled={isLoading || !defaultLocation || !localStorage.getItem('openai_api_key')}>
             {isListening ? <MicOff className="h-6 w-6 stroke-red-500" /> : <Mic className="h-6 w-6" style={{
-              stroke: 'url(#iconGradient)'
+              stroke: 'url(#iconGradient)',
+              fill: 'none',
+              strokeWidth: 2
             }} />}
           </Button>
         </div>
         <Button type="submit" variant="outline" className="bg-black border-white/10 hover:bg-white/10 h-16 w-16" disabled={isLoading || !defaultLocation || !localStorage.getItem('openai_api_key')}>
           {isLoading ? <Loader className="h-6 w-6 animate-spin" /> : <Send className="h-6 w-6" style={{
-            stroke: 'url(#iconGradient)'
+            stroke: 'url(#iconGradient)',
+            fill: 'none',
+            strokeWidth: 2
           }} />}
         </Button>
       </div>
