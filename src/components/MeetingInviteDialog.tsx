@@ -1,8 +1,9 @@
+
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Mail, Copy, Send, Loader2 } from 'lucide-react';
 import { Textarea } from "@/components/ui/textarea";
@@ -97,22 +98,27 @@ export const MeetingInviteDialog = ({
           </div>
         `;
 
-        const response = await fetch('https://api.resend.com/emails', {
-          method: 'POST',
-          headers: {
-            'Authorization': 'Bearer re_VTZG7Eaa_JBrKDGivXkodXJ83UoSt5p3X',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            from: 'noreply@tymeai.com',
-            to: recipientEmail,
-            subject: 'Meeting Invite',
-            html: emailContent
-          })
-        });
+        try {
+          const response = await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+              'Authorization': 'Bearer re_VTZG7Eaa_JBrKDGivXkodXJ83UoSt5p3X',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              from: 'noreply@tymeai.com',
+              to: recipientEmail,
+              subject: 'Meeting Invite',
+              html: emailContent
+            })
+          });
 
-        if (!response.ok) {
-          throw new Error(`Failed to send email to ${recipientEmail}`);
+          if (!response.ok) {
+            throw new Error(`Failed to send email to ${recipientEmail}`);
+          }
+        } catch (error) {
+          console.error('Email sending error:', error);
+          throw error; // Re-throw to be caught by outer catch block
         }
       }
 
@@ -154,6 +160,9 @@ export const MeetingInviteDialog = ({
       <DialogContent className="w-[95vw] max-w-[600px] h-[90vh] bg-black/90 text-white border border-white/10 overflow-y-auto mx-2">
         <DialogHeader>
           <DialogTitle>Send Meeting Invitation</DialogTitle>
+          <DialogDescription className="text-white/70">
+            Fill out the form to send meeting invitations via email.
+          </DialogDescription>
         </DialogHeader>
         
         <div className="relative -mt-2 -mx-6 mb-0 py-0">
