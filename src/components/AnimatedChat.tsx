@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -119,18 +118,11 @@ export const AnimatedChat = ({
   }, [recognition]);
   return <div className={cn("w-full max-w-3xl mx-auto transition-all duration-500 ease-in-out", showResults ? "mt-8" : "mt-[20vh]")}>
       <div className="flex justify-center mb-8">
-        <img 
-          alt="App Logo" 
-          width={120} 
-          height={120} 
-          className="mx-auto object-contain w-[120px] h-[120px]" 
-          onError={e => {
-            console.error('Failed to load logo');
-            const target = e.target as HTMLImageElement;
-            target.src = '/logo.png';
-          }} 
-          src="/lovable-uploads/e2afcc0e-1442-4c08-87c5-b436bb8440ef.png" 
-        />
+        <img alt="App Logo" width={120} height={120} className="mx-auto object-contain w-[120px] h-[120px]" onError={e => {
+        console.error('Failed to load logo');
+        const target = e.target as HTMLImageElement;
+        target.src = '/logo.png';
+      }} src="/lovable-uploads/97a170c6-860a-464b-a41f-38b2f2f7c5ca.png" />
       </div>
       
       <p className="text-center mb-8 text-white/80 text-lg">Our AI maps the perfect moment to meet.</p>
