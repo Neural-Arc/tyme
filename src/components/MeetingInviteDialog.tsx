@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,12 +6,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useToast } from "@/hooks/use-toast";
 import { Mail, Copy, Send } from 'lucide-react';
 import { Textarea } from "@/components/ui/textarea";
-
 interface MeetingInviteDialogProps {
   meetingTime: string;
   date: string;
 }
-
 export const MeetingInviteDialog = ({
   meetingTime,
   date
@@ -70,7 +67,6 @@ export const MeetingInviteDialog = ({
       duration: 3000
     });
   };
-
   return <Dialog>
     <DialogTrigger asChild>
       <Button variant="outline" size="sm" className="ml-4 mx-[8px] hover:bg-gradient-to-r hover:from-[#FFD93B] hover:via-[#FF4E9B] hover:to-[#2AC4F2]">
@@ -80,67 +76,34 @@ export const MeetingInviteDialog = ({
     </DialogTrigger>
     <DialogContent className="sm:max-w-[600px] h-[90vh] bg-black/90 text-white border border-white/10 overflow-y-auto">
       <div className="relative -mt-2 -mx-6 mb-0 py-0">
-        <img alt="Meeting Banner" className="w-full h-[200px] object-cover" src="/lovable-uploads/c26b2a6a-457a-486f-8af0-e8f7531bc8a9.png" />
+        <img alt="Meeting Banner" className="w-full h-[200px] object-cover" src="/lovable-uploads/9377e5b4-da16-4149-863f-beef4b64ba46.png" />
       </div>
 
       <div className="grid gap-3 py-2">
         <div className="grid grid-cols-2 gap-4">
           <div className="grid gap-2">
             <Label htmlFor="sender-name">Your Name</Label>
-            <Input 
-              id="sender-name" 
-              value={senderName} 
-              onChange={e => setSenderName(e.target.value)} 
-              className="bg-black/50 border-white/20 text-white" 
-            />
+            <Input id="sender-name" value={senderName} onChange={e => setSenderName(e.target.value)} className="bg-black/50 border-white/20 text-white" />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="sender-email">Your Email</Label>
-            <Input 
-              id="sender-email" 
-              type="email" 
-              value={senderEmail} 
-              onChange={e => setSenderEmail(e.target.value)} 
-              className="bg-black/50 border-white/20 text-white" 
-            />
+            <Input id="sender-email" type="email" value={senderEmail} onChange={e => setSenderEmail(e.target.value)} className="bg-black/50 border-white/20 text-white" />
           </div>
         </div>
         
         <div className="grid gap-2">
           <Label htmlFor="recipient-emails">Recipient Emails (comma separated)</Label>
-          <Input 
-            id="recipient-emails" 
-            value={recipientEmails} 
-            onChange={e => setRecipientEmails(e.target.value)} 
-            placeholder="email1@example.com, email2@example.com" 
-            className="bg-black/50 border-white/20 text-white" 
-          />
+          <Input id="recipient-emails" value={recipientEmails} onChange={e => setRecipientEmails(e.target.value)} placeholder="email1@example.com, email2@example.com" className="bg-black/50 border-white/20 text-white" />
         </div>
 
         <div className="grid gap-2">
           <Label htmlFor="meeting-link">Meeting Link</Label>
           <div className="flex gap-2">
-            <Input 
-              id="meeting-link" 
-              value={meetingLink} 
-              onChange={e => setMeetingLink(e.target.value)} 
-              placeholder="Your meeting link will appear here" 
-              className="bg-black/50 border-white/20 flex-1 bg-gradient-to-r from-[#FFD93B] via-[#FF4E9B] to-[#2AC4F2] bg-clip-text text-transparent" 
-              readOnly 
-            />
-            <Button 
-              variant="outline" 
-              size="icon" 
-              onClick={handleCopyLink}
-              className="hover:bg-gradient-to-r hover:from-[#FFD93B] hover:via-[#FF4E9B] hover:to-[#2AC4F2]"
-            >
+            <Input id="meeting-link" value={meetingLink} onChange={e => setMeetingLink(e.target.value)} placeholder="Your meeting link will appear here" className="bg-black/50 border-white/20 flex-1 bg-gradient-to-r from-[#FFD93B] via-[#FF4E9B] to-[#2AC4F2] bg-clip-text text-transparent" readOnly />
+            <Button variant="outline" size="icon" onClick={handleCopyLink} className="hover:bg-gradient-to-r hover:from-[#FFD93B] hover:via-[#FF4E9B] hover:to-[#2AC4F2]">
               <Copy className="h-4 w-4" />
             </Button>
-            <Button 
-              variant="outline" 
-              onClick={generateGoogleMeetLink}
-              className="hover:bg-gradient-to-r hover:from-[#FFD93B] hover:via-[#FF4E9B] hover:to-[#2AC4F2]"
-            >
+            <Button variant="outline" onClick={generateGoogleMeetLink} className="hover:bg-gradient-to-r hover:from-[#FFD93B] hover:via-[#FF4E9B] hover:to-[#2AC4F2]">
               Generate Meet Link
             </Button>
           </div>
@@ -148,13 +111,7 @@ export const MeetingInviteDialog = ({
 
         <div className="grid gap-2">
           <Label htmlFor="description">Meeting Description</Label>
-          <Textarea 
-            id="description" 
-            value={description} 
-            onChange={e => setDescription(e.target.value)} 
-            className="bg-black/50 border-white/20 text-white min-h-[150px]" 
-            placeholder="Enter meeting agenda and details..." 
-          />
+          <Textarea id="description" value={description} onChange={e => setDescription(e.target.value)} className="bg-black/50 border-white/20 text-white min-h-[150px]" placeholder="Enter meeting agenda and details..." />
         </div>
 
         <div className="text-sm text-white mt-2">
@@ -163,10 +120,7 @@ export const MeetingInviteDialog = ({
         </div>
 
         <div className="flex gap-2">
-          <Button 
-            onClick={handleSendInvite} 
-            className="flex-1 text-white bg-gradient-to-r from-[#FFD93B] via-[#FF4E9B] to-[#2AC4F2] hover:opacity-90 transition-all duration-300"
-          >
+          <Button onClick={handleSendInvite} className="flex-1 text-white bg-gradient-to-r from-[#FFD93B] via-[#FF4E9B] to-[#2AC4F2] hover:opacity-90 transition-all duration-300">
             <Send className="mr-2 h-4 w-4" />
             Send Invitation
           </Button>
