@@ -79,7 +79,7 @@ export const MeetingInviteDialog = ({
         <img alt="Meeting Banner" className="w-full h-[200px] object-cover" src="/lovable-uploads/018f957d-6791-4e60-8334-7c2b7ca353d4.png" />
       </div>
 
-      <div className="grid gap-3 py-2">
+
         <div className="grid grid-cols-2 gap-4">
           <div className="grid gap-2">
             <Label htmlFor="sender-name">Your Name</Label>
