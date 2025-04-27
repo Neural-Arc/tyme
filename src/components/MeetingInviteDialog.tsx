@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,10 +7,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useToast } from "@/hooks/use-toast";
 import { Mail, Copy, Send } from 'lucide-react';
 import { Textarea } from "@/components/ui/textarea";
+
 interface MeetingInviteDialogProps {
   meetingTime: string;
   date: string;
 }
+
 export const MeetingInviteDialog = ({
   meetingTime,
   date
@@ -22,6 +25,7 @@ export const MeetingInviteDialog = ({
   const {
     toast
   } = useToast();
+
   const generateGoogleMeetLink = () => {
     const meetLink = `https://meet.google.com/${Math.random().toString(36).substring(2, 15)}`;
     setMeetingLink(meetLink);
@@ -30,6 +34,7 @@ export const MeetingInviteDialog = ({
       duration: 2000
     });
   };
+
   const handleCopyLink = () => {
     navigator.clipboard.writeText(meetingLink).then(() => {
       toast({
@@ -38,6 +43,7 @@ export const MeetingInviteDialog = ({
       });
     });
   };
+
   const handleSendInvite = () => {
     // Form validation
     if (!senderName || !senderEmail || !recipientEmails) {
@@ -67,18 +73,19 @@ export const MeetingInviteDialog = ({
       duration: 3000
     });
   };
-  return <Dialog>
-    <DialogTrigger asChild>
-      <Button variant="outline" size="sm" className="ml-4 mx-[8px] hover:bg-gradient-to-r hover:from-[#FFD93B] hover:via-[#FF4E9B] hover:to-[#2AC4F2]">
-        <Mail className="mr-2 h-4 w-4" />
-        Send Invite
-      </Button>
-    </DialogTrigger>
-    <DialogContent className="sm:max-w-[600px] h-[90vh] bg-black/90 text-white border border-white/10 overflow-y-auto">
-      <div className="relative -mt-2 -mx-6 mb-0 py-0">
-        <img alt="Meeting Banner" className="w-full h-[200px] object-cover" src="/lovable-uploads/018f957d-6791-4e60-8334-7c2b7ca353d4.png" />
-      </div>
 
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm" className="ml-4 mx-[8px] hover:bg-gradient-to-r hover:from-[#FFD93B] hover:via-[#FF4E9B] hover:to-[#2AC4F2]">
+          <Mail className="mr-2 h-4 w-4" />
+          Send Invite
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[600px] h-[90vh] bg-black/90 text-white border border-white/10 overflow-y-auto">
+        <div className="relative -mt-2 -mx-6 mb-0 py-0">
+          <img alt="Meeting Banner" className="w-full h-[200px] object-cover" src="/lovable-uploads/018f957d-6791-4e60-8334-7c2b7ca353d4.png" />
+        </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div className="grid gap-2">
@@ -125,7 +132,7 @@ export const MeetingInviteDialog = ({
             Send Invitation
           </Button>
         </div>
-      </div>
-    </DialogContent>
-  </Dialog>;
+      </DialogContent>
+    </Dialog>
+  );
 };
