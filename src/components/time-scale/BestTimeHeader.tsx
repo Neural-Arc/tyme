@@ -1,5 +1,5 @@
 
-import { Info } from 'lucide-react';
+import { Clock, CalendarCheck } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { MeetingInviteDialog } from '../MeetingInviteDialog';
 
@@ -49,7 +49,7 @@ export const BestTimeHeader = ({ bestTimeRange, currentDate, timeZoneName }: Bes
             <Tooltip>
               <TooltipTrigger asChild>
                 <div className="cursor-help">
-                  <Info className="h-4 w-4 text-white/60" />
+                  <CalendarCheck className="h-4 w-4 text-white/60" />
                 </div>
               </TooltipTrigger>
               <TooltipContent className="bg-black/90 border border-white/10 text-white">

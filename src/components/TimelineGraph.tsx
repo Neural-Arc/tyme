@@ -1,9 +1,9 @@
-
 import React, { useState, useRef } from 'react';
 import { Clock } from 'lucide-react';
 import { formatTime, getTimeZoneAcronym, formatTimeZone } from '@/utils/timeZoneUtils';
 import { ScrollArea } from './ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
+import { BestTimeHeader } from './time-scale/BestTimeHeader';
 
 interface TimelineGraphProps {
   timeZoneData: {
@@ -84,22 +84,11 @@ export const TimelineGraph = ({
   return (
     <div className="glass-card p-4 md:p-6 animate-fade-up backdrop-blur-md">
       {bestTimeRange && defaultLocation && (
-        <div className="mb-4 p-3 md:p-5 glass-card relative overflow-hidden border-gradient">
-          <div className="absolute inset-0 opacity-20 bg-gradient"></div>
-          <div className="relative z-10">
-            <h3 className="text-sm md:text-base font-medium gradient-text flex items-center gap-2">
-              <Clock className="h-4 w-4" /> Best Meeting Time
-            </h3>
-            <p className="text-white/70 text-xs md:text-sm mt-1">
-              {bestTimeRange.formattedLocal} ({timeZoneName}) on {currentDate.toLocaleDateString(undefined, {
-                weekday: 'long',
-                month: 'long',
-                day: 'numeric',
-                year: 'numeric'
-              })}
-            </p>
-          </div>
-        </div>
+        <BestTimeHeader 
+          bestTimeRange={bestTimeRange}
+          currentDate={currentDate}
+          timeZoneName={timeZoneName}
+        />
       )}
 
       <div className="relative w-full overflow-hidden">
