@@ -36,7 +36,7 @@ export const TimeZoneCard = ({
         <Clock className={`h-5 w-5 ${isCurrentLocation ? 'text-blue-400' : 'text-white/60'}`} />
         <h3 className="text-lg font-medium text-white">
           {city}
-          {isCurrentLocation && <span className="ml-2 text-xs text-cyan-400">(Current Location)</span>}
+          {isCurrentLocation && <span className="ml-2 text-xs text-blue-400">(Current Location)</span>}
         </h3>
       </div>
       

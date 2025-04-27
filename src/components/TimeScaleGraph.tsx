@@ -1,4 +1,3 @@
-
 import { Clock, Info } from 'lucide-react';
 import { 
   formatTime, 
@@ -39,25 +38,25 @@ export const TimeScaleGraph = ({
 
   if (timeZoneData.length > 4) {
     return (
-      <div className="bg-black/40 border border-orange-400/20 rounded-xl p-6 animate-fade-up">
+      <div className="bg-black/40 border border-blue-400/20 rounded-xl p-6 animate-fade-up">
         <p className="text-white text-center">Please select 4 or fewer cities for optimal display.</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-black/40 border border-orange-400/20 rounded-xl p-6 animate-fade-up">
+    <div className="bg-black/40 border border-blue-400/20 rounded-xl p-6 animate-fade-up">
       <div className="flex items-center gap-3 mb-6">
-        <Clock className="h-5 w-5 text-orange-400" />
+        <Clock className="h-5 w-5 text-blue-400" />
         <h3 className="text-xl font-medium text-white">Working Hours (08:00 - 21:00)</h3>
       </div>
 
       {bestTimeRange && defaultLocation && (
-        <div className="mb-6 p-4 bg-black/50 border border-orange-400/20 rounded-lg">
+        <div className="mb-6 p-4 bg-black/50 border border-blue-400/20 rounded-lg">
           <div className="flex justify-between items-start flex-wrap gap-2">
             <div className="flex-1 min-w-0">
               <p className="text-lg font-medium">
-                <span className="font-bold text-orange-400">Best meeting time:</span>
+                <span className="font-bold text-blue-400">Best meeting time:</span>
                 <br />
                 <span>{bestTimeRange.formattedLocal}</span>
                 <br />
@@ -100,7 +99,7 @@ export const TimeScaleGraph = ({
 
       <div className="relative overflow-x-auto">
         <div className="min-w-[800px]">
-          <div className="absolute top-0 left-[180px] right-0 flex justify-between text-white/70 text-sm border-b border-orange-400/20 pb-2">
+          <div className="absolute top-0 left-[180px] right-0 flex justify-between text-white/70 text-sm border-b border-blue-400/20 pb-2">
             {timeMarkers.map(hour => (
               <div key={hour} className="text-center min-w-[36px]">
                 {hour.toString().padStart(2, '0')}:00
@@ -126,11 +125,11 @@ export const TimeScaleGraph = ({
                   <div className="flex justify-between items-center">
                     <div className="w-[160px]">
                       <span className={`text-sm truncate block ${
-                        isCurrentLocation ? 'text-white font-medium' : 'text-white/80'
+                        isCurrentLocation ? 'text-blue-400 font-medium' : 'text-white/80'
                       }`}>
                         {cityData.city}
                         {isCurrentLocation && (
-                          <span className="ml-1 text-xs text-orange-400">(Current)</span>
+                          <span className="ml-1 text-xs text-blue-400">(Current)</span>
                         )}
                       </span>
                       <span className="text-white/60 text-xs">
@@ -139,7 +138,7 @@ export const TimeScaleGraph = ({
                     </div>
 
                     {bestTimeRange?.cityTimes[cityData.city] && (
-                      <div className="absolute right-2 text-xs text-orange-400 font-medium">
+                      <div className="absolute right-2 text-xs text-blue-400 font-medium">
                         {bestTimeRange.cityTimes[cityData.city]}
                       </div>
                     )}
@@ -149,18 +148,18 @@ export const TimeScaleGraph = ({
                     <div className="absolute inset-0 grid grid-cols-24 gap-px">
                       {Array.from({ length: 24 }).map((_, hour) => {
                         const isWorkingHour = cityData.workingHours.includes(hour);
-                        const isBestTimeHour = bestTimeRange && 
-                          Math.round(convertUtcToLocal(bestTimeRange.utcHour, cityData.offset)) === hour;
+                        const cityLocalHour = convertUtcToLocal(bestTimeRange?.utcHour || 0, cityData.offset);
+                        const isBestTimeHour = bestTimeRange && hour === cityLocalHour;
                         
                         return (
                           <div
                             key={hour}
                             className={`
                               h-full transition-all duration-300
-                              ${isWorkingHour ? 'bg-orange-900/10 hover:bg-orange-900/20' : 'bg-black/60'}
-                              ${isBestTimeHour ? 'timeline-highlight !bg-orange-400/90 hover:!bg-orange-400' : ''}
+                              ${isWorkingHour ? 'bg-blue-900/10 hover:bg-blue-900/20' : 'bg-black/60'}
+                              ${isBestTimeHour ? 'timeline-highlight !bg-blue-400/90 hover:!bg-blue-400' : ''}
                               border rounded-sm
-                              ${isWorkingHour ? 'border-orange-900/20' : 'border-white/5'}
+                              ${isWorkingHour ? 'border-blue-900/20' : 'border-white/5'}
                             `}
                           />
                         );
