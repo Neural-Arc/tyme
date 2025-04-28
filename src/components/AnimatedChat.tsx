@@ -146,6 +146,12 @@ export const AnimatedChat = ({
     setShowSuggestions(false);
   };
 
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setShowSuggestions(false); // Close suggestions when submitting
+    handleSubmit(e);
+  };
+
   return (
     <div className={cn("center-content relative", !showResults && "flex flex-col items-center justify-center")}>
       <div className="flex justify-center mb-8">
@@ -166,7 +172,7 @@ export const AnimatedChat = ({
           }}
         />
         
-        <form onSubmit={handleSubmit} className="relative flex gap-2 w-full">
+        <form onSubmit={handleFormSubmit} className="relative flex gap-2 w-full">
           <div className="flex-1 relative">
             <Input 
               value={input} 
@@ -176,12 +182,12 @@ export const AnimatedChat = ({
                 "bg-black/50 backdrop-blur-md text-2xl h-16 px-6 border-white/10 focus:ring-0 focus:ring-offset-0 focus:outline-none", 
                 input && "gradient-text"
               )} 
-              disabled={isLoading || !defaultLocation || !localStorage.getItem('openai_api_key')} 
+              disabled={isLoading || !defaultLocation} 
             />
             
             {showSuggestions && suggestions.length > 0 && (
               <div className="absolute w-full z-50 mt-1">
-                <Command className="rounded-lg border shadow-md">
+                <Command className="rounded-lg border shadow-md bg-black/10 backdrop-blur-3xl">
                   <CommandList>
                     {suggestions.map((suggestion, index) => (
                       <CommandItem 
@@ -221,7 +227,7 @@ export const AnimatedChat = ({
                   </linearGradient>
                 </defs>
               </svg>
-              <Button type="button" variant="outline" className="bg-black border-white/10 hover:bg-white/10 h-16 w-16" onClick={isListening ? stopListening : startListening} disabled={isLoading || !defaultLocation || !localStorage.getItem('openai_api_key')}>
+              <Button type="button" variant="outline" className="bg-black border-white/10 hover:bg-white/10 h-16 w-16" onClick={isListening ? stopListening : startListening} disabled={isLoading || !defaultLocation}>
                 {isListening ? <MicOff className="h-6 w-6 stroke-red-500" /> : <Mic className="h-6 w-6" style={{
                 stroke: 'url(#iconGradient)',
                 fill: 'none',
@@ -229,7 +235,7 @@ export const AnimatedChat = ({
               }} />}
               </Button>
             </div>
-            <Button type="submit" variant="outline" className="bg-black border-white/10 hover:bg-white/10 h-16 w-16" disabled={isLoading || !defaultLocation || !localStorage.getItem('openai_api_key')}>
+            <Button type="submit" variant="outline" className="bg-black border-white/10 hover:bg-white/10 h-16 w-16" disabled={isLoading || !defaultLocation}>
               {isLoading ? <Loader className="h-6 w-6 animate-spin" /> : <Send className="h-6 w-6" style={{
               stroke: 'url(#iconGradient)',
               fill: 'none',

@@ -4,10 +4,7 @@ import { processMessage } from '@/utils/chat';
 import { useLocation } from '@/hooks/useLocation';
 import { AnimatedChat } from './AnimatedChat';
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { Info, Settings } from 'lucide-react';
-import { Button } from './ui/button';
-import { Dialog, DialogTrigger } from './ui/dialog';
-import { Settings as SettingsComponent } from './Settings';
+import { Info } from 'lucide-react';
 
 export const Chat = () => {
   const [input, setInput] = useState('');
@@ -31,16 +28,12 @@ export const Chat = () => {
     e.preventDefault();
     if (!input.trim()) return;
 
-    const apiKey = localStorage.getItem('openai_api_key');
-    if (!apiKey) {
-      toast.error('Please add your OpenAI API key in settings first');
-      return;
-    }
-
     if (!defaultLocation || defaultLocation === 'Unknown Location') {
       toast.error('Please allow location access to use the app');
       return;
     }
+
+    setShowResults(false);
 
     setIsLoading(true);
 
@@ -49,7 +42,7 @@ export const Chat = () => {
         ? input
         : `${input}, ${defaultLocation}`;
 
-      const response = await processMessage(processInput, apiKey);
+      const response = await processMessage(processInput);
       
       if (response.timeConversionRequest) {
         const event = new CustomEvent('updateTimeZones', { 
@@ -93,31 +86,6 @@ export const Chat = () => {
           <AlertDescription>
             Please allow location access to use the app. This helps us calculate accurate meeting times.
           </AlertDescription>
-        </Alert>
-      )}
-      
-      {!localStorage.getItem('openai_api_key') && (
-        <Alert className="mb-4 bg-black border-orange-400/20 text-white flex items-center justify-between">
-          <div className="flex-1">
-            <Info className="h-5 w-5 text-orange-400" />
-            <AlertTitle>API Key Required</AlertTitle>
-            <AlertDescription className="flex items-center gap-2">
-              Please add your OpenAI API key to use the chat.
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    className="ml-2 bg-orange-400/10 border-orange-400/20 text-orange-400 hover:bg-orange-400/20"
-                  >
-                    <Settings className="h-4 w-4 mr-2" />
-                    Open Settings
-                  </Button>
-                </DialogTrigger>
-                <SettingsComponent />
-              </Dialog>
-            </AlertDescription>
-          </div>
         </Alert>
       )}
       

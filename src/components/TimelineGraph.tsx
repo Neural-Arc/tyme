@@ -1,9 +1,10 @@
 import React, { useState, useRef } from 'react';
-import { Clock } from 'lucide-react';
+import { Clock, X } from 'lucide-react';
 import { formatTime, getTimeZoneAcronym, formatTimeZone } from '@/utils/timeZoneUtils';
 import { ScrollArea } from './ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 import { BestTimeHeader } from './time-scale/BestTimeHeader';
+import { Button } from './ui/button';
 
 interface TimelineGraphProps {
   timeZoneData: {
@@ -21,6 +22,7 @@ interface TimelineGraphProps {
   defaultLocation?: string;
   timeZoneName: string;
   currentDate: Date;
+  onRemoveTimezone?: (city: string) => void;
 }
 
 export const TimelineGraph = ({
@@ -28,12 +30,15 @@ export const TimelineGraph = ({
   bestTimeRange,
   defaultLocation,
   timeZoneName,
-  currentDate
+  currentDate,
+  onRemoveTimezone
 }: TimelineGraphProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
+  const [selectedHour, setSelectedHour] = useState<number | null>(null);
+  const [hoveredHour, setHoveredHour] = useState<number | null>(null);
 
   // Sort cities to put default location first
   const sortedCities = [...timeZoneData].sort((a, b) => {
@@ -71,6 +76,18 @@ export const TimelineGraph = ({
 
   const handleMouseUp = () => {
     setIsDragging(false);
+  };
+
+  const handleHourClick = (hour: number) => {
+    setSelectedHour(hour === selectedHour ? null : hour);
+  };
+
+  const handleHourHover = (hour: number) => {
+    setHoveredHour(hour);
+  };
+
+  const handleHourLeave = () => {
+    setHoveredHour(null);
   };
 
   if (timeZoneData.length === 0) {
@@ -127,20 +144,32 @@ export const TimelineGraph = ({
               return (
                 <div 
                   key={`${city.city}-${cityIndex}`} 
-                  className="flex items-center mb-4 last:mb-0"
+                  className="flex items-center mb-4 last:mb-0 group"
                 >
-                  <div className="w-[160px] pr-4 flex-shrink-0">
-                    <div className="text-sm font-medium truncate">
-                      <span className={city.city === defaultLocation ? "gradient-text" : "text-white"}>
-                        {city.city}
-                        {city.city === defaultLocation && (
-                          <span className="ml-1 text-xs">(Current)</span>
-                        )}
-                      </span>
+                  <div className="w-[160px] pr-4 flex-shrink-0 flex items-center justify-between">
+                    <div>
+                      <div className="text-sm font-medium truncate">
+                        <span className={city.city === defaultLocation ? "gradient-text" : "text-white"}>
+                          {city.city}
+                          {city.city === defaultLocation && (
+                            <span className="ml-1 text-xs">(Current)</span>
+                          )}
+                        </span>
+                      </div>
+                      <div className="text-xs text-white/60">
+                        {getTimeZoneAcronym(city.offset)} ({formatTimeZone(city.offset)})
+                      </div>
                     </div>
-                    <div className="text-xs text-white/60">
-                      {getTimeZoneAcronym(city.offset)} ({formatTimeZone(city.offset)})
-                    </div>
+                    {onRemoveTimezone && city.city !== defaultLocation && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6"
+                        onClick={() => onRemoveTimezone(city.city)}
+                      >
+                        <X className="h-4 w-4 text-white/60 hover:text-white" />
+                      </Button>
+                    )}
                   </div>
 
                   {/* 24-hour timeline */}
@@ -150,6 +179,8 @@ export const TimelineGraph = ({
                       const isWorkingHour = localHour >= 8 && localHour <= 20;
                       const isBestTimeHour = bestTimeRange && hour === bestTimeRange.utcHour;
                       const isCurrentHour = Math.floor(localHour) === Math.floor(cityCurrentHour);
+                      const isSelected = hour === selectedHour;
+                      const isHovered = hour === hoveredHour;
 
                       return (
                         <TooltipProvider key={`${city.city}-hour-${hour}`}>
@@ -158,35 +189,67 @@ export const TimelineGraph = ({
                               <div 
                                 className={`
                                   w-12 h-10 flex items-center justify-center m-px relative
-                                  ${isWorkingHour ? 'bg-white/10' : 'bg-black/40'} 
+                                  ${isWorkingHour ? 'bg-white/10 hover:bg-white/20' : 'bg-black/40 hover:bg-black/60'} 
                                   ${isBestTimeHour ? 'best-time-cell' : ''}
-                                  ${isCurrentHour ? 'border-l-2 border-r-2 border-yellow-400/50' : ''}
-                                  hover:bg-white/20 transition-all duration-200
+                                  ${isCurrentHour ? 'border-l-2 border-r-2 border-yellow-400/50 bg-yellow-400/10' : ''}
+                                  ${isSelected ? 'bg-blue-500/20 border-2 border-blue-400' : ''}
+                                  ${isHovered ? 'bg-blue-400/10 border border-blue-400/50' : ''}
+                                  transition-all duration-200
                                   rounded-md
+                                  cursor-pointer
                                 `}
+                                onClick={() => handleHourClick(hour)}
+                                onMouseEnter={() => handleHourHover(hour)}
+                                onMouseLeave={handleHourLeave}
                               >
                                 {isCurrentHour && (
-                                  <div className="absolute top-0 right-0 w-2 h-2 bg-yellow-400 rounded-full"></div>
+                                  <>
+                                    <div className="absolute top-0 right-0 w-2 h-2 bg-yellow-400 rounded-full"></div>
+                                    <div className="absolute inset-0 border-2 border-yellow-400/30 rounded-md"></div>
+                                  </>
                                 )}
                                 {isBestTimeHour && (
                                   <div className="absolute inset-0 animate-pulse-subtle rounded-md bg-gradient"></div>
                                 )}
-                                <span className="text-xs text-white/80 relative z-10">
-                                  {isWorkingHour && formatTime(localHour).split(' ')[0]}
+                                <span className={`
+                                  text-xs relative z-10
+                                  ${isWorkingHour ? 'text-white/80' : 'text-white/40'}
+                                  ${isCurrentHour ? 'text-yellow-400 font-medium' : ''}
+                                  ${isBestTimeHour ? 'text-white font-medium' : ''}
+                                  ${isSelected ? 'text-blue-400 font-medium' : ''}
+                                  ${isHovered ? 'text-blue-400' : ''}
+                                `}>
+                                  {formatTime(localHour).split(' ')[0]}
                                 </span>
                               </div>
                             </TooltipTrigger>
-                            <TooltipContent side="top">
-                              <div className="text-xs">
-                                <div className="font-medium">{city.city}</div>
-                                <div>{formatTime(localHour)}</div>
-                                {isWorkingHour ? (
-                                  <div className="text-green-400">Working Hours</div>
-                                ) : (
-                                  <div className="text-gray-400">Non-Working Hours</div>
-                                )}
+                            <TooltipContent side="top" className="bg-black/90 backdrop-blur-md border-white/10">
+                              <div className="text-xs space-y-1">
+                                <div className="font-medium text-white">{city.city}</div>
+                                <div className="text-white/80">{formatTime(localHour)}</div>
+                                <div className="flex items-center gap-2">
+                                  <div className={`w-2 h-2 rounded-full ${isWorkingHour ? 'bg-green-400' : 'bg-gray-400'}`} />
+                                  <span className={isWorkingHour ? 'text-green-400' : 'text-gray-400'}>
+                                    {isWorkingHour ? 'Working Hours' : 'Non-Working Hours'}
+                                  </span>
+                                </div>
                                 {isBestTimeHour && (
-                                  <div className="text-yellow-400 mt-1 font-medium">Best Meeting Time</div>
+                                  <div className="flex items-center gap-2 mt-1">
+                                    <div className="w-2 h-2 rounded-full bg-yellow-400" />
+                                    <span className="text-yellow-400 font-medium">Best Meeting Time</span>
+                                  </div>
+                                )}
+                                {isCurrentHour && (
+                                  <div className="flex items-center gap-2 mt-1">
+                                    <div className="w-2 h-2 rounded-full bg-yellow-400" />
+                                    <span className="text-yellow-400 font-medium">Current Time</span>
+                                  </div>
+                                )}
+                                {isSelected && (
+                                  <div className="flex items-center gap-2 mt-1">
+                                    <div className="w-2 h-2 rounded-full bg-blue-400" />
+                                    <span className="text-blue-400 font-medium">Selected Time</span>
+                                  </div>
                                 )}
                               </div>
                             </TooltipContent>
@@ -203,6 +266,8 @@ export const TimelineGraph = ({
       </div>
 
       <div className="flex flex-wrap gap-3 mt-6 justify-center text-xs text-white/60">
+        <span>Click to select a time • Hover to highlight across timezones</span>
+        <span>•</span>
         <span>Drag to scroll horizontally</span>
         <span>•</span>
         <span>All times shown in your local time zone ({timeZoneName})</span>

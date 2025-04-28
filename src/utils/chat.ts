@@ -1,6 +1,6 @@
 import { toast } from "sonner";
 
-export async function processMessage(message: string, apiKey: string): Promise<{ 
+export async function processMessage(message: string): Promise<{ 
   content: string; 
   cities: string[]; 
   suggestedTime?: string; 
@@ -8,6 +8,11 @@ export async function processMessage(message: string, apiKey: string): Promise<{
   timeConversionRequest?: { sourceCity: string; time: string; };
 }> {
   try {
+    const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+    if (!apiKey) {
+      throw new Error('OpenAI API key is not configured');
+    }
+
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -44,7 +49,8 @@ export async function processMessage(message: string, apiKey: string): Promise<{
                    SOURCE_CITY: Sydney
                    SOURCE_TIME: 10:00 AM
                    DATE: 2025-05-01`
-        }, {
+        },
+        {
           role: 'user',
           content: message
         }],
